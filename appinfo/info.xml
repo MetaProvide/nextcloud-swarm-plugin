@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<info xmlns:xsi= "http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="https://apps.nextcloud.com/schema/apps/info.xsd">
+    <id>swarm</id>
+    <name>Swarm</name>
+    <summary><![CDATA[Swarm plugin for Nextcloud]]></summary>
+    <description><![CDATA[]]></description>
+    <version>0.1.0</version>
+    <licence>agpl</licence>
+    <author mail="magnus@metaprovide.org" homepage="https://github.com/MetaProvide/nextcloud-swarm-plugin">MetaProvide</author>
+    <namespace>Swarm</namespace>
+    <category></category>
+    <website>https://github.com/MetaProvide/nextcloud-swarm-plugin</website>
+    <bugs>https://github.com/MetaProvide/nextcloud-swarm-plugin/issues</bugs>
+    <dependencies>
+        <nextcloud min-version="22" max-version="23"/>
+    </dependencies>
+    <settings>
+        <admin>OCA\Swarm\Settings\Admin</admin>
+    </settings>
+</info>
