@@ -41,6 +41,7 @@ services:
       - host.docker.internal:host-gateway
     volumes:
       - nextcloud:/var/www/html
+      - ./:/var/www/html/custom_apps/swarm_plugin
     ports:
       - "80:80"
       - "443:443"
@@ -73,7 +74,7 @@ services:
       - clef-1:/app/data
     command: full
     networks:
-      - backend      
+      - backend
 
   bee-1:
     image: ethersphere/bee:stable
@@ -133,4 +134,4 @@ services:
     depends_on:
       - clef-1
     networks:
-      - backend      
+      - backend
