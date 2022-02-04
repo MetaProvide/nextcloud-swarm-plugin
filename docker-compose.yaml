@@ -5,13 +5,13 @@ volumes:
   mariadb: null
   nextcloud: null
   clef-1: null
-  bee-1: null
+
 networks:
   frontend: null
   backend: null
+
 services:
   mariadb:
-    container_name: nextcloud_mariadb
     image: mariadb:10.6
     # set transaction isolation: https://docs.nextcloud.com/server/stable/admin_manual/configuration_database/linux_database_configuration.html
     command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW --innodb-file-per-table=1 --skip-innodb-read-only-compressed
@@ -29,7 +29,6 @@ services:
       MYSQL_PASSWORD: nextcloud
 
   nextcloud:
-    container_name: nextcloud
     build: ./docker/nextcloud
     restart: always
     depends_on:
@@ -42,7 +41,6 @@ services:
       - host.docker.internal:host-gateway
     volumes:
       - nextcloud:/var/www/html
-      - ./:/var/www/html/custom_apps/files_external_beeswarm
     ports:
       - "80:80"
       - "443:443"
@@ -130,7 +128,7 @@ services:
       - "${P2P_ADDR:-1634}${BEE_P2P_ADDR:-:1634}"
       - "${DEBUG_API_ADDR:-127.0.0.1:1635}${BEE_DEBUG_API_ADDR:-:1635}"
     volumes:
-      - bee-1:/home/bee/.bee
+      - ../bee_node:/home/bee/.bee
     command: start
     depends_on:
       - clef-1
