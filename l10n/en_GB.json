@@ -1,0 +1,9 @@
+{
+  "translations": {
+    "BeeSwarm" : "BeeSwarm",
+    "Client Id" : "Client Id",
+    "Client Secret" : "Client Secret",
+    "Token" : "Token"
+  },
+  "pluralForm" :"nplurals=2; plural=(n != 1);"
+}

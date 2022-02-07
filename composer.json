@@ -1,8 +1,9 @@
 {
     "autoload-dev": {
         "psr-4": {
-            "OCP\\": "vendor/christophwurst/nextcloud/OCP",
-            "OCA\\Talked\\": "lib/"
+            "OCP\\": "..\\nextcloud_source\\lib\\public",
+			"OCA\\Files_External\\":"..\\nextcloud_source\\apps\\files_external\\lib",
+            "OCA\\Files_External_BeeSwarm\\": "lib\\"
         }
     },
     "require": {},
