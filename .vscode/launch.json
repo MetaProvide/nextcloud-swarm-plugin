@@ -11,7 +11,7 @@
             "port": 9003,
             "pathMappings": {
                 "/var/www/html/custom_apps/files_external_beeswarm": "${workspaceFolder}",
-                "/var/www/html": "${workspaceFolder}/../nextcloud_source",
+                "/var/www/html": "${workspaceFolder}/dev-environment/nextcloud_source",
               }
         }
     ]

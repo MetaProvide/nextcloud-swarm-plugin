@@ -1,14 +1,14 @@
 {
-    "autoload-dev": {
-        "psr-4": {
-            "OCP\\": "..\\nextcloud_source\\lib\\public",
-			"OCA\\Files_External\\":"..\\nextcloud_source\\apps\\files_external\\lib",
-            "OCA\\Files_External_BeeSwarm\\": "lib\\"
-        }
-    },
-    "require": {},
-    "require-dev": {
-        "nextcloud/coding-standard": "^0.5.0",
-        "christophwurst/nextcloud": "^22"
-    }
+	"autoload-dev": {
+		"psr-4": {
+			"OCP\\": "dev-environment/nextcloud_source/lib/public/",
+			"OCA\\Files_External\\": "dev-environment/nextcloud_source/apps/files_external/lib/",
+			"OCA\\Files_External_BeeSwarm\\": "lib/"
+		}
+	},
+	"require": {},
+	"require-dev": {
+		"nextcloud/coding-standard": "^0.5.0",
+		"christophwurst/nextcloud": "^22"
+	}
 }
