@@ -33,7 +33,7 @@ use OC\Files\Filesystem;
 use OCP\Files\ForbiddenException;
 use OCP\Files\GenericFileException;
 use OCP\ILogger;
-use Symfony\Component\Console\Output\OutputInterface;
+use Sabre\DAV\Exception\BadRequest;
 
 class BeeSwarm extends \OC\Files\Storage\Common
 {
@@ -75,45 +75,19 @@ class BeeSwarm extends \OC\Files\Storage\Common
 
 	public function file_exists($path) {
 		\OC::$server->getLogger()->warning("\\apps\\nextcloud-swarm-plugin\\lib\\Storage\\BeeSwarm.php-file_exists: path=" . $path);
-		return false;
-		// if ($path === '' || $path === '/' || $path === '.') {
-		// 	return true;
-		// }
 
-		// return parent::file_exists($path);
-	}
-
-	protected function getLargest($arr, $default = 0) {
-		if (\count($arr) === 0) {
-			return $default;
+		if ($path === '' || $path === '/' || $path === '.') {
+			// Return true always the creation of the root folder
+		 	return true;
 		}
-		\arsort($arr);
-		return \array_values($arr)[0];
+		return false;
 	}
 
 	public function filemtime($path) {
-		if ($this->is_dir($path)) {
-			if ($path === '.' || $path === '') {
-				$path = "/";
-			}
+		\OC::$server->getLogger()->warning("\\apps\\nextcloud-swarm-plugin\\lib\\Storage\\BeeSwarm.php-filemtime: path=" . $path . ";class ns=" . self::class);
 
-			if ($this->cacheFilemtime && isset($this->cacheFilemtime[$path])) {
-				return $this->cacheFilemtime[$path];
-			}
-
-			$arr = [];
-			$contents = $this->flysystem->listContents($path, true);
-			foreach ($contents as $c) {
-				$arr[] = $c['type'] === 'file' ? $c['timestamp'] : 0;
-			}
-			$mtime = $this->getLargest($arr);
-		} else {
-			if ($this->cacheFilemtime && isset($this->cacheFilemtime[$path])) {
-				return $this->cacheFilemtime[$path];
-			}
-			$mtime = parent::filemtime($path);
-		}
-		$this->cacheFilemtime[$path] = $mtime;
+		//$this->cacheFilemtime[$path] = $mtime;
+		$mtime = 0;
 		return $mtime;
 	}
 
@@ -125,14 +99,18 @@ class BeeSwarm extends \OC\Files\Storage\Common
 		return parent::stat($path);
 	}
 
+	/**
+	 * get the ETag for a file or folder
+	 *
+	 * @param string $path
+	 * @return string
+	 */
+	public function getETag($path) {
+	 	return null;
+	}
+
 	public function getDirectoryContent($directory) :\Traversable
 	{
-		// $idx = 0;
-		// while ($idx < 5) {
-			// $metadata = $this->getMetaData($directory);
-			// yield $metadata;
-		// 	$idx++;
-		// }
 		\OC::$server->getLogger()->warning("\\apps\\nextcloud-swarm-plugin\\lib\\Storage\\BeeSwarm.php-Start getDirectoryContent(): directory=" . $directory);
 		$metadata = $this->populateMetadata();
 		foreach ($metadata as $meta)
@@ -149,28 +127,37 @@ class BeeSwarm extends \OC\Files\Storage\Common
 		}
 	}
 
+	public function needsPartFile()
+	{
+		return false;
+	}
+
 	public function getMetaData($path) {
 
 		\OC::$server->getLogger()->warning("\\apps\\nextcloud-swarm-plugin\\lib\\Storage\\BeeSwarm.php-Start getMetaData(): path=". $path);
 
 		$data = [];
-	 	$data['name'] = '';
-	 	$data['permissions'] = Constants::PERMISSION_ALL;
-	 	$data['mimetype'] = 'httpd/unix-directory';		//$this->getMimeType($path);
-	 	$data['mtime'] = time();
-	 	$data['storage_mtime'] = time();
-	 	$data['size'] = -1; //unknown
-	 	$data['etag'] = "61dx037xdc07z";
-		 \OC::$server->getLogger()->warning("\\apps\\nextcloud-swarm-plugin\\lib\\Storage\\BeeSwarm.php-End getMetaData(): data['mimetype']=". $data['mimetype']);
-		// $data = [];
-	 	// $data['name'] = "sample.txt";
-	 	// $data['permissions'] = Constants::PERMISSION_ALL;
-	 	// $data['mimetype'] = "text/plain";		//$this->getMimeType($path);
-	 	// $data['mtime'] = time();
-	 	// $data['storage_mtime'] = time();
-	 	// $data['size'] = -1; //unknown
-	 	// $data['etag'] = "61dx037xdc07x";
-		 //\OC::$server->getLogger()->warning("\\apps\\nextcloud-swarm-plugin\\lib\\Storage\\BeeSwarm.php-End getMetaData(): data['name']=". $data['name']);
+		if ($path === '' || $path === '/' || $path === '.') {
+			// This creates a root folder for the storage mount.
+			$data['name'] = '';
+			$data['permissions'] = Constants::PERMISSION_ALL;
+			$data['mimetype'] = 'httpd/unix-directory';		//$this->getMimeType($path);
+			$data['mtime'] = time();
+			$data['storage_mtime'] = time();
+			$data['size'] = 5; //unknown
+			$data['etag'] = null;
+		}
+		else
+		{
+			// A file
+			$data['name'] = $path;
+			$data['permissions'] = Constants::PERMISSION_ALL;
+			$data['mimetype'] = "text/plain";	//$this->getMimeType($path);
+			$data['mtime'] = time();
+			$data['storage_mtime'] = time();
+			$data['size'] = 5500; //unknown
+			$data['etag'] = null;
+		}
 	 	return $data;
 	}
 	private function populateMetadata() {
@@ -181,7 +168,7 @@ class BeeSwarm extends \OC\Files\Storage\Common
 				"mimetype" => "text/plain",
 				"mtime" => time(),
 				"storage_mtime" => time(),
-				"size" => -1,
+				"size" => 60,
 				"etag" => uniqid()
 			],
 			[
@@ -190,7 +177,7 @@ class BeeSwarm extends \OC\Files\Storage\Common
 				"mimetype" => "image/jpeg",
 				"mtime" => time(),
 				"storage_mtime" => time(),
-				"size" => -1,
+				"size" => 70,
 				"etag" => uniqid()			]
 		];
 		return $metadata_arr;
@@ -201,18 +188,6 @@ class BeeSwarm extends \OC\Files\Storage\Common
 	}
 
 	public function rmdir($path) {
-		// $path = $this->normalizePath($path);
-
-		// if ($this->isRoot($path)) {
-		// 	return $this->clearBucket();
-		// }
-
-		// if (!$this->file_exists($path)) {
-		// 	return false;
-		// }
-
-		// $this->invalidateCache($path);
-		// return $this->batchDelete($path);
 	}
 
 	public function opendir($path) {
@@ -309,43 +284,43 @@ class BeeSwarm extends \OC\Files\Storage\Common
 		// return $result;
 	}
 
-	/**
-	 * Get the source path (on disk) of a given path
-	 *
-	 * @param string $path
-	 * @return string
-	 * @throws ForbiddenException
-	 */
-	public function getSourcePath($path) {
-		if (Filesystem::isFileBlacklisted($path)) {
-			throw new ForbiddenException('Invalid path: ' . $path, false);
-		}
+	// /**
+	//  * Get the source path (on disk) of a given path
+	//  *
+	//  * @param string $path
+	//  * @return string
+	//  * @throws ForbiddenException
+	//  */
+	// public function getSourcePath($path) {
+	// 	if (Filesystem::isFileBlacklisted($path)) {
+	// 		throw new ForbiddenException('Invalid path: ' . $path, false);
+	// 	}
 
-		$fullPath = $this->datadir . $path;
-		$currentPath = $path;
-		$allowSymlinks = \OC::$server->getConfig()->getSystemValue('localstorage.allowsymlinks', false);
-		if ($allowSymlinks || $currentPath === '') {
-			return $fullPath;
-		}
-		$pathToResolve = $fullPath;
-		$realPath = realpath($pathToResolve);
-		while ($realPath === false) { // for non existing files check the parent directory
-			$currentPath = dirname($currentPath);
-			if ($currentPath === '' || $currentPath === '.') {
-				return $fullPath;
-			}
-			$realPath = realpath($this->datadir . $currentPath);
-		}
-		if ($realPath) {
-			$realPath = $realPath . '/';
-		}
-		if (substr($realPath, 0, $this->dataDirLength) === $this->realDataDir) {
-			return $fullPath;
-		}
+	// 	$fullPath = $this->datadir . $path;
+	// 	$currentPath = $path;
+	// 	$allowSymlinks = \OC::$server->getConfig()->getSystemValue('localstorage.allowsymlinks', false);
+	// 	if ($allowSymlinks || $currentPath === '') {
+	// 		return $fullPath;
+	// 	}
+	// 	$pathToResolve = $fullPath;
+	// 	$realPath = realpath($pathToResolve);
+	// 	while ($realPath === false) { // for non existing files check the parent directory
+	// 		$currentPath = dirname($currentPath);
+	// 		if ($currentPath === '' || $currentPath === '.') {
+	// 			return $fullPath;
+	// 		}
+	// 		$realPath = realpath($this->datadir . $currentPath);
+	// 	}
+	// 	if ($realPath) {
+	// 		$realPath = $realPath . '/';
+	// 	}
+	// 	if (substr($realPath, 0, $this->dataDirLength) === $this->realDataDir) {
+	// 		return $fullPath;
+	// 	}
 
-		\OCP\Util::writeLog('core', "Following symlinks is not allowed ('$fullPath' -> '$realPath' not inside '{$this->realDataDir}')", ILogger::ERROR);
-		throw new ForbiddenException('Following symlinks is not allowed', false);
-	}
+	// 	\OCP\Util::writeLog('core', "Following symlinks is not allowed ('$fullPath' -> '$realPath' not inside '{$this->realDataDir}')", ILogger::ERROR);
+	// 	throw new ForbiddenException('Following symlinks is not allowed', false);
+	// }
 
 
 	public function getDirectDownload($path)
@@ -381,20 +356,24 @@ class BeeSwarm extends \OC\Files\Storage\Common
 			\OC::$server->getLogger()->warning("\\apps\\nextcloud-swarm-plugin\\lib\\Storage\\BeeSwarm.php-writeStream(): result2=" . var_export($result, true));
 			\OC::$server->getLogger()->warning("\\apps\\nextcloud-swarm-plugin\\lib\\Storage\\BeeSwarm.php-writeStream(): reference2=" . (is_array($result) ? $result["reference"] : "novalue") . ";isset=" . isset($result) );
 
-			// if (!is_array($result))
-			// {
-			// 	\OC::$server->getLogger()->warning("\\apps\\nextcloud-swarm-plugin\\lib\\Storage\\BeeSwarm.php-writeStream(): GenericFileException=" . (is_array($result) ? $result["reference"] : "novalue"));
-			//   	throw new GenericFileException("Failed to upload file to swarm " . $this->id);
-			// }
+			if (!is_array($result))
+			{
+				throw new BadRequest("Failed to upload file to swarm " . $this->id);
+			}
 		}
 		catch (\Exception $e) {
 			\OC::$server->getLogger()->warning("\\apps\\nextcloud-swarm-plugin\\lib\\Storage\\BeeSwarm.php-writeStream(): exception=" . $e->getMessage());
 			//$output->writeln('<error>Mount not found</error>');
+			throw new StorageNotAvailableException($e->getMessage());
 		}
 		finally {
 		  	fclose($stream);
 		}
 
+		// Write metadata to table
+		// reference
+		// fileid
+		// encryption key
 
 		// //TODO: Read back from swarm to return filesize
 		return $tmpFilesize;
