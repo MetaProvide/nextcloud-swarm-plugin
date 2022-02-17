@@ -30,10 +30,12 @@ use OCA\Files_External_BeeSwarm\Storage\BeeSwarmTrait;
 use OCP\Files\FileInfo;
 use OCP\Files\StorageNotAvailableException;
 use OC\Files\Filesystem;
+use OCA\Files_External_BeeSwarm\Db\SwarmFileMapper;
 use OCP\Files\ForbiddenException;
 use OCP\Files\GenericFileException;
 use OCP\ILogger;
 use Sabre\DAV\Exception\BadRequest;
+use OCP\IDBConnection;
 
 class BeeSwarm extends \OC\Files\Storage\Common
 {
@@ -42,20 +44,25 @@ class BeeSwarm extends \OC\Files\Storage\Common
 	const APP_NAME = 'files_external_beeswarm';
 
 	/**
+	 * @var uploadfiles
+	 */
+	private $uploadfiles = [];
+
+	/**
 	 * @var ILogger
 	 */
 	protected $logger;
 
-	/**
-	 * @var int
-	 */
-	protected $cacheFilemtime = [];
+	/** @var SwarmFileMapper */
+	private $filemapper;
 
 	public function __construct($params)
 	{
 		$this->parseParams($params);
 		$this->id = 'beeswarm2::' . $this->ip . ':' . $this->port;
-		//\OC::$server->getLogger()->warning("\\apps\\nextcloud-swarm-plugin\\lib\Storage\\BeeSwarm.php-ip=" . $this->ip . ";id=" . $this->id);
+
+		$db = new IDBConnection();
+		$this->filemapper = new SwarmFileMapper($db);
 	}
 
 	public static function checkDependencies() {
@@ -149,14 +156,17 @@ class BeeSwarm extends \OC\Files\Storage\Common
 		}
 		else
 		{
-			// A file
-			$data['name'] = $path;
-			$data['permissions'] = Constants::PERMISSION_ALL;
-			$data['mimetype'] = "text/plain";	//$this->getMimeType($path);
-			$data['mtime'] = time();
-			$data['storage_mtime'] = time();
-			$data['size'] = 5500; //unknown
-			$data['etag'] = null;
+			if (in_array($path, $this->uploadfiles, false))
+			{
+				// A file
+				$data['name'] = $path;
+				$data['permissions'] = Constants::PERMISSION_ALL;
+				$data['mimetype'] = $this->uploadfiles["mimetype"];
+				$data['mtime'] = $this->uploadfiles["mtime"];
+				$data['storage_mtime'] = $this->uploadfiles["storage_mtime"];
+				$data['size'] = $this->uploadfiles["size"];
+				$data['etag'] = $this->uploadfiles["etag"];
+			}
 		}
 	 	return $data;
 	}
@@ -348,22 +358,22 @@ class BeeSwarm extends \OC\Files\Storage\Common
 		// Write to temp file
 		$tmpFile = $this->toTmpFile($stream);
 		$tmpFilesize = (file_exists($tmpFile) ? filesize($tmpFile) : -1);
+		$mimetype = mime_content_type($tmpFile);
 		\OC::$server->getLogger()->warning("\\apps\\nextcloud-swarm-plugin\\lib\\Storage\\BeeSwarm.php-writeStream(): path=" . $path . ";size=" . ($size === null ? "unknown" : $size) . ";tempfile=" . $tmpFile . ";file_exists=" . file_exists($tmpFile) . ";filesize=" . $tmpFilesize);
 
 		try {
 		 	//$result = $this->upload_file($path, $tmpFile, $tmpFilesize);
-			$result = $this->upload_stream($path, $stream, $tmpFile, $tmpFilesize);
-			\OC::$server->getLogger()->warning("\\apps\\nextcloud-swarm-plugin\\lib\\Storage\\BeeSwarm.php-writeStream(): result2=" . var_export($result, true));
-			\OC::$server->getLogger()->warning("\\apps\\nextcloud-swarm-plugin\\lib\\Storage\\BeeSwarm.php-writeStream(): reference2=" . (is_array($result) ? $result["reference"] : "novalue") . ";isset=" . isset($result) );
+			$result = $this->upload_stream($path, $stream, $tmpFile, $mimetype, $tmpFilesize);
+			$reference = (isset($result["reference"]) ? $result['reference'] : null);
+			\OC::$server->getLogger()->warning("\\apps\\nextcloud-swarm-plugin\\lib\\Storage\\BeeSwarm.php-writeStream(): result2=" . var_export($result['response'], true));
+			\OC::$server->getLogger()->warning("\\apps\\nextcloud-swarm-plugin\\lib\\Storage\\BeeSwarm.php-writeStream(): reference2=" . (is_array($result) ? $result["reference"] : "novalue") . ";isset=" . isset($result['response']) );
 
-			if (!is_array($result))
+			if (!isset($reference))
 			{
 				throw new BadRequest("Failed to upload file to swarm " . $this->id);
 			}
 		}
 		catch (\Exception $e) {
-			\OC::$server->getLogger()->warning("\\apps\\nextcloud-swarm-plugin\\lib\\Storage\\BeeSwarm.php-writeStream(): exception=" . $e->getMessage());
-			//$output->writeln('<error>Mount not found</error>');
 			throw new StorageNotAvailableException($e->getMessage());
 		}
 		finally {
@@ -371,9 +381,17 @@ class BeeSwarm extends \OC\Files\Storage\Common
 		}
 
 		// Write metadata to table
-		// reference
-		// fileid
-		// encryption key
+		$uploadfiles = [
+		"name" => $path,
+		"permissions" => Constants::PERMISSION_ALL,
+		"mimetype" => $mimetype,
+		"mtime" => time(),
+		"storage_mtime" => time(),
+		"size" => $tmpFilesize,
+		"etag" => null,
+		"reference" => $reference,
+		];
+		$this->filemapper->createFile($uploadfiles);
 
 		// //TODO: Read back from swarm to return filesize
 		return $tmpFilesize;

@@ -99,14 +99,14 @@ trait BeeSwarmTrait  {
 
 	/*
 	*/
-	private function upload_stream(string $path, $stream, string $tmpfile, int $file_size = null) {
+	private function upload_stream(string $path, $stream, string $tmpfile, string $mimetype, int $file_size = null) {
 		$url_endpoint = $this->api_url . '/bzz';
 		$url_params = "?name=" . urlencode(basename($path));
 
 		$url_endpoint .= $url_params;
 		$curl = $this->setCurl($url_endpoint);
 
-		$mimetype = mime_content_type($tmpfile);
+
 		$fh = fopen($tmpfile, 'r');
 		if ($fh === false)
 		{
