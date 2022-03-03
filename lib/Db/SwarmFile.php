@@ -36,14 +36,17 @@ use OCP\AppFramework\Db\Entity;
 *  @method string|null getSwarmReference()
  * @method void setSwarmTag(string $tag)
 *  @method string|null getSwarmTag()
- * @method void setMimeType(int $mimetype)
- * @method string|null getMimeType()
+ * @method void setMimetype(int $mimetype)
+ * @method string|null getMimetype()
  * @method void setSize(int $size)
  * @method string getSize()
- * @method void setMtime(int $mtime)
- * @method int getMTime()
- * @method void setEncryptionKey(string $encryption)
- * @method string getEncryptionKey()
+ * @method void setStorageMtime(int $mtime)
+ * @method int getStorageMtime()
+ * @method void setEncryptionkey(string $encryption)
+ * @method string getEncryptionkey()
+ * @method void setStorage(int $storage)
+ * @method int|null getStorage()
+ *
  */
 class SwarmFile extends Entity {
 
@@ -69,7 +72,10 @@ class SwarmFile extends Entity {
 	protected $storageMtime;
 
 	/** @var string */
-	protected $encryptionKey;
+	protected $encryptionkey;
+
+	/** @var int */
+	protected $storage;
 
 	public function __construct() {
 		$this->addType('fileid', 'int');
@@ -79,6 +85,7 @@ class SwarmFile extends Entity {
 		$this->addType('mimetype', 'int');
 		$this->addType('size', 'int');
 		$this->addType('storageMtime', 'int');
-		$this->addType('encryptionKey', 'string');
+		$this->addType('encryptionkey', 'string');
+		$this->addType('storage', 'int');
 	}
 }
