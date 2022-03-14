@@ -22,9 +22,9 @@
 
 namespace OCA\Files_External_BeeSwarm\Storage;
 
-trait BeeSwarmTrait  {
-	//const IS_CASE_INSENSITIVE_STORAGE = 'isCaseInsensitiveStorage';
+use OCP\Files\StorageNotAvailableException;
 
+trait BeeSwarmTrait  {
 	protected $ip;
 	protected $port;
 	protected $api_url;
@@ -99,14 +99,14 @@ trait BeeSwarmTrait  {
 
 	/*
 	*/
-	private function upload_stream(string $path, $stream, string $tmpfile, int $file_size = null) {
+	private function upload_stream(string $path, $stream, string $tmpfile, string $mimetype, int $file_size = null) {
 		$url_endpoint = $this->api_url . '/bzz';
 		$url_params = "?name=" . urlencode(basename($path));
 
 		$url_endpoint .= $url_params;
 		$curl = $this->setCurl($url_endpoint);
 
-		$mimetype = mime_content_type($tmpfile);
+
 		$fh = fopen($tmpfile, 'r');
 		if ($fh === false)
 		{
@@ -130,6 +130,7 @@ trait BeeSwarmTrait  {
 			'swarm-postage-batch-id: ' . $this->postage_batchid,
 			//'Content-Type: application/octet-stream',	// this is necessary, otherwise produces server error 500: "could not store directory". File can then be Open or Save in browser.
 			'Content-Type: ' . $mimetype,
+			($this->isEncrypted ? 'Swarm-Encrypt: true' : '')
 			 ));
 
 		\OC::$server->getLogger()->warning("\\apps\\nextcloud-swarm-plugin\\lib\Storage\\BeeSwarmTrait.php-upload_stream: ok exec");
@@ -178,6 +179,43 @@ trait BeeSwarmTrait  {
 		$response_data = json_decode($output, true);
 		curl_close($curl);
 		return $response_data;
+	}
+
+	private function get_stream_by_curl(string $path, string $reference) {
+		$url_endpoint = $this->api_url . '/bzz/';
+		$url_params = $reference;
+		$url_endpoint .= $url_params;
+
+		$curl = $this->setCurl($url_endpoint);
+
+		curl_setopt($curl, CURLOPT_HTTPHEADER, array(
+		  	'Content-Type: application/octet-stream',
+		  	 ));
+
+		curl_setopt($curl, CURLOPT_HEADER, true);
+		$output = curl_exec($curl);
+		$this->checkCurlResult($curl, $output);
+		curl_close($curl);
+		return $output;
+	}
+
+	private function get_stream(string $path, string $reference) {
+//		try {
+			$url_endpoint = $this->api_url . '/bzz/';
+			$url_params = $reference;
+			$url_endpoint .= $url_params;
+
+			$output = fopen($url_endpoint, 'r');
+
+			if (!$output)
+			{
+				throw new StorageNotAvailableException("Unable to get file from swarm");
+			}
+//		}
+		// catch (\Exception $e) {
+		//
+		// }
+		return $output;
 	}
 
 }
