@@ -78,7 +78,7 @@ class BeeSwarm extends \OC\Files\Storage\Common
 	public function __construct($params)
 	{
 		$this->parseParams($params);
-		$this->id = 'beeswarm2::' . $this->ip . ':' . $this->port;
+		$this->id = 'beeswarm::' . $this->ip . ':' . $this->port;
 		$this->storageId = $this->getStorageCache()->getNumericId();
 
 		// Load handlers
@@ -92,18 +92,18 @@ class BeeSwarm extends \OC\Files\Storage\Common
 		if (is_array($storageMounts) && $storageMounts[0]) {
 			// Parse array for config of requested storage
 			$storageMount = $storageMounts[0];
-				$mountId = $storageMount->getMountId();
+			$mountId = $storageMount->getMountId();
 
-				$this->config = \OC::$server->get(IConfig::class);
-				$configSettings = $this->config->getAppValue(SELF::APP_NAME,"storageconfig","");	//default
-				$mounts = json_decode($configSettings, true);
-				$mountIds = array_column($mounts, 'mount_id');
-				$key = array_search($mountId, $mountIds);
-				if (!empty($key) || $key === 0) {
-					$isConfigured = true;
-					$this->isEncrypted = $mounts[$key]['encrypt'] == "1" ? true : false;
-					$this->stampBatchId = $mounts[$key]['batchid'];
-				}
+			$this->config = \OC::$server->get(IConfig::class);
+			$configSettings = $this->config->getAppValue(SELF::APP_NAME,"storageconfig","");	//default
+			$mounts = json_decode($configSettings, true);
+			$mountIds = array_column($mounts, 'mount_id');
+			$key = array_search($mountId, $mountIds);
+			if (!empty($key) || $key === 0) {
+				$isConfigured = true;
+				$this->isEncrypted = $mounts[$key]['encrypt'] == "1" ? true : false;
+				$this->stampBatchId = $mounts[$key]['batchid'];
+			}
 		}
 		if (!$isConfigured)
 		{
@@ -123,7 +123,7 @@ class BeeSwarm extends \OC\Files\Storage\Common
 
 	public function test()
 	{
-		return true;
+		return $this->getConnection();
 	}
 
 	public function file_exists($path) {
@@ -140,9 +140,6 @@ class BeeSwarm extends \OC\Files\Storage\Common
 	}
 
 	public function stat($path) {
-		// if ($path === '' || $path === '/' || $path === '.') {
-		// 	return ['mtime' => 0];
-		// }
 		return parent::stat($path);
 	}
 
@@ -156,28 +153,18 @@ class BeeSwarm extends \OC\Files\Storage\Common
 	 	return null;
 	}
 
-	public function getDirectoryContent($directory) :\Traversable
-	{
-		$metadata = $this->populateMetadata();
-		foreach ($metadata as $meta)
-		{
-			$cacheEntry = $this->getCache()->get($meta['name']);
-			if (1==2 && $cacheEntry instanceof CacheEntry) {
-				\OC::$server->getLogger()->warning("\\apps\\nextcloud-swarm-plugin\\lib\\Storage\\BeeSwarm.php-getDirectoryContent(): cacheEntry->getData()=" . var_export($cacheEntry->getData(), true));
-				yield $cacheEntry->getData();
-			}
-			else {
-			 	\OC::$server->getLogger()->warning("\\apps\\nextcloud-swarm-plugin\\lib\\Storage\\BeeSwarm.php-getDirectoryContent(): populateMetadata()=" . var_export($meta, true));
-			 	yield $meta;
-			}
-		}
-	}
-
+	/**
+	 * @return bool
+	 */
 	public function needsPartFile()
 	{
 		return false;
 	}
 
+	/**
+	 * @param string $path
+	 * @return array|null
+	 */
 	public function getMetaData($path) {
 		$data = [];
 		if ($path === '' || $path === '/' || $path === '.') {
@@ -195,7 +182,7 @@ class BeeSwarm extends \OC\Files\Storage\Common
 			// Get record from table
 			$swarmFile = $this->filemapper->find($path, $this->storageId);
             $data['name'] = $path;
-            $data['permissions'] = Constants::PERMISSION_ALL;
+            $data['permissions'] = Constants::PERMISSION_READ;
 			// Set mimetype as a string, get by using its ID (int)
 			$mimetypeId = $swarmFile->getMimetype();
             $data['mimetype'] = $this->mimeTypeHandler->getMimetypeById($mimetypeId);
@@ -205,28 +192,6 @@ class BeeSwarm extends \OC\Files\Storage\Common
             $data['etag'] = null;
         }
 	 	return $data;
-	}
-	private function populateMetadata() {
-		$metadata_arr =[
-			[
-				"name" => "sample.txt",
-				"permissions" => Constants::PERMISSION_ALL,
-				"mimetype" => "text/plain",
-				"mtime" => time(),
-				"storage_mtime" => time(),
-				"size" => 60,
-				"etag" => uniqid()
-			],
-			[
-				"name" => "sample_icon.jpg",
-				"permissions" => Constants::PERMISSION_ALL,
-				"mimetype" => "image/jpeg",
-				"mtime" => time(),
-				"storage_mtime" => time(),
-				"size" => 70,
-				"etag" => uniqid()			]
-		];
-		return $metadata_arr;
 	}
 
 	public function mkdir($path) {
@@ -240,6 +205,9 @@ class BeeSwarm extends \OC\Files\Storage\Common
 		return opendir($path);
 	}
 
+	/**
+	 * @return bool
+	 */
 	public function is_dir($path) {
 		return true;
 	}
@@ -256,10 +224,16 @@ class BeeSwarm extends \OC\Files\Storage\Common
 		return \OCP\Files\FileInfo::SPACE_UNLIMITED;
 	}
 
+	/**
+	 * @return bool
+	 */
 	public function hasUpdated($path, $time) {
 		return true;
 	}
 
+	/**
+	 * @return bool
+	 */
 	public function isLocal() {
 		// the common implementation returns a temporary file by
 		// default, which is not local
@@ -275,18 +249,22 @@ class BeeSwarm extends \OC\Files\Storage\Common
 	 * @return mixed
 	 */
 	public function getMountOption($name, $default = null) {
-		//\OC::$server->getLogger()->warning("\\apps\\nextcloud-swarm-plugin\\lib\\Storage\\BeeSwarm.php-getMountOption(): name=" . $name);
 		return isset($this->mountOptions[$name]) ? $this->mountOptions[$name] : $default;
 	}
 
 	public function verifyPath($path, $fileName) {
-		\OC::$server->getLogger()->warning("\\apps\\nextcloud-swarm-plugin\\lib\\Storage\\BeeSwarm.php-verifyPath(): path=" . $path . ";filename=" . $fileName) ;
 	}
 
+	/**
+	 * @return bool
+	 */
 	public function isCreatable($path) {
 		return true;
 	}
 
+	/**
+	 * @return bool
+	 */
 	public function isUpdatable($path)
 	{
 		return true;
@@ -325,23 +303,20 @@ class BeeSwarm extends \OC\Files\Storage\Common
 		return false;
 	}
 
+	/**
+	 * @return bool
+	 */
 	public function touch($path, $mtime = null) {
 		return true;
 	}
 
-	public function file_get_contents($path)
-	{
-		\OC::$server->getLogger()->warning("\\apps\\nextcloud-swarm-plugin\\lib\\Storage\\BeeSwarm.php-file_get_contents(): path=" . $path);
+	public function file_get_contents($path)	{
 	}
 
-	public function file_put_contents($path, $data)
-	{
-		\OC::$server->getLogger()->warning("\\apps\\nextcloud-swarm-plugin\\lib\\Storage\\BeeSwarm.php-file_put_contents(): path=" . $path);
+	public function file_put_contents($path, $data)	{
 	}
 
-	public function getDirectDownload($path)
-	{
-		\OC::$server->getLogger()->warning("\\apps\\nextcloud-swarm-plugin\\lib\\Storage\\BeeSwarm.php-getDirectDownload(): path=" . $path);
+	public function getDirectDownload($path)	{
 	}
 
 	/* Enabling this function causes a fatal exception "Call to a member function getId() on null /var/www/html/lib/private/Files/Mount/MountPoint.php - line 276: OC\Files\Cache\Wrapper\CacheWrapper->getId("")
@@ -351,7 +326,7 @@ class BeeSwarm extends \OC\Files\Storage\Common
 	}
 	*/
 
-	protected function toTmpFile($source) { //no longer in the storage api, still useful here
+	protected function toTmpFile($source) {
 		$extension = '';
 		$tmpFile = \OC::$server->getTempManager()->getTemporaryFile($extension);
 		$target = fopen($tmpFile, 'w');
@@ -373,11 +348,11 @@ class BeeSwarm extends \OC\Files\Storage\Common
 
 			if (!isset($reference))
 			{
-				throw new BadRequest("Failed to upload file to swarm " . $this->id);
+				throw new BadRequest("Failed to upload file to " . $this->id . ": " . $result['message']);
 			}
 		}
 		catch (\Exception $e) {
-			throw new StorageNotAvailableException($e->getMessage());
+			throw new \Exception($e->getMessage());
 		}
 		finally {
 		  	fclose($stream);
@@ -386,7 +361,7 @@ class BeeSwarm extends \OC\Files\Storage\Common
 		// Write metadata to table
 		$uploadfiles = [
 		"name" => $path,
-		"permissions" => Constants::PERMISSION_ALL,
+		"permissions" => Constants::PERMISSION_READ,
 		"mimetype" => $this->mimeTypeHandler->getId($mimetype),
 		"mtime" => time(),
 		"storage_mtime" => time(),
@@ -397,7 +372,7 @@ class BeeSwarm extends \OC\Files\Storage\Common
 		];
 		$this->filemapper->createFile($uploadfiles);
 
-		// //TODO: Read back from swarm to return filesize
+		// //TODO: Read back from swarm to return filesize?
 		return $tmpFilesize;
 	}
 }
