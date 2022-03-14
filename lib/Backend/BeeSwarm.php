@@ -50,7 +50,6 @@ class BeeSwarm extends Backend
             ->addParameters([
 				new DefinitionParameter('ip', $l->t('IP Address 2')),
 				new DefinitionParameter('port', $l->t('Port 2')),
-				new DefinitionParameter('postage_batchid', $l->t('Postage Batch Id')),
 			])
             ->addAuthScheme(AuthMechanism::SCHEME_NULL);
             //->addCustomJs("../../../$appWebPath/js/beeswarm");

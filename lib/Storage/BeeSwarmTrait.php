@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @author
  *
@@ -19,16 +18,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  *
  */
-
 namespace OCA\Files_External_BeeSwarm\Storage;
-
-use OCP\Files\StorageNotAvailableException;
 
 trait BeeSwarmTrait  {
 	protected $ip;
 	protected $port;
 	protected $api_url;
-	protected $postage_batchid;
+	protected $debug_api_url;
 
 	/** @var string */
 	protected $id;
@@ -47,11 +43,10 @@ trait BeeSwarmTrait  {
 			$this->ip = $params['ip'];
 			$this->port = $params['port'] ?? 1633;
 			$this->api_url = $this->ip . ':' . $this->port;
-			$this->postage_batchid = $params['postage_batchid'];
+			$this->debug_api_url = $this->ip . ':1635';
 		} else {
 			throw new \Exception('Creating ' . self::class . ' storage failed, required parameters not set for bee swarm');
 		}
-
 		$this->params = $params;
 	}
 	/**
@@ -92,7 +87,6 @@ trait BeeSwarmTrait  {
 		if ($result === false) {
 			$error = curl_error($ch);
 			curl_close($ch);
-			\OC::$server->getLogger()->warning("\\apps\\nextcloud-swarm-plugin\\lib\Storage\\BeeSwarmTrait.php-checkCurlResult: error=" . $error);
 			throw new \Exception($error);
 		}
 	}
@@ -106,18 +100,12 @@ trait BeeSwarmTrait  {
 		$url_endpoint .= $url_params;
 		$curl = $this->setCurl($url_endpoint);
 
-
 		$fh = fopen($tmpfile, 'r');
-		if ($fh === false)
+		if ($fh === false || !is_resource($fh))
 		{
-			\OC::$server->getLogger()->warning("\\apps\\nextcloud-swarm-plugin\\lib\Storage\\BeeSwarmTrait.php-upload_stream: fh nok");
-		}
-		if (is_resource($fh))
-		{
-			\OC::$server->getLogger()->warning("\\apps\\nextcloud-swarm-plugin\\lib\Storage\\BeeSwarmTrait.php-upload_stream: is_resource ok; filesize=" . $file_size . ";endpoint=" . $url_endpoint . ";url_encodeparams" . urlencode($url_params) . ";mimetype" . $mimetype);
+			throw new \Exception("Failed to open temporary file $tmpfile");
 		}
 
-		curl_setopt($curl, CURLOPT_URL, $url_endpoint);
 		curl_setopt($curl, CURLOPT_PUT, true);
 		curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "POST");
 		curl_setopt($curl, CURLOPT_POST, true);
@@ -127,13 +115,10 @@ trait BeeSwarmTrait  {
 		curl_setopt($curl, CURLOPT_VERBOSE, true);
 
 		curl_setopt($curl, CURLOPT_HTTPHEADER, array(
-			'swarm-postage-batch-id: ' . $this->postage_batchid,
-			//'Content-Type: application/octet-stream',	// this is necessary, otherwise produces server error 500: "could not store directory". File can then be Open or Save in browser.
+			'swarm-postage-batch-id: ' . $this->stampBatchId,
 			'Content-Type: ' . $mimetype,
 			($this->isEncrypted ? 'Swarm-Encrypt: true' : '')
 			 ));
-
-		\OC::$server->getLogger()->warning("\\apps\\nextcloud-swarm-plugin\\lib\Storage\\BeeSwarmTrait.php-upload_stream: ok exec");
 
 		$output = curl_exec($curl);
 		$this->checkCurlResult($curl, $output);
@@ -148,8 +133,9 @@ trait BeeSwarmTrait  {
 		$curl = $this->setCurl($url_endpoint);
 
 		curl_setopt($curl, CURLOPT_HTTPHEADER, array(
-			'swarm-postage-batch-id: ' . $this->postage_batchid,
+			'swarm-postage-batch-id: ' . $this->stampBatchId,
 			'Content-Type: application/octet-stream',	// this is necessary, otherwise produces server error 500: "could not store directory". File can then be Open or Save in browser.
+			($this->isEncrypted ? 'Swarm-Encrypt: true' : '')
 			 ));
 		curl_setopt($curl, CURLOPT_POST, true);
 
@@ -200,7 +186,6 @@ trait BeeSwarmTrait  {
 	}
 
 	private function get_stream(string $path, string $reference) {
-//		try {
 			$url_endpoint = $this->api_url . '/bzz/';
 			$url_params = $reference;
 			$url_endpoint .= $url_params;
@@ -209,13 +194,8 @@ trait BeeSwarmTrait  {
 
 			if (!$output)
 			{
-				throw new StorageNotAvailableException("Unable to get file from swarm");
+			  	throw new \Exception("Unable to get file $path from swarm");
 			}
-//		}
-		// catch (\Exception $e) {
-		//
-		// }
 		return $output;
 	}
-
 }

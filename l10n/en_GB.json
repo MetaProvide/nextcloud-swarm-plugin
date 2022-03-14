@@ -3,7 +3,8 @@
     "BeeSwarm" : "BeeSwarm",
     "Client Id" : "Client Id",
     "Client Secret" : "Client Secret",
-    "Token" : "Token"
+    "Token" : "Token",
+	"BeeSwarm storage" : "BeeSwarm Storage",
   },
   "pluralForm" :"nplurals=2; plural=(n != 1);"
 }
