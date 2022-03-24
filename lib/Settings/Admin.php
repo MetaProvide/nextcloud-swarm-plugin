@@ -32,7 +32,7 @@ use OCP\Settings\ISettings;
 class Admin implements ISettings {
 
 	/** @var string */
-	const APP_NAME = 'files_external_beeswarm';
+	protected $appName;
 
 	/** @var IConfig */
 	private $config;
@@ -45,10 +45,12 @@ class Admin implements ISettings {
 	/** @var BackendService */
 	private $backendService;
 
-	public function __construct(IConfig $config,
+	public function __construct($appName,
+								IConfig $config,
 								IL10N $l,
 								GlobalStoragesService $globalStoragesService,
 								BackendService $backendService) {
+		$this->appName = $appName;
 		$this->config = $config;
 		$this->l = $l;
 		$this->globalStoragesService = $globalStoragesService;
@@ -59,10 +61,8 @@ class Admin implements ISettings {
 	 * @return TemplateResponse
 	 */
 	public function getForm(): TemplateResponse {
-
 		// Get Mount settings
-		//$mounts_json = '[{"mount_id":"1","mount_point":"\/Beeswarm-local","encrypt":"1","batchid":"112020e2e112020e2e112020e2e"},{"mount_id":"12","mount_point":"\/beeswarm2","encrypt":"0","batchid":"fsdffsdasdasdsdasdasdasdsdasdasdasd"}]';
-		$mounts_json = $this->config->getAppValue(SELF::APP_NAME,"storageconfig","");	//default
+		$mounts_json = $this->config->getAppValue($this->appName,"storageconfig","");	//default
 		$mounts = json_decode($mounts_json,  true);
 
 		// Get all valid Beeswarm storages
@@ -83,15 +83,15 @@ class Admin implements ISettings {
 		foreach ($storageBackends as $backend) {
 			$backendId = $backend->getId();
 			$backendName = $backend->getMountPoint();
-			$url_endpoint = $backend->getBackendOptions()['ip'];
+			$urlOptions = $backend->getBackendOptions();
 
 			// Is it configured?
 			$key = array_search($backendId, $mountIds);
 			if (!empty($key) || $key === 0) {
 				$mounts[$key]['mount_name'] = $backendName;
 				$batchId = isset($mounts[$key]['batchid']) ? $mounts[$key]['batchid'] : "";
-				$mounts[$key]['batchbalance'] = $this->getBatchBalance($batchId, $url_endpoint);
-				$mounts[$key]['chequebalance'] = $this->getChequebookBalance($url_endpoint);
+				$mounts[$key]['batchbalance'] = $this->getBatchBalance($batchId, $urlOptions);
+				$mounts[$key]['chequebalance'] = $this->getChequebookBalance($urlOptions);
 			}
 			else {
 				// not yet configured, so add to array. Default to encryption.
@@ -106,14 +106,14 @@ class Admin implements ISettings {
 			'visibilityType' => BackendService::VISIBILITY_ADMIN,
 			'mounts' => json_encode($mounts),
 		];
-		return new TemplateResponse('files_external_beeswarm', 'admin-section', $parameters, '');
+		return new TemplateResponse($this->appName, 'admin-section', $parameters, '');
 	}
 
 	/**
 	 * @return string the section ID, e.g. 'sharing'
 	 */
 	public function getSection(): string {
-		return 'files_external_beeswarm';
+		return $this->appName;
 	}
 
 	/**
@@ -127,26 +127,9 @@ class Admin implements ISettings {
 		return 5;
 	}
 
-	public function getName(): ?string {
-		return null; // Only one setting in this section
-	}
-
-	public function getAuthorizedAppConfig(): array {
-		return [
-			'theming' => '/.*/',
-		];
-	}
-
-	public function getBatchBalance(string $batchId, $url_endpoint) {
-
-
-		$url_endpoint .= ':1635/stamps/';
-
-		$url_endpoint .= $batchId;
-		$curl = curl_init();
-
-		curl_setopt($curl, CURLOPT_URL, $url_endpoint);
-		curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+	public function getBatchBalance(string $batchId, $urlOptions) {
+		$uri = "/stamps/" . $batchId;
+		$curl = $this->setCurl($uri, $urlOptions);
 
 		$output = curl_exec($curl);
 
@@ -156,14 +139,9 @@ class Admin implements ISettings {
 		return isset($response_data["batchTTL"]) ? $response_data['batchTTL'] : null;
 	}
 
-	public function getChequebookBalance($url_endpoint) {
-
-		$url_endpoint .= ':1635/chequebook/balance';
-
-		$curl = curl_init();
-
-		curl_setopt($curl, CURLOPT_URL, $url_endpoint);
-		curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+	public function getChequebookBalance($urlOptions) {
+		$uri = "/chequebook/balance";
+		$curl = $this->setCurl($uri, $urlOptions);
 
 		$output = curl_exec($curl);
 
@@ -171,5 +149,27 @@ class Admin implements ISettings {
 
 		curl_close($curl);
 		return isset($response_data["totalBalance"]) ? $response_data['totalBalance'] : null;
+	}
+
+	/**
+	 * initializes a curl handler
+	 * @return \CurlHandle
+	 */
+	protected function setCurl(string $uri_params, array $urlOptions) : \CurlHandle {
+		$url_endpoint = $urlOptions['ip'] . ":" . $urlOptions['debug_api_port'];
+		$url_endpoint .= $uri_params;
+
+		$curl = curl_init();
+
+		curl_setopt($curl, CURLOPT_URL, $url_endpoint);
+		curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+
+		if (isset($urlOptions['user']) && isset($urlOptions['password'])) {
+
+			$base64EncodedAuth = base64_encode($urlOptions['user'] . ':' . $urlOptions['password']);
+			$header = 'Authorization: Basic ' . $base64EncodedAuth;
+			curl_setopt($curl, CURLOPT_HTTPHEADER, array($header));
+		}
+		return $curl;
 	}
 }

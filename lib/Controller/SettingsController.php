@@ -31,8 +31,8 @@ use OCP\IRequest;
 
 class SettingsController extends Controller {
 
-	/** @var string */
-	const APP_NAME = 'files_external_beeswarm';
+    /** @var string */
+    protected $appName;
 
 	/** @var IConfig */
 	private $config;
@@ -42,10 +42,11 @@ class SettingsController extends Controller {
 	 * @param IRequest $request
 	 */
 	public function __construct(
+		string $appName,
 		IConfig $config,
 		IRequest $request
 	) {
-		parent::__construct(self::APP_NAME, $request);
+		parent::__construct($appName, $request);
 		$this->config = $config;
 	}
 
@@ -54,9 +55,9 @@ class SettingsController extends Controller {
 	 */
 	public function admin(): void {
 		if ($this->request->getParam("storageconfig")) {
-			$this->config->setAppValue(self::APP_NAME, "storageconfig", $this->request->getParam("storageconfig"));
+			$this->config->setAppValue($this->appName, "storageconfig", $this->request->getParam("storageconfig"));
 		} else {
-			$this->config->setAppValue(self::APP_NAME, "storageconfig", "");
+			$this->config->setAppValue($this->appName, "storageconfig", "");
 		}
 	}
 }

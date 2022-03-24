@@ -28,8 +28,8 @@ use OCP\Settings\IIconSection;
 
 class Section implements IIconSection {
 
-	const APP_NAME = 'files_external_beeswarm';
-
+	/** @var string */
+	protected $appName;
 	/** @var IL10N */
 	private $l;
 	/** @var IURLGenerator */
@@ -39,7 +39,8 @@ class Section implements IIconSection {
 	 * @param IURLGenerator $url
 	 * @param IL10N $l
 	 */
-	public function __construct(IURLGenerator $url, IL10N $l) {
+	public function __construct(string $appName, IURLGenerator $url, IL10N $l) {
+		$this->appName = $appName;
 		$this->url = $url;
 		$this->l = $l;
 	}
@@ -51,7 +52,7 @@ class Section implements IIconSection {
 	 * @returns string
 	 */
 	public function getID() {
-		return SELF::APP_NAME;
+		return $this->appName;
 	}
 
 	/**
@@ -79,6 +80,6 @@ class Section implements IIconSection {
 	 * {@inheritdoc}
 	 */
 	public function getIcon() {
-		return $this->url->imagePath('files_external_beeswarm', 'app-dark.svg');
+		return $this->url->imagePath($this->appName, 'app-dark.svg');
 	}
 }
