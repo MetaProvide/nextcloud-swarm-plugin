@@ -22,14 +22,10 @@
 style('files_external_beeswarm', 'settings-admin');
 script('files_external_beeswarm', 'settings');
 ?>
-<div id="theming" class="section">
+<div id="beeswarm" class="section">
 	<h2 class="inlineblock"><?php p($l->t('Bee Swarm Storage')); ?></h2>
 	<a target="_blank" rel="noreferrer" class="icon-info" title="<?php p($l->t('Open documentation'));?>" href="<?php p(link_to_docs('admin-beeswarm')); ?>"></a>
         <p class="settings-hint"><?php p($l->t('View the current status of the Swarm node(s) configured in \'External Storage\' section of NextCloud.')); ?></p>
-		<div id="theming_settings_status">
-			<div id="theming_settings_loading" class="icon-loading-small" style="display: none;"></div>
-			<span id="theming_settings_msg" class="msg success" style="display: none;">Saved</span>
-		</div>
 
 	<?php
 	// Get configured storage mounts from parameters
@@ -53,30 +49,30 @@ script('files_external_beeswarm', 'settings');
 	</div>
 	<div>
 		<label>
-			<span><?php p($l->t('Allow encryption')) ?></span>
+			<span class="label"><?php p($l->t('Allow encryption')) ?></span>
 			<?php
 			if ($encrypted) {
 				$checked = "checked";
 			}?>
-			<input id="beeswarm_encrypt_<?php p($mountId); ?>" type="checkbox" <?php p($checked) ?>/>
+			<span><input id="beeswarm_encrypt_<?php p($mountId); ?>" type="checkbox" <?php p($checked) ?>/></span>
 		</label>
 	</div>
 	<div>
 		<label>
-			<span><?php p($l->t('Current Batch Id')) ?></span>
-			<input id="beeswarm_batchid_<?php p($mountId); ?>" type="text" maxlength="200" class="inputBatch" value="<?php p($batchId)?>" />
+			<span class="label"><?php p($l->t('Current Batch Id')) ?></span>
+			<span><input id="beeswarm_batchid_<?php p($mountId); ?>" type="text" maxlength="200" class="inputBatch" value="<?php p($batchId)?>" /></span>
 		</label>
 	</div>
 	<div>
 		<label>
-			<span><?php p($l->t('Batch TTL')) ?></span>
-			<input id="beeswarm-bzz_<?php p($mountId); ?>" type="text" placeholder="<?php p($l->t('Batch TTL')); ?>" value="<?php p($batchBalance) ?>" maxlength="20" />
-			<div data-setting="bzz" data-toggle="tooltip" data-original-title="<?php p($l->t('Reset to default')); ?>" class="theme-undo icon icon-history"></div>
+			<span class="label"><?php p($l->t('Batch TTL')) ?></span>
+			<span><input id="beeswarm-bzz_<?php p($mountId); ?>" type="text" placeholder="<?php p($l->t('Batch TTL')); ?>" value="<?php p($batchBalance) ?>" maxlength="20" /><span>
+			<span data-setting="bzz" data-toggle="tooltip" data-original-title="<?php p($l->t('Reset to default')); ?>" class="theme-undo icon icon-history"></span>
 		</label>
 	</div>
 	<div>
 		<label>
-			<span><?php p($l->t('Chequebook Balance')) ?></span>
+			<span class="label"><?php p($l->t('Chequebook Balance')) ?></span>
 			<input id="beeswarm-chequebalance_<?php p($mountId);?>" type="text" maxlength="20" value="<?php p($chequeBalance) ?>" />
 			<div data-setting="chequebalance_" data-toggle="tooltip" data-original-title="<?php p($l->t('Reset to default')); ?>" class="theme-undo icon icon-history"></div>
 		</label>
@@ -84,14 +80,5 @@ script('files_external_beeswarm', 'settings');
 	<?php endforeach;	?>
 	<input id="mountsIds" type="hidden" value='<?php p($controlmountIds);?>'>
 
-	<div id="beeswarm-preview">
-		<div id="beeswarm-preview-logo"></div>
-	</div>
 	<button id="beeswarm-save-settings"><?php p($l->t("Save")); ?></button>
-
-
-	<div class="beeswarm-hints">
-	</div>
-	<h3 class="inlineblock"><?php p($l->t('Advanced options')); ?></h3>
 </div>
-
