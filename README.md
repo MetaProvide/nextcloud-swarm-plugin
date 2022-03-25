@@ -21,10 +21,9 @@ https://github.com/nextcloud/server/blob/master/lib/private/Files/Storage/Common
 
 and it implements the following interfaces:
 
-* https://github.com/nextcloud/server/blob/master/lib/public/Files/Storage/IStorage.php
-* https://github.com/nextcloud/server/blob/master/lib/public/Files/Storage/IWriteStreamStorage.php
-* https://github.com/nextcloud/server/blob/master/lib/public/Files/Storage/ILockingStorage.php
-
+-   https://github.com/nextcloud/server/blob/master/lib/public/Files/Storage/IStorage.php
+-   https://github.com/nextcloud/server/blob/master/lib/public/Files/Storage/IWriteStreamStorage.php
+-   https://github.com/nextcloud/server/blob/master/lib/public/Files/Storage/ILockingStorage.php
 
 File metadata, like with all files in Nextcloud, should be stored in the database. This includes any extra information, for example the swarm encryption key that is used for each encrypted file. A new database table will be needed for any data that can't be discovered anew through the Swarm node, like the before mentioned encryption keys. The rest of the metadata should be stored in the normal filecache table.
 
@@ -46,10 +45,10 @@ The preferred way of storing the settings configured in the settings view is to 
 
 ## Goals for v0.1.0
 
-* Figure out what is needed for a bare-bones file system in Nextcloud and implement read and write file system operations through external storage in Nextcloud.
-* Create settings view that allows you to see the status of the Swarm node and configure it.
-* Support for toggling the Swarm encryption on and off (Should be on by default).
-* Only support for one Swarm node per instance (only allow configuration by admins). Mounting Swarm storage should also only be allowed through the admin settings.
+-   Figure out what is needed for a bare-bones file system in Nextcloud and implement read and write file system operations through external storage in Nextcloud.
+-   Create settings view that allows you to see the status of the Swarm node and configure it.
+-   Support for toggling the Swarm encryption on and off (Should be on by default).
+-   Only support for one Swarm node per instance (only allow configuration by admins). Mounting Swarm storage should also only be allowed through the admin settings.
 
 ## License
 
