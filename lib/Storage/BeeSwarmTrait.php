@@ -44,6 +44,8 @@ trait BeeSwarmTrait  {
 		} else {
 			throw new \Exception('Creating ' . self::class . ' storage failed, required parameters not set for bee swarm');
 		}
+	}
+
 	/**
 	 * Returns the connection
 	 *
