@@ -51,7 +51,7 @@ class SettingsController extends Controller {
 	}
 
 	/**
-	 *
+	 * Set the storage config settings
 	 */
 	public function admin(): void {
 		if ($this->request->getParam("storageconfig")) {

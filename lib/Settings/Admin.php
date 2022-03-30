@@ -26,7 +26,6 @@ use OCA\Files_External\Service\BackendService;
 use OCA\Files_External\Service\GlobalStoragesService;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\IConfig;
-use OCP\IL10N;
 use OCP\Settings\ISettings;
 
 class Admin implements ISettings {
@@ -36,25 +35,16 @@ class Admin implements ISettings {
 
 	/** @var IConfig */
 	private $config;
-	/** @var IL10N */
-	private $l;
 
 	/** @var GlobalStoragesService */
 	private $globalStoragesService;
 
-	/** @var BackendService */
-	private $backendService;
-
 	public function __construct($appName,
 								IConfig $config,
-								IL10N $l,
-								GlobalStoragesService $globalStoragesService,
-								BackendService $backendService) {
+								GlobalStoragesService $globalStoragesService) {
 		$this->appName = $appName;
 		$this->config = $config;
-		$this->l = $l;
 		$this->globalStoragesService = $globalStoragesService;
-		$this->backendService = $backendService;
 	}
 
 	/**
@@ -106,7 +96,7 @@ class Admin implements ISettings {
 			'visibilityType' => BackendService::VISIBILITY_ADMIN,
 			'mounts' => json_encode($mounts),
 		];
-		return new TemplateResponse($this->appName, 'admin-section', $parameters, '');
+		return new TemplateResponse($this->appName, 'admin-settings', $parameters, '');
 	}
 
 	/**

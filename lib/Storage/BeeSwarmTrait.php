@@ -36,19 +36,14 @@ trait BeeSwarmTrait  {
 	protected $connection;
 
 	protected function parseParams($params) {
-
-		//\OC::$server->getLogger()->warning("\\apps\\nextcloud-swarm-plugin\\lib\Storage\\BeeSwarmTrait.php-parseParams: ip=" .$params["ip"] . ";id=" . $this->id);
-
 		if (isset($params['ip']) && isset($params['port'])) {
 			$this->ip = $params['ip'];
-			$this->port = $params['port'] ?? 1633;
+			$this->port = $params['port'];
 			$this->api_url = $this->ip . ':' . $this->port;
-			$this->debug_api_url = $this->ip . ':1635';
+			$this->debug_api_url = $this->ip . ':' . $params['debug_api_port'];
 		} else {
 			throw new \Exception('Creating ' . self::class . ' storage failed, required parameters not set for bee swarm');
 		}
-		$this->params = $params;
-	}
 	/**
 	 * Returns the connection
 	 *

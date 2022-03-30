@@ -24,9 +24,8 @@ script('files_external_beeswarm', 'settings');
 ?>
 <div id="beeswarm" class="section">
 	<h2 class="inlineblock"><?php p($l->t('Bee Swarm Storage')); ?></h2>
-	<a target="_blank" rel="noreferrer" class="icon-info" title="<?php p($l->t('Open documentation'));?>" href="<?php p(link_to_docs('admin-beeswarm')); ?>"></a>
-        <p class="settings-hint"><?php p($l->t('View the current status of the Swarm node(s) configured in \'External Storage\' section of NextCloud.')); ?></p>
-
+	<a target="_blank" rel="noreferrer" class="icon-info" title="<?php p($l->t('Open documentation'));?>" href="<?php p('https://github.com/MetaProvide/nextcloud-swarm-plugin/'); ?>"></a>
+    <p class="settings-hint"><?php p($l->t('View the current status of the Swarm node(s) configured in \'External Storage\' section of NextCloud.')); ?></p>
 	<?php
 	// Get configured storage mounts from parameters
 	$mounts = json_decode($_['mounts'], true);
