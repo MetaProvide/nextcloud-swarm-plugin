@@ -1,5 +1,5 @@
 ---
-version: '3'
+version: "3"
 
 volumes:
   mariadb: null
@@ -128,7 +128,7 @@ services:
       - "${P2P_ADDR:-1634}${BEE_P2P_ADDR:-:1634}"
       - "${DEBUG_API_ADDR:-127.0.0.1:1635}${BEE_DEBUG_API_ADDR:-:1635}"
     volumes:
-      - dev-environment/bee_node:/home/bee/.bee
+      - ./dev-environment/bee_node:/home/bee/.bee
     command: start
     depends_on:
       - clef-1
