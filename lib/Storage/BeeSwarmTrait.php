@@ -21,19 +21,32 @@
 namespace OCA\Files_External_BeeSwarm\Storage;
 
 trait BeeSwarmTrait  {
+
+	/** @var string */
 	protected $ip;
+
+	/** @var string */
 	protected $port;
+
+	/** @var string */
 	protected $api_url;
+
+	/** @var string */
 	protected $debug_api_url;
+
+	/** @var bool */
+	protected $isBasicAuth;
+
+	/** @var string */
+	protected $username;
+
+	/** @var string */
+	protected $password;
 
 	/** @var string */
 	protected $id;
 
-	/** @var array */
-	protected $params;
-
-	/** @var SwarmClient */
-	protected $connection;
+	private static string $CONNECTIONSTATUS = "Ethereum Swarm Bee";
 
 	protected function parseParams($params) {
 		if (isset($params['ip']) && isset($params['port'])) {
@@ -44,19 +57,12 @@ trait BeeSwarmTrait  {
 		} else {
 			throw new \Exception('Creating ' . self::class . ' storage failed, required parameters not set for bee swarm');
 		}
-	}
 
-	/**
-	 * Returns the connection
-	 *
-	 * @return Swarm connected client
-	 * @throws \Exception if connection could not be made
-	 */
-	public function getConnection() {
-		if (!is_null($this->connection)) {
-			return $this->connection;
+		if (isset($params['user']) && isset($params['password'])) {
+			$this->isBasicAuth = true;
+			$this->username = $params['user'];
+			$this->password = $params['password'];
 		}
-		return $this->connection;
 	}
 
 	/**
@@ -67,12 +73,11 @@ trait BeeSwarmTrait  {
 		$ch = curl_init();
 
 		curl_setopt($ch, CURLOPT_URL, $url);
-		//curl_setopt($ch, CURLOPT_HEADER, false);		// include header in output
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		return $ch;
 	}
 
-		/**
+	/**
 	 * tests whether a curl operation ran successfully. If not, an exception
 	 * is thrown
 	 *
@@ -88,8 +93,12 @@ trait BeeSwarmTrait  {
 		}
 	}
 
-	/*
-	*/
+	protected function addBasicAuthHeaders(string $user, string $password): string {
+		$base64EncodedAuth = base64_encode($user . ':' . $password);
+		$header = 'Authorization: Basic ' . $base64EncodedAuth;
+		return $header;
+	}
+
 	private function upload_stream(string $path, $stream, string $tmpfile, string $mimetype, int $file_size = null) {
 		$url_endpoint = $this->api_url . '/bzz';
 		$url_params = "?name=" . urlencode(basename($path));
@@ -114,8 +123,9 @@ trait BeeSwarmTrait  {
 		curl_setopt($curl, CURLOPT_HTTPHEADER, array(
 			'swarm-postage-batch-id: ' . $this->stampBatchId,
 			'Content-Type: ' . $mimetype,
-			($this->isEncrypted ? 'Swarm-Encrypt: true' : '')
-			 ));
+			($this->isEncrypted ? 'Swarm-Encrypt: true' : ''),
+			($this->isBasicAuth ? $this->addBasicAuthHeaders($this->username, $this->password) : '')
+		));
 
 		$output = curl_exec($curl);
 		$this->checkCurlResult($curl, $output);
@@ -138,23 +148,10 @@ trait BeeSwarmTrait  {
 
 		// Create a CURLFile object
 		$cfile = curl_file_create($tmppath); //,'image/jpeg','mytest');
-		//$cfile = curl_file_create($tmppath, 'image/jpeg','mytest');
-		//$cfile = new CURLFile(@$input_file_path,'image/png','testpic');	// alternative
 		// Assign POST data
 		$post_data = array('file=' => $cfile);
-		//$post_data = array('file_contents'=>'@'.$tmppath.';type=image/jpeg;');
-		if ($post_data === false)
-		{
-			\OC::$server->getLogger()->warning("\\apps\\nextcloud-swarm-plugin\\lib\Storage\\BeeSwarmTrait.php-upload_file: postdata=" . var_export($post_data, true));
-		}
-		else
-		{
-			\OC::$server->getLogger()->warning("\\apps\\nextcloud-swarm-plugin\\lib\Storage\\BeeSwarmTrait.php-upload_file: postdata ok=" . var_export($post_data, true));
-		}
 
 		curl_setopt($curl, CURLOPT_POSTFIELDS, $post_data);
-
-		\OC::$server->getLogger()->warning("\\apps\\nextcloud-swarm-plugin\\lib\Storage\\BeeSwarmTrait.php-upload_file: postdata ok exec");
 
 		$output = curl_exec($curl);
 
@@ -183,16 +180,54 @@ trait BeeSwarmTrait  {
 	}
 
 	private function get_stream(string $path, string $reference) {
-			$url_endpoint = $this->api_url . '/bzz/';
-			$url_params = $reference;
-			$url_endpoint .= $url_params;
+		$url_endpoint = $this->api_url . '/bzz/';
+		$url_params = $reference;
+		$url_endpoint .= $url_params;
 
-			$output = fopen($url_endpoint, 'r');
+		$context = null;
+		if ($this->isBasicAuth) {
+			$hdr = $this->addBasicAuthHeaders($this->username, $this->password);
+			$opts = array(
+				'http'=>array(
+					'method'=>"GET",
+					'header'=>$hdr
+				)
+				);
+				$context = stream_context_create($opts);
+		}
+		$output = fopen($url_endpoint, 'r', false, $context);
 
-			if (!$output)
-			{
-			  	throw new \Exception("Unable to get file $path from swarm");
-			}
+		if (!$output)
+		{
+			fclose($output);
+			throw new \Exception("Unable to get file $path from swarm");
+		}
 		return $output;
+	}
+
+	/**
+	 * Returns the connection status of Swarm node
+	 *
+	 * @return bool
+	 * @throws \Exception if connection could not be made
+	 */
+	private function getConnection() {
+		$url_endpoint = $this->api_url;
+
+		$curl = $this->setCurl($url_endpoint);
+
+		curl_setopt($curl, CURLOPT_HEADER, false);
+		curl_setopt($curl, CURLOPT_HTTPHEADER, array(
+			($this->isBasicAuth ? $this->addBasicAuthHeaders($this->username, $this->password) : '')
+		));
+		$output = curl_exec($curl);
+		$this->checkCurlResult($curl, $output);
+		curl_close($curl);
+
+		if (trim($output) === self::$CONNECTIONSTATUS)
+		{
+			return true;
+		}
+		return false;
 	}
 }

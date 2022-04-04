@@ -26,7 +26,7 @@ namespace OCA\Files_External_BeeSwarm\Backend;
 use OCP\IL10N;
 use OCA\Files_External\Lib\Backend\Backend;
 use OCA\Files_External\Lib\Auth\AuthMechanism;
-use OCA\Files_External\Lib\Auth\NullMechanism;
+use OCA\Files_External_BeeSwarm\Auth\HttpBasicAuth;
 use OCA\Files_External\Lib\DefinitionParameter;
 
 class BeeSwarm extends Backend
@@ -38,20 +38,19 @@ class BeeSwarm extends Backend
      */
     public function __construct(IL10N $l)
     {
-        //$appWebPath = \OC_App::getAppWebPath('files_external_beeswarm');
-
-        \OC::$server->getLogger()->warning("\\apps\\nextcloud-swarm-plugin\\lib\\Backend\\BeeSwarm.php-__construct(): appWebPath=");
-
         $this
             ->setIdentifier('files_external_beeswarm')
             ->addIdentifierAlias('\OC\Files\External_Storage\BeeSwarm') // legacy compat
             ->setStorageClass('\OCA\Files_External_BeeSwarm\Storage\BeeSwarm')
             ->setText($l->t('BeeSwarm \\nextcloud-swarm-plugin'))
             ->addParameters([
-				new DefinitionParameter('ip', $l->t('IP Address 2')),
-				new DefinitionParameter('port', $l->t('Port 2')),
+				new DefinitionParameter('ip', $l->t('IP Address')),
+				new DefinitionParameter('port', $l->t('API Port')),
+				new DefinitionParameter('debug_api_port', $l->t('Debug API Port')),
 			])
-            ->addAuthScheme(AuthMechanism::SCHEME_NULL);
+			->addAuthScheme(AuthMechanism::SCHEME_NULL)
+			->addAuthScheme(HttpBasicAuth::SCHEME_HTTP_BASIC);
             //->addCustomJs("../../../$appWebPath/js/beeswarm");
     }
 }
+

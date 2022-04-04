@@ -25,8 +25,10 @@ declare(strict_types=1);
 
 namespace OCA\Files_External_BeeSwarm\AppInfo;
 use OCA\Files_External_BeeSwarm\Backend\BeeSwarm;
+use OCA\Files_External_BeeSwarm\Auth\HttpBasicAuth;
 use OCA\Files_External\Lib\Config\IBackendProvider;
 use OCA\Files_External\Service\BackendService;
+use OCA\Files_External\Lib\Config\IAuthMechanismProvider;
 use OCP\AppFramework\App;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use OCP\AppFramework\Bootstrap\IBootContext;
@@ -36,14 +38,13 @@ use OCP\EventDispatcher\IEventDispatcher;
 /**
  * @package OCA\Files_external_beeswarm\AppInfo
  */
-class Application extends App implements IBootstrap, IBackendProvider
+class Application extends App implements IBootstrap, IBackendProvider,IAuthMechanismProvider
 {
 	public const APP_ID = 'files_external_beeswarm';
 
     public function __construct(array $urlParams = array())
     {
         parent::__construct(self::APP_ID, $urlParams);
-		//\OC::$server->getLogger()->warning("\\apps\\nextcloud-swarm-plugin\\lib\\AppInfo\\Application.php-__construct()");
     }
 
 	/**
@@ -51,20 +52,22 @@ class Application extends App implements IBootstrap, IBackendProvider
      */
     public function getBackends()
     {
-		\OC::$server->getLogger()->warning("\\apps\\nextcloud-swarm-plugin\\lib\\AppInfo\\Application.php-getBackends()");
         $container = $this->getContainer();
         return [
 			$container->query(BeeSwarm::class)
 		];
     }
 
-	// Example from tutorial
 	public function boot(IBootContext $context): void {
-		 //\OC::$server->getLogger()->warning("\\apps\\nextcloud-swarm-plugin\\lib\\AppInfo\\Application.php-boot()");
 		 $context->injectFn([$this, 'registerEventsScripts']);
-    //     /** @var IManager $manager */
-    //     $manager = $context->getAppContainer()->query(IManager::class);
-    //     $manager->registerNotifierService(Notifier::class);
+
+		 $context->injectFn(function (BackendService $backendService) {
+			$backendService->registerBackendProvider($this);
+			$backendService->registerAuthMechanismProvider($this);
+		});
+
+
+		 $this->getAuthMechanisms();
     }
 
 	public function registerEventsScripts(IEventDispatcher $dispatcher) {
@@ -77,17 +80,14 @@ class Application extends App implements IBootstrap, IBackendProvider
 
 	public function register(IRegistrationContext $context): void
     {
-		//\OC::$server->getLogger()->warning("\\apps\\nextcloud-swarm-plugin\\lib\\AppInfo\\Application.php-register()");
-        $container = $this->getContainer();
-        $server = $container->getServer();
-
-        \OC::$server->getEventDispatcher()->addListener(
-			'OCA\\Files_External::loadAdditionalBackends',
-			function() use ($server) {
-				$backendService = $server->query(BackendService::class);
-				$backendService->registerBackendProvider($this);
-			}
-        );
-
     }
+
+	public function getAuthMechanisms() {
+		$container = $this->getContainer();
+		return [
+			// AuthMechanism::BASIC HTTP mechanisms
+			$container->get(HttpBasicAuth::class),
+		];
+	}
+
 }

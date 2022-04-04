@@ -30,8 +30,10 @@ class Section implements IIconSection {
 
 	/** @var string */
 	protected $appName;
+
 	/** @var IL10N */
 	private $l;
+
 	/** @var IURLGenerator */
 	private $url;
 
