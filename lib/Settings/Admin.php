@@ -27,6 +27,7 @@ use OCA\Files_External\Service\GlobalStoragesService;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\IConfig;
 use OCP\Settings\ISettings;
+use OCP\Util;
 
 class Admin implements ISettings {
 
@@ -96,7 +97,10 @@ class Admin implements ISettings {
 			'visibilityType' => BackendService::VISIBILITY_ADMIN,
 			'mounts' => json_encode($mounts),
 		];
-		return new TemplateResponse($this->appName, 'admin-settings', $parameters, '');
+
+		// return new TemplateResponse($this->appName, 'admin-settings', $parameters, '');
+		Util::addScript($this->appName, 'nextcloud-swarm-plugin-main');
+		return new TemplateResponse($this->appName, 'vue-admin-settings', ['params' => $parameters], '');
 	}
 
 	/**
