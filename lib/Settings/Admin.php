@@ -126,7 +126,13 @@ class Admin implements ISettings {
 		$response_data = json_decode($output, true);
 
 		curl_close($curl);
-		return isset($response_data["batchTTL"]) ? $response_data['batchTTL'] : null;
+		if (isset($response_data["batchTTL"])) {
+			return $response_data["batchTTL"];
+		}
+		else if (isset($response_data["message"])) {
+			return $response_data["message"];
+		}
+		return null;
 	}
 
 	public function getChequebookBalance($urlOptions) {
@@ -138,7 +144,13 @@ class Admin implements ISettings {
 		$response_data = json_decode($output, true);
 
 		curl_close($curl);
-		return isset($response_data["totalBalance"]) ? $response_data['totalBalance'] : null;
+		if (isset($response_data["totalBalance"])) {
+			return $response_data["totalBalance"];
+		}
+		else if (isset($response_data["message"])) {
+			return $response_data["message"];
+		}
+		return null;
 	}
 
 	/**
@@ -154,8 +166,7 @@ class Admin implements ISettings {
 		curl_setopt($curl, CURLOPT_URL, $url_endpoint);
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
 
-		if (isset($urlOptions['user']) && isset($urlOptions['password'])) {
-
+		if (!empty($urlOptions['user']) && !empty($urlOptions['password'])) {
 			$base64EncodedAuth = base64_encode($urlOptions['user'] . ':' . $urlOptions['password']);
 			$header = 'Authorization: Basic ' . $base64EncodedAuth;
 			curl_setopt($curl, CURLOPT_HTTPHEADER, array($header));

@@ -58,7 +58,7 @@ trait BeeSwarmTrait  {
 			throw new \Exception('Creating ' . self::class . ' storage failed, required parameters not set for bee swarm');
 		}
 
-		if (isset($params['user']) && isset($params['password'])) {
+		if (!empty($params['user']) && !empty($params['password'])) {
 			$this->isBasicAuth = true;
 			$this->username = $params['user'];
 			$this->password = $params['password'];

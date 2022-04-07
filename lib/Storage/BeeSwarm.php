@@ -25,20 +25,13 @@
 namespace OCA\Files_External_BeeSwarm\Storage;
 
 use OCP\Constants;
-use OC\Files\Cache\CacheEntry;
 use OCA\Files_External_BeeSwarm\Storage\BeeSwarmTrait;
 use OCP\Files\IMimeTypeLoader;
 use OCA\Files_External_BeeSwarm\Db\SwarmFileMapper;
-use OCA\Files_External\Service;
-use OCA\Files_External\Service\DBConfigService;
-use OCP\Files\Config\ICachedMountInfo;
 use OCP\Files\Config\IUserMountCache;
 use OCP\IDBConnection;
 use OCP\IConfig;
-use OCP\Files\GenericFileException;
 use OCP\ILogger;
-use OCP\Files\StorageNotAvailableException;
-use OCP\Security\ICrypto;
 use Sabre\DAV\Exception\BadRequest;
 
 class BeeSwarm extends \OC\Files\Storage\Common
@@ -89,7 +82,7 @@ class BeeSwarm extends \OC\Files\Storage\Common
 		$mountHandler = \OC::$server->get(IUserMountCache::class);
 		$storageMounts = $mountHandler->getMountsForStorageId($this->storageId);
 		$isConfigured = false;
-		if (is_array($storageMounts) && $storageMounts[0]) {
+		if (is_array($storageMounts) && isset($storageMounts[0])) {
 			// Parse array for config of requested storage
 			$storageMount = $storageMounts[0];
 			$mountId = $storageMount->getMountId();
@@ -104,11 +97,6 @@ class BeeSwarm extends \OC\Files\Storage\Common
 				$this->isEncrypted = $mounts[$key]['encrypt'] == "1" ? true : false;
 				$this->stampBatchId = $mounts[$key]['batchid'];
 			}
-		}
-		if (!$isConfigured)
-		{
-			// not yet configured, exception
-			//throw new \Exception("Unable to read swarm configuration for {$this->id}");
 		}
 	}
 

@@ -28,16 +28,16 @@ use OCA\Files_External\Lib\Backend\Backend;
 use OCA\Files_External\Lib\Auth\AuthMechanism;
 use OCA\Files_External_BeeSwarm\Auth\HttpBasicAuth;
 use OCA\Files_External\Lib\DefinitionParameter;
+use OCA\Files_External\Lib\StorageConfig;
+use OCP\IUser;
 
 class BeeSwarm extends Backend
 {
-
     /**
      * beeswarm constructor.
      * @param IL10N $l
      */
-    public function __construct(IL10N $l)
-    {
+    public function __construct(IL10N $l) {
         $this
             ->setIdentifier('files_external_beeswarm')
             ->addIdentifierAlias('\OC\Files\External_Storage\BeeSwarm') // legacy compat
@@ -52,5 +52,14 @@ class BeeSwarm extends Backend
 			->addAuthScheme(HttpBasicAuth::SCHEME_HTTP_BASIC);
             //->addCustomJs("../../../$appWebPath/js/beeswarm");
     }
+
+	public function manipulateStorageConfig(StorageConfig &$storage, IUser $user = null) {
+		$auth = $storage->getAuthMechanism();
+
+		if ($auth->getScheme() != HttpBasicAuth::SCHEME_HTTP_BASIC ) {
+			$storage->setBackendOption('user', '');
+			$storage->setBackendOption('password', '');
+		}
+	}
 }
 
