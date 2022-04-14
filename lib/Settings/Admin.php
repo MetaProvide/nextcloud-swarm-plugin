@@ -56,7 +56,7 @@ class Admin implements ISettings {
 		$mounts = json_decode($mounts_json,  true);
 
 		// Get all valid Beeswarm storages
-		$storageBackends = array_filter($this->globalStoragesService->getStorages(), function ($storageBackend) use ($_) {
+		$storageBackends = array_filter($this->globalStoragesService->getStorages(), function ($storageBackend) {
 			return $storageBackend->getBackend()->getStorageClass() == '\OCA\Files_External_BeeSwarm\Storage\BeeSwarm';
 		});
 
@@ -88,7 +88,7 @@ class Admin implements ISettings {
 				$newMounts[] = ['mount_id' => $backendId, 'mount_name' => $backendName, 'encrypt'=> '1'];
 			}
 		}
-		if ($newMounts) {
+		if (isset($newMounts)) {
 			$mounts = array_merge($mounts, $newMounts);
 		}
 
