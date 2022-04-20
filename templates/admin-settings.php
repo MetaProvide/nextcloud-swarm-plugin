@@ -1,14 +1,15 @@
 <?php
 /**
+ * @copyright Copyright (c) 2022, MetaProvide Holding EKF
  *
- * @author
+ * @author Ron Trevor <ecoron@proton.me>
  *
  * @license GNU AGPL version 3 or any later version
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -65,14 +66,14 @@ script('files_external_beeswarm', 'settings');
 	<div>
 		<label>
 			<span class="label"><?php p($l->t('Batch TTL')) ?></span>
-			<span><input id="beeswarm-bzz_<?php p($mountId); ?>" type="text" placeholder="<?php p($l->t('Batch TTL')); ?>" value="<?php p($batchBalance) ?>" maxlength="20" /><span>
+			<span><input id="beeswarm-bzz_<?php p($mountId); ?>" type="text" placeholder="<?php p($l->t('Batch TTL')); ?>" value="<?php p($batchBalance) ?>" maxlength="20" readonly/><span>
 			<span data-setting="bzz" data-toggle="tooltip" data-original-title="<?php p($l->t('Reset to default')); ?>" class="theme-undo icon icon-history"></span>
 		</label>
 	</div>
 	<div>
 		<label>
 			<span class="label"><?php p($l->t('Chequebook Balance')) ?></span>
-			<input id="beeswarm-chequebalance_<?php p($mountId);?>" type="text" maxlength="20" value="<?php p($chequeBalance) ?>" />
+			<input id="beeswarm-chequebalance_<?php p($mountId);?>" type="text" maxlength="20" value="<?php p($chequeBalance) ?>" readonly/>
 			<div data-setting="chequebalance_" data-toggle="tooltip" data-original-title="<?php p($l->t('Reset to default')); ?>" class="theme-undo icon icon-history"></div>
 		</label>
 	</div>

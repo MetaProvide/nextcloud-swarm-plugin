@@ -1,44 +1,36 @@
 <?php
-
 /**
- * @author Metaprovide
+ * @copyright Copyright (c) 2022, MetaProvide Holding EKF
  *
- * @copyright Copyright (c) 2022, Metaprovide
- * @license GPL-2.0
+ * @author Ron Trevor <ecoron@proton.me>
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the Free
- * Software Foundation; either version 2 of the License, or (at your option)
- * any later version.
+ * @license GNU AGPL version 3 or any later version
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
- * more details.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- * You should have received a copy of the GNU General Public License along
- * with this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
 namespace OCA\Files_External_BeeSwarm\Storage;
 
 use OCP\Constants;
-use OC\Files\Cache\CacheEntry;
 use OCA\Files_External_BeeSwarm\Storage\BeeSwarmTrait;
 use OCP\Files\IMimeTypeLoader;
 use OCA\Files_External_BeeSwarm\Db\SwarmFileMapper;
-use OCA\Files_External\Service;
-use OCA\Files_External\Service\DBConfigService;
-use OCP\Files\Config\ICachedMountInfo;
 use OCP\Files\Config\IUserMountCache;
 use OCP\IDBConnection;
 use OCP\IConfig;
-use OCP\Files\GenericFileException;
 use OCP\ILogger;
-use OCP\Files\StorageNotAvailableException;
-use OCP\Security\ICrypto;
 use Sabre\DAV\Exception\BadRequest;
 
 class BeeSwarm extends \OC\Files\Storage\Common
@@ -89,7 +81,7 @@ class BeeSwarm extends \OC\Files\Storage\Common
 		$mountHandler = \OC::$server->get(IUserMountCache::class);
 		$storageMounts = $mountHandler->getMountsForStorageId($this->storageId);
 		$isConfigured = false;
-		if (is_array($storageMounts) && $storageMounts[0]) {
+		if (is_array($storageMounts) && isset($storageMounts[0])) {
 			// Parse array for config of requested storage
 			$storageMount = $storageMounts[0];
 			$mountId = $storageMount->getMountId();
@@ -104,11 +96,6 @@ class BeeSwarm extends \OC\Files\Storage\Common
 				$this->isEncrypted = $mounts[$key]['encrypt'] == "1" ? true : false;
 				$this->stampBatchId = $mounts[$key]['batchid'];
 			}
-		}
-		if (!$isConfigured)
-		{
-			// not yet configured, exception
-			//throw new \Exception("Unable to read swarm configuration for {$this->id}");
 		}
 	}
 

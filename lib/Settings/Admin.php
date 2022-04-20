@@ -1,23 +1,23 @@
 <?php
 /**
- * @copyright Copyright (c)
+ * @copyright Copyright (c) 2022, MetaProvide Holding EKF
  *
- * @author
+ * @author Ron Trevor <ecoron@proton.me>
  *
  * @license GNU AGPL version 3 or any later version
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
 namespace OCA\Files_External_BeeSwarm\Settings;
@@ -56,7 +56,7 @@ class Admin implements ISettings {
 		$mounts = json_decode($mounts_json,  true);
 
 		// Get all valid Beeswarm storages
-		$storageBackends = array_filter($this->globalStoragesService->getStorages(), function ($storageBackend) use ($_) {
+		$storageBackends = array_filter($this->globalStoragesService->getStorages(), function ($storageBackend) {
 			return $storageBackend->getBackend()->getStorageClass() == '\OCA\Files_External_BeeSwarm\Storage\BeeSwarm';
 		});
 
@@ -88,7 +88,7 @@ class Admin implements ISettings {
 				$newMounts[] = ['mount_id' => $backendId, 'mount_name' => $backendName, 'encrypt'=> '1'];
 			}
 		}
-		if ($newMounts) {
+		if (isset($newMounts)) {
 			$mounts = array_merge($mounts, $newMounts);
 		}
 
@@ -126,7 +126,13 @@ class Admin implements ISettings {
 		$response_data = json_decode($output, true);
 
 		curl_close($curl);
-		return isset($response_data["batchTTL"]) ? $response_data['batchTTL'] : null;
+		if (isset($response_data["batchTTL"])) {
+			return $response_data["batchTTL"];
+		}
+		else if (isset($response_data["message"])) {
+			return $response_data["message"];
+		}
+		return null;
 	}
 
 	public function getChequebookBalance($urlOptions) {
@@ -138,7 +144,13 @@ class Admin implements ISettings {
 		$response_data = json_decode($output, true);
 
 		curl_close($curl);
-		return isset($response_data["totalBalance"]) ? $response_data['totalBalance'] : null;
+		if (isset($response_data["totalBalance"])) {
+			return $response_data["totalBalance"];
+		}
+		else if (isset($response_data["message"])) {
+			return $response_data["message"];
+		}
+		return null;
 	}
 
 	/**
@@ -154,8 +166,7 @@ class Admin implements ISettings {
 		curl_setopt($curl, CURLOPT_URL, $url_endpoint);
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
 
-		if (isset($urlOptions['user']) && isset($urlOptions['password'])) {
-
+		if (!empty($urlOptions['user']) && !empty($urlOptions['password'])) {
 			$base64EncodedAuth = base64_encode($urlOptions['user'] . ':' . $urlOptions['password']);
 			$header = 'Authorization: Basic ' . $base64EncodedAuth;
 			curl_setopt($curl, CURLOPT_HTTPHEADER, array($header));
