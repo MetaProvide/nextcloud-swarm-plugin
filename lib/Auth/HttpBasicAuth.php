@@ -19,7 +19,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  *
  */
-namespace OCA\Files_External_BeeSwarm\Auth;
+namespace OCA\Files_External_Ethswarm\Auth;
 
 use OCA\Files_External\Lib\Auth\AuthMechanism;
 use OCA\Files_External\Lib\DefinitionParameter;

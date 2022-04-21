@@ -20,7 +20,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  */
-namespace OCA\Files_External_BeeSwarm\Settings;
+namespace OCA\Files_External_Ethswarm\Settings;
 
 use OCA\Files_External\Service\BackendService;
 use OCA\Files_External\Service\GlobalStoragesService;
@@ -57,7 +57,7 @@ class Admin implements ISettings {
 
 		// Get all valid Beeswarm storages
 		$storageBackends = array_filter($this->globalStoragesService->getStorages(), function ($storageBackend) use ($_) {
-			return $storageBackend->getBackend()->getStorageClass() == '\OCA\Files_External_BeeSwarm\Storage\BeeSwarm';
+			return $storageBackend->getBackend()->getStorageClass() == '\OCA\Files_External_Ethswarm\Storage\BeeSwarm';
 		});
 
 		// remove configurations that are no longer in Storages

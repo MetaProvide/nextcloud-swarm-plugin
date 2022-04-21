@@ -3,7 +3,7 @@
 		"psr-4": {
 			"OCP\\": "dev-environment/nextcloud_source/lib/public/",
 			"OCA\\Files_External\\": "dev-environment/nextcloud_source/apps/files_external/lib/",
-			"OCA\\Files_External_BeeSwarm\\": "lib/"
+			"OCA\\Files_External_Ethswarm\\": "lib/"
 		}
 	},
 	"require": {},

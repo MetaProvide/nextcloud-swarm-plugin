@@ -23,7 +23,7 @@ declare(strict_types=1);
  *
  */
 
-namespace OCA\Files_External_BeeSwarm\Controller;
+namespace OCA\Files_External_Ethswarm\Controller;
 
 use OCP\AppFramework\Controller;
 use OCP\IConfig;

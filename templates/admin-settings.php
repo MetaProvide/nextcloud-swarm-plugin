@@ -19,11 +19,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-style('files_external_beeswarm', 'settings-admin');
-script('files_external_beeswarm', 'settings');
+style('files_external_ethswarm', 'settings-admin');
+script('files_external_ethswarm', 'settings');
 ?>
 <div id="beeswarm" class="section">
-	<h2 class="inlineblock"><?php p($l->t('Bee Swarm Storage')); ?></h2>
+	<h2 class="inlineblock"><?php p($l->t('External Storage: Swarm')); ?></h2>
 	<a target="_blank" rel="noreferrer" class="icon-info" title="<?php p($l->t('Open documentation'));?>" href="<?php p('https://github.com/MetaProvide/nextcloud-swarm-plugin/'); ?>"></a>
     <p class="settings-hint"><?php p($l->t('View the current status of the Swarm node(s) configured in \'External Storage\' section of NextCloud.')); ?></p>
 	<?php

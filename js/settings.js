@@ -21,7 +21,7 @@
  *
  */
 
- function postSuccess(selector, id) {
+function postSuccess(selector, id) {
 	$(selector).after(
 		" <span id='" + id + "' class='msg success'>" + t("beeswarm", "Saved") + "</span>"
 	);
@@ -50,7 +50,7 @@ window.addEventListener("DOMContentLoaded", function () {
 		storageConfig = JSON.stringify(storageArray);
 		// reset temp array for next Save click.
 		storageArray = [];
-		$.post(OC.generateUrl("apps/files_external_beeswarm/settings/admin"), {
+		$.post(OC.generateUrl("apps/files_external_ethswarm/settings/admin"), {
 			storageconfig: storageConfig,
 		})
 			.done(function () {
@@ -65,8 +65,8 @@ window.addEventListener("DOMContentLoaded", function () {
 function addToStorageJson(item) {
 	// Create json config for each batchid
 	batchId = ($("#beeswarm_batchid_" + item).val());
-	if (batchId	) {
-		jsonConfig = {"mount_id":item, "encrypt":$("#beeswarm_encrypt_" + item).prop("checked") ? 1 : 0, "batchid":batchId};
+	if (batchId) {
+		jsonConfig = { "mount_id": item, "encrypt": $("#beeswarm_encrypt_" + item).prop("checked") ? 1 : 0, "batchid": batchId };
 		// Add to temp array
 		storageArray.push(jsonConfig);
 	}
