@@ -3,8 +3,9 @@
 declare(strict_types=1);
 
 /**
+ * @copyright Copyright (c) 2022, MetaProvide Holding EKF
  *
- * @copyright Copyright (C)
+ * @author Ron Trevor <ecoron@proton.me>
  *
  * @license GNU AGPL version 3 or any later version
  *

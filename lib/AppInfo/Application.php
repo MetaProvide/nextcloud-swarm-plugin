@@ -1,23 +1,23 @@
 <?php
 /**
- * @author Metaprovide
+ * @copyright Copyright (c) 2022, MetaProvide Holding EKF
  *
- * @copyright Copyright (c) 2022, Metaprovide
- * @license GPL-2.0
+ * @author Ron Trevor <ecoron@proton.me>
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the Free
- * Software Foundation; either version 2 of the License, or (at your option)
- * any later version.
+ * @license GNU AGPL version 3 or any later version
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
- * more details.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- * You should have received a copy of the GNU General Public License along
- * with this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -76,6 +76,10 @@ class Application extends App implements IBootstrap, IBackendProvider,IAuthMecha
 		// 	\OCP\Util::addScript(self::APP_ID, 'dist/collaboration');
 		// });
 		//\OCP\Util::addScript(self::APP_ID, 'beeswarmfilelist' );
+<<<<<<< HEAD
+=======
+		\OCP\Util::addScript(self::APP_ID, "main");
+>>>>>>> f2e5dee91ff6d550b63b77fbb990b8720d52fe99
 	}
 
 	public function register(IRegistrationContext $context): void

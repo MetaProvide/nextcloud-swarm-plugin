@@ -1,21 +1,23 @@
 <?php
 /**
- * @author
+ * @copyright Copyright (c) 2022, MetaProvide Holding EKF
  *
- * @copyright Copyright (c) 2022
- * @license AGPL-3.0
+ * @author Ron Trevor <ecoron@proton.me>
  *
- * This code is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License, version 3,
- * as published by the Free Software Foundation.
+ * @license GNU AGPL version 3 or any later version
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License, version 3,
- * along with this program.  If not, see <http://www.gnu.org/licenses/>
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
 namespace OCA\Files_External_Ethswarm\Storage;
@@ -58,7 +60,7 @@ trait BeeSwarmTrait  {
 			throw new \Exception('Creating ' . self::class . ' storage failed, required parameters not set for bee swarm');
 		}
 
-		if (isset($params['user']) && isset($params['password'])) {
+		if (!empty($params['user']) && !empty($params['password'])) {
 			$this->isBasicAuth = true;
 			$this->username = $params['user'];
 			$this->password = $params['password'];
