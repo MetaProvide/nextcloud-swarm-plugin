@@ -56,13 +56,8 @@ class Admin implements ISettings {
 		$mounts = json_decode($mounts_json,  true);
 
 		// Get all valid Beeswarm storages
-<<<<<<< HEAD
-		$storageBackends = array_filter($this->globalStoragesService->getStorages(), function ($storageBackend) use ($_) {
-			return $storageBackend->getBackend()->getStorageClass() == '\OCA\Files_External_Ethswarm\Storage\BeeSwarm';
-=======
 		$storageBackends = array_filter($this->globalStoragesService->getStorages(), function ($storageBackend) {
-			return $storageBackend->getBackend()->getStorageClass() == '\OCA\Files_External_BeeSwarm\Storage\BeeSwarm';
->>>>>>> f2e5dee91ff6d550b63b77fbb990b8720d52fe99
+			return $storageBackend->getBackend()->getStorageClass() == '\OCA\Files_External_Ethswarm\Storage\BeeSwarm';
 		});
 
 		// remove configurations that are no longer in Storages

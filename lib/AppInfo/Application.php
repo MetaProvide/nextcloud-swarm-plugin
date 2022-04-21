@@ -76,10 +76,7 @@ class Application extends App implements IBootstrap, IBackendProvider,IAuthMecha
 		// 	\OCP\Util::addScript(self::APP_ID, 'dist/collaboration');
 		// });
 		//\OCP\Util::addScript(self::APP_ID, 'beeswarmfilelist' );
-<<<<<<< HEAD
-=======
-		\OCP\Util::addScript(self::APP_ID, "main");
->>>>>>> f2e5dee91ff6d550b63b77fbb990b8720d52fe99
+		//\OCP\Util::addScript(self::APP_ID, "main");
 	}
 
 	public function register(IRegistrationContext $context): void
