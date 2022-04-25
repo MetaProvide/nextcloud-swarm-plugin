@@ -1,21 +1,21 @@
 <?xml version="1.0"?>
 <info xmlns:xsi= "http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://apps.nextcloud.com/schema/apps/info.xsd">
-    <id>files_external_beeswarm</id>
-    <name>External Storage: BeeSwarm plugin</name>
+    <id>files_external_ethswarm</id>
+    <name>External Storage: Swarm</name>
     <summary>Integrate Bee swarm as an external storage</summary>
     <description><![CDATA[The BeeSwarm Backend allows administrators and users to add their own Bee node as folders in Nextcloud. This offers an easy way for users to access the Bee node data in the same place where they find their other files.]]></description>
     <version>0.0.3</version>
     <licence>agpl</licence>
     <author>Metaprovide</author>
-    <namespace>Files_External_BeeSwarm</namespace>
+    <namespace>Files_External_Ethswarm</namespace>
     <types>
 	    <filesystem/>
     </types>
     <category>files</category>
     <category>tools</category>
-    <website>https://github.com/metaprovide/files_external_beeswarm</website>
-    <bugs>https://github.com/metaprovide/files_external_beeswarm/issues</bugs>
-    <repository type="git">https://github.com/metaprovide/files_external_beeswarm.git</repository>
+    <website>https://github.com/MetaProvide/nextcloud-swarm-plugin</website>
+    <bugs>https://github.com/MetaProvide/nextcloud-swarm-plugin/issues</bugs>
+    <repository type="git">https://github.com/MetaProvide/nextcloud-swarm-plugin.git</repository>
 
     <screenshot>
 
@@ -30,8 +30,8 @@
         <nextcloud min-version="22.0" max-version="23.0"/>
     </dependencies>
 	<settings>
-		<admin>OCA\Files_External_BeeSwarm\Settings\Admin</admin>
-		<admin-section>OCA\Files_External_BeeSwarm\Settings\Section</admin-section>
+		<admin>OCA\Files_External_Ethswarm\Settings\Admin</admin>
+		<admin-section>OCA\Files_External_Ethswarm\Settings\Section</admin-section>
 	</settings>
 
 </info>

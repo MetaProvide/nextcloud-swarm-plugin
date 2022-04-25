@@ -37,7 +37,7 @@ window.addEventListener("DOMContentLoaded", function () {
 		storageConfig = JSON.stringify(storageArray);
 		// reset temp array for next Save click.
 		storageArray = [];
-		$.post(OC.generateUrl("apps/files_external_beeswarm/settings/admin"), {
+		$.post(OC.generateUrl("apps/files_external_ethswarm/settings/admin"), {
 			storageconfig: storageConfig,
 		})
 			.done(function () {

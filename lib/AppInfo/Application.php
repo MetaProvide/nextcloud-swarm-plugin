@@ -23,9 +23,9 @@
 
 declare(strict_types=1);
 
-namespace OCA\Files_External_BeeSwarm\AppInfo;
-use OCA\Files_External_BeeSwarm\Backend\BeeSwarm;
-use OCA\Files_External_BeeSwarm\Auth\HttpBasicAuth;
+namespace OCA\Files_External_Ethswarm\AppInfo;
+use OCA\Files_External_Ethswarm\Backend\BeeSwarm;
+use OCA\Files_External_Ethswarm\Auth\HttpBasicAuth;
 use OCA\Files_External\Lib\Config\IBackendProvider;
 use OCA\Files_External\Service\BackendService;
 use OCA\Files_External\Lib\Config\IAuthMechanismProvider;
@@ -40,7 +40,7 @@ use OCP\EventDispatcher\IEventDispatcher;
  */
 class Application extends App implements IBootstrap, IBackendProvider,IAuthMechanismProvider
 {
-	public const APP_ID = 'files_external_beeswarm';
+	public const APP_ID = 'files_external_ethswarm';
 
     public function __construct(array $urlParams = array())
     {
@@ -71,12 +71,6 @@ class Application extends App implements IBootstrap, IBackendProvider,IAuthMecha
     }
 
 	public function registerEventsScripts(IEventDispatcher $dispatcher) {
-		// files scripts
-		// $dispatcher->addListener('\OCP\Collaboration\Resources::loadAdditionalScripts', function () {
-		// 	\OCP\Util::addScript(self::APP_ID, 'dist/collaboration');
-		// });
-		//\OCP\Util::addScript(self::APP_ID, 'beeswarmfilelist' );
-		\OCP\Util::addScript(self::APP_ID, "main");
 	}
 
 	public function register(IRegistrationContext $context): void

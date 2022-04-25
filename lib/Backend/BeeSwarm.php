@@ -21,12 +21,12 @@
  *
  */
 
-namespace OCA\Files_External_BeeSwarm\Backend;
+namespace OCA\Files_External_Ethswarm\Backend;
 
 use OCP\IL10N;
 use OCA\Files_External\Lib\Backend\Backend;
 use OCA\Files_External\Lib\Auth\AuthMechanism;
-use OCA\Files_External_BeeSwarm\Auth\HttpBasicAuth;
+use OCA\Files_External_Ethswarm\Auth\HttpBasicAuth;
 use OCA\Files_External\Lib\DefinitionParameter;
 use OCA\Files_External\Lib\StorageConfig;
 use OCP\IUser;
@@ -34,15 +34,15 @@ use OCP\IUser;
 class BeeSwarm extends Backend
 {
     /**
-     * beeswarm constructor.
+     * ethswarm constructor.
      * @param IL10N $l
      */
     public function __construct(IL10N $l) {
         $this
-            ->setIdentifier('files_external_beeswarm')
+            ->setIdentifier('files_external_ethswarm')
             ->addIdentifierAlias('\OC\Files\External_Storage\BeeSwarm') // legacy compat
-            ->setStorageClass('\OCA\Files_External_BeeSwarm\Storage\BeeSwarm')
-            ->setText($l->t('BeeSwarm \\nextcloud-swarm-plugin'))
+            ->setStorageClass('\OCA\Files_External_Ethswarm\Storage\BeeSwarm')
+            ->setText($l->t('Swarm'))
             ->addParameters([
 				new DefinitionParameter('ip', $l->t('IP Address')),
 				new DefinitionParameter('port', $l->t('API Port')),

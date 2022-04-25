@@ -20,7 +20,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-namespace OCA\Files_External_BeeSwarm\Settings;
+namespace OCA\Files_External_Ethswarm\Settings;
 
 use OCP\IL10N;
 use OCP\IURLGenerator;
@@ -64,7 +64,7 @@ class Section implements IIconSection {
 	 * @return string
 	 */
 	public function getName() {
-		return $this->l->t('BeeSwarm storage');
+		return $this->l->t('Ethswarm Storage');
 	}
 
 	/**

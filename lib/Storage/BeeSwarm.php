@@ -21,12 +21,12 @@
  *
  */
 
-namespace OCA\Files_External_BeeSwarm\Storage;
+namespace OCA\Files_External_Ethswarm\Storage;
 
 use OCP\Constants;
-use OCA\Files_External_BeeSwarm\Storage\BeeSwarmTrait;
+use OCA\Files_External_Ethswarm\Storage\BeeSwarmTrait;
 use OCP\Files\IMimeTypeLoader;
-use OCA\Files_External_BeeSwarm\Db\SwarmFileMapper;
+use OCA\Files_External_Ethswarm\Db\SwarmFileMapper;
 use OCP\Files\Config\IUserMountCache;
 use OCP\IDBConnection;
 use OCP\IConfig;
@@ -37,7 +37,7 @@ class BeeSwarm extends \OC\Files\Storage\Common
 {
 	use BeeSwarmTrait;
 
-	const APP_NAME = 'files_external_beeswarm';
+	const APP_NAME = 'files_external_ethswarm';
 
 	/** @var int */
 	protected $storageId;
@@ -70,7 +70,7 @@ class BeeSwarm extends \OC\Files\Storage\Common
 	public function __construct($params)
 	{
 		$this->parseParams($params);
-		$this->id = 'beeswarm::' . $this->ip . ':' . $this->port;
+		$this->id = 'ethswarm::' . $this->ip . ':' . $this->port;
 		$this->storageId = $this->getStorageCache()->getNumericId();
 
 		// Load handlers
