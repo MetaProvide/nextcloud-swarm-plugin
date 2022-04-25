@@ -1,7 +1,7 @@
 # This file is licensed under the Affero General Public License version 3 or
 # later. See the LICENSE file.
 
-app_name=files_external_beeswarm
+app_name=files_external_ethswarm
 build_directory=$(CURDIR)/build
 temp_build_directory=$(build_directory)/temp
 build_tools_directory=$(CURDIR)/build/tools

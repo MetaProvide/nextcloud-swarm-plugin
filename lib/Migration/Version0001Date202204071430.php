@@ -3,24 +3,24 @@
 declare(strict_types=1);
 
 /**
- * @copyright Copyright (c)
+ * @copyright Copyright (c) 2022, MetaProvide Holding EKF
  *
- * @author
+ * @author Ron Trevor <ecoron@proton.me>
  *
  * @license GNU AGPL version 3 or any later version
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
 namespace OCA\Files_External_BeeSwarm\Migration;
@@ -31,7 +31,7 @@ use OCP\Migration\IOutput;
 use OCP\Migration\SimpleMigrationStep;
 use OCP\DB\Types;
 
-class Version0001Date202202171130 extends SimpleMigrationStep {
+class Version0001Date202204071430 extends SimpleMigrationStep {
 
 	const _TABLENAME = "files_swarm";
 	/**
@@ -51,7 +51,7 @@ class Version0001Date202202171130 extends SimpleMigrationStep {
 				'notnull' => true,
 				'length' => 20,
 			]);
-			$table->addColumn('fileid', Types::BIGINT, [
+			$table->addColumn('storage', Types::BIGINT, [
 				'notnull' => true,
 				'length' => 20,
 			]);
@@ -63,11 +63,6 @@ class Version0001Date202202171130 extends SimpleMigrationStep {
 				'notnull' => false,
 				'length' => 250,
 			]);
-			$table->addColumn('swarm_tag', Types::STRING, [
-				'notnull' => false,
-				'length' => 250,
-			]);
-
 			$table->addColumn('mimetype', Types::BIGINT, [
 				'notnull' => true,
 				'length' => 20,
@@ -83,31 +78,12 @@ class Version0001Date202202171130 extends SimpleMigrationStep {
 				'length' => 20,
 				'default' => 0,
 			]);
-			$table->addColumn('encryptionkey', Types::STRING, [
-				'notnull' => true,
-				'default' => 0,
-			]);
 			$table->setPrimaryKey(['id']);
-			$table->addUniqueIndex(['fileid'], 'file_id_index');
+			$table->addIndex(['storage'], 'storage_index');
 		}
 		return $schema;
 }
 
-	/**
-	 * @throws Exception
-	 */
-	private function getStorageConfig(int $mountId): array {
-		$qb = $this->connection->getQueryBuilder();
-		$qb->select('key', 'value')
-			->from('external_config')
-			->where($qb->expr()->eq('mount_id', $qb->createPositionalParameter($mountId)));
-		$config = [];
-		foreach ($qb->execute()->fetchAll() as $row) {
-			$config[$row['key']] = $row['value'];
-		}
-		return $config;
-	}
-
-	public function postSchemaChange(IOutput $output, \Closure $schemaClosure, array $options) {
-	}
+public function postSchemaChange(IOutput $output, \Closure $schemaClosure, array $options) {
+}
 }

@@ -3,8 +3,9 @@
 declare(strict_types=1);
 
 /**
+ * @copyright Copyright (c) 2022, MetaProvide Holding EKF
  *
- * @copyright Copyright (C)
+ * @author Ron Trevor <ecoron@proton.me>
  *
  * @license GNU AGPL version 3 or any later version
  *
@@ -23,7 +24,7 @@ declare(strict_types=1);
  *
  */
 
-namespace OCA\Files_External_BeeSwarm\Controller;
+namespace OCA\Files_External_Ethswarm\Controller;
 
 use OCP\AppFramework\Controller;
 use OCP\IConfig;

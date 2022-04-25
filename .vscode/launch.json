@@ -10,7 +10,7 @@
 			"request": "launch",
 			"port": 9003,
 			"pathMappings": {
-				"/var/www/html/custom_apps/files_external_beeswarm": "${workspaceFolder}",
+				"/var/www/html/custom_apps/files_external_ethswarm": "${workspaceFolder}",
 				"/var/www/html": "${workspaceFolder}/dev-environment/nextcloud_source"
 			}
 		}

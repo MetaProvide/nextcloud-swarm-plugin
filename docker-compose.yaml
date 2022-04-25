@@ -41,7 +41,7 @@ services:
       - host.docker.internal:host-gateway
     volumes:
       - nextcloud:/var/www/html
-      - ./:/var/www/html/custom_apps/files_external_beeswarm
+      - ./:/var/www/html/custom_apps/files_external_ethswarm
     ports:
       - "80:80"
       - "443:443"
