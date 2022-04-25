@@ -71,12 +71,6 @@ class Application extends App implements IBootstrap, IBackendProvider,IAuthMecha
     }
 
 	public function registerEventsScripts(IEventDispatcher $dispatcher) {
-		// files scripts
-		// $dispatcher->addListener('\OCP\Collaboration\Resources::loadAdditionalScripts', function () {
-		// 	\OCP\Util::addScript(self::APP_ID, 'dist/collaboration');
-		// });
-		//\OCP\Util::addScript(self::APP_ID, 'beeswarmfilelist' );
-		//\OCP\Util::addScript(self::APP_ID, "main");
 	}
 
 	public function register(IRegistrationContext $context): void
