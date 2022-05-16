@@ -1,6 +1,6 @@
 <?php
 /**
- * Adminly Dashboard
+ * External Storage: Swarm
  *
  * @copyright Copyright (C) 2022  Henry Bergström <metahenry@metaprovide.org>
  *
@@ -24,4 +24,8 @@
  */
 ?>
 <!-- Element to inject Vue app, anchoring server params in data attribute -->
-<div id="app" data-params="<?php p(json_encode($_['params'])); ?>">></div>
+<div id="app" data-params="<?php p(json_encode($_['params'])); ?>"></div>
+<?php
+	// Get configured storage mounts from parameters
+//	$params = json_decode($_['params'], true);
+

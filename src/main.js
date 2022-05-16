@@ -24,7 +24,7 @@ import { generateFilePath } from "@nextcloud/router";
 import Vue from "vue";
 import App from "./App";
 
-const appName = "files_external_beeswarm";
+const appName = "files_external_ethswarm";
 
 // eslint-disable-next-line
 __webpack_public_path__ = generateFilePath(appName, "", "js/");
