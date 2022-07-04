@@ -1,19 +1,21 @@
 <template>
 	<AppContent>
-	<div class="section">
-		<h2 class="inlineblock">External Storage: Swarm</h2>
+		<div class="section">
+			<h2 class="inlineblock">External Storage: Swarm</h2>
 
-		<div>
-			parseMounts={{ parsedMounts }}
-		</div>
+			<div v-for="(mount, mountidx) in parsedMounts" :key="mount.mount_id">
+				<h3>Swarm Node: <b>{{ mount.mount_name }}</b>
+					<Actions>
+						<ActionButton icon="icon-caret-dark" @click="showNode(mountidx)"></ActionButton>
+					</Actions>
+				</h3>
 
- 		<div v-for="(mount,idx) in parsedMounts" :key="mount.mount_id">
-			<h3 >Swarm Node: <b>{{mount.mount_name}}</b>
-			<Actions><ActionButton icon="icon-caret-dark" ></ActionButton></Actions>
-			</h3>
+				<div>
+					parseMounts={{ parsedMounts[mountidx] }}
+				</div>
 
-			<div v-show="show" >
-				<!--<Actions>
+				<div v-if="toggleNode[mountidx]">
+					<!--<Actions>
 					<ActionButton icon="icon-delete" @click="alert('Delete')">Delete</ActionButton>
 				</Actions>
 
@@ -26,79 +28,121 @@
 					<ActionTextEditable icon="icon-edit" :disabled="true" value="This is a disabled editable textarea" />
 					<ActionTextEditable icon="icon-edit" title="Please edit the text" value="This is a textarea editable with title" />
 				</Actions>-->
-				<div>
-					<CheckboxRadioSwitch :checked.sync="mount.isEncrypted" type="switch" @update:checked="toggleEncryption(idx)">Enable encryption</CheckboxRadioSwitch>
-					<!--  -->
-					selected: {{mount.encrypt}} mountid: "ethswarm_encrypt_{{mount.mount_id}}"
+					<div>
+						<CheckboxRadioSwitch :checked.sync="mount.isEncrypted" type="switch"
+							@update:checked="toggleEncryption(mountidx)">Enable encryption</CheckboxRadioSwitch>
+						<!-- selected: {{mount.encrypt}} mountid: "ethswarm_encrypt_{{mount.mount_id}}" -->
+					</div>
+
+					<div>
+						Available chequebook balance (bzz): <input type="text" :value="mount.chequebalance"
+							maxlength="200" readonly />
+					</div>
+
+					<Actions>
+
+					</Actions>
+
+					<div><u>Stamp batches:</u></div>
+
+					<div>
+						<!--v-if="!batch"-->
+						<div v-for="(batch, batchidx) in mount.batches" :key="batchidx">
+							mountBatch{{ batchidx }}={{ batch }}
+						</div>
+					</div>
+
+					<div>
+						<!--style="overflow-x: auto;"-->
+						<table id="externalStorage" class="grid">
+							<!--class="grid" uses 100% width -->
+							<thead>
+								<tr>
+									<th>Batch Id</th>
+									<th>Bzz purchased</th>
+									<th>Balance</th>
+									<th>Active</th>
+									<th>Actions</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr v-for="(batch, batchidx) in mount.batches" :key="batchidx">
+									<td><input type="text" name="batchid" :value="batch.batchID" maxlength="200" /></td>
+									<td><input type="text" name="bzz" :value="batch.amount" maxlength="200" readonly />
+									</td>
+									<td><input type="text" name="balance" :value="batch.batchTTL" maxlength="200"
+											readonly /></td>
+									<td>
+										<CheckboxRadioSwitch :checked.sync="batch.isActive" type="switch"
+											name="toggleActiveBatchName"
+											@update:checked="toggleActiveBatch(mountidx, batchidx, batch.batchID)">
+										</CheckboxRadioSwitch>
+									</td>
+									<td>
+										<Actions>
+											<ActionInput type="number" :editable="true" icon="icon-add"
+												:value="batch.topUpValue"
+												@update:value="x => handleTopUpChange(x, mountidx)"
+												@submit="topupBatch(mountidx, batchidx, batch.batchID)">Top up (Bzz)
+											</ActionInput>
+											<ActionSeparator title="" />
+											<ActionButton :disabled="false" icon="icon-toggle">Set as active
+											</ActionButton>
+										</Actions>
+									</td>
+								</tr>
+								<tr>
+									<td colspan="5">Active batchId: {{ parsedMounts[mountidx].batchid }}</td>
+								</tr>
+								<tr>
+									<td colspan="5"><input type="submit" value="Save settings"
+											@click="saveSettings" />&nbsp;&nbsp;&nbsp;</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+
+					<div style="border-bottom: 1px solid #ccc !important; padding: 20px 20px 20px 20px;"></div>
+
+					<div><u>Purchase new Stamp:</u></div>
+
+					<div>
+						<form @submit.prevent>
+							<table id="" style="border-style: solid;">
+								<thead>
+									<tr>
+										<th>Amount:</th>
+										<th>Depth</th>
+										<th></th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td><input v-model="newBatchAmounts[mountidx]" type="number" value=""
+												maxlength="10" /></td>
+										<td><input v-model="newBatchDepths[mountidx]" type="number" value=""
+												maxlength="17" />
+
+										</td>
+										<td>
+											<input type="submit" :disabled="newBatchBtnDisabled[mountidx]" value="Buy"
+												@click="buyPostage(mountidx, $event)" />&nbsp;&nbsp;&nbsp;{{
+														newBatchLabel[mountidx]
+												}}
+											<!--Button type="secondary" disabled="newBatchBtnDisabled" value="Buy" @click="buyPostage(mountidx, $event)"/-->
+											<br />
+											<br />
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</form>
+					</div>
+
+					<div style="border-bottom: 2px solid #ccc !important; padding: 20px 20px 20px 20px;"></div>
 				</div>
-
-				<div>
-					Available chequebook balance (bzz): <input type="text" :value="mount.chequebalance" maxlength="200" readonly @click="alertme" @change="toggleNode"/>
-				</div>
-
-				<Actions>
-
-				</Actions>
-
-				<div><u>Stamp batches:</u></div>
-
-				<div > <!--style="overflow-x: auto;"-->
-					<table id="externalStorage" class="grid" ><!--class="grid" uses 100% width -->
-						<thead>
-							<tr>
-								<th>Batch Id</th>
-								<th>Bzz purchased</th>
-								<th>Balance</th>
-								<th>Active</th>
-								<th>Actions</th>
-							</tr>
-						</thead>
-						<tbody>
-							<tr>
-								<td><input id="ethswarm_batchid_" type="text" name="batchid" :value="mount.batchid" maxlength="200" @click="alertme" @change="toggleNode"/></td>
-								<td><input id="ethswarm_bzz_" type="text" name="bzz" value="bzz" maxlength="200" readonly /></td>
-								<td><input id="ethswarm_balance_" type="text" name="balance" :value="mount.batchbalance" maxlength="200" readonly /></td>
-								<td ><CheckboxRadioSwitch id="ethswarm_active_" :disabled="true" type="switch"></CheckboxRadioSwitch></td>
-								<td>
-									<Actions>
-										<!--ActionText icon="icon-edit" value="Top up" /-->
-										<ActionInput id="ethswarm_topup_" type="number" :editable="true" icon="icon-add" >Top up (Bzz)</ActionInput>
-										<ActionSeparator title="" />
-										<ActionButton id="ethswarm_setactive_" :disabled="false" icon="icon-toggle" @click="alertme('Edit')">Set as active</ActionButton>
-									</Actions>
-								</td>
-							</tr>
-						</tbody>
-					</table>
-				</div>
-
-				<div style="border-bottom: 1px solid #ccc !important; padding: 20px 20px 20px 20px;"></div>
-
-				<div><u>Purchase new Stamp:</u></div>
-
-				<div >
-					<table id="" style="border-style: solid;">
-						<thead>
-							<tr>
-								<th>Amount:</th>
-								<th>Depth</th>
-								<th></th>
-							</tr>
-						</thead>
-						<tbody>
-							<tr>
-								<td><input type="number" name="amount" value="BatchId" maxlength="200" @click="alertme" @change="toggleNode"/></td>
-								<td><input type="number" name="depth" value="bzz" maxlength="200" /></td>
-								<td><input type="submit" value="Buy"  /></td>
-							</tr>
-						</tbody>
-					</table>
-				</div>
-
-				<div style="border-bottom: 2px solid #ccc !important; padding: 20px 20px 20px 20px;"></div>
 			</div>
 		</div>
-	</div>
 	</AppContent>
 </template>
 
@@ -112,13 +156,16 @@ import ActionButton from '@nextcloud/vue/dist/Components/ActionButton';
 import CheckboxRadioSwitch from '@nextcloud/vue/dist/Components/CheckboxRadioSwitch';
 import ActionInput from '@nextcloud/vue/dist/Components/ActionInput';
 import ActionSeparator from '@nextcloud/vue/dist/Components/ActionSeparator';
+// import Button from '@nextcloud/vue/dist/Components/Button';
 // More components and docs here: https://nextcloud-vue-components.netlify.app/
-import { Bee } from "@ethersphere/bee-js";
+import { BeeDebug } from "@ethersphere/bee-js";
+
+// import axios from "axios";
 
 export default {
 	name: "App",
 	components: {
-		AppContent,Actions,ActionButton,CheckboxRadioSwitch,ActionInput,ActionSeparator
+		AppContent, Actions, ActionButton, CheckboxRadioSwitch, ActionInput, ActionSeparator
 	},
 	props: {
 		settings: {
@@ -134,32 +181,124 @@ export default {
 			beeClient: null, // with inital values
 			show: true,
 			parsedMounts: null,
+			newBatchAmounts: [],
+			newBatchDepths: [],
+			newBatchLabel: [],
+			newBatchBtnDisabled: [],
+			// topUpValue: [],
+			toggleNode: [],
 		};
 	},
 	computed: {
 	},
 	async mounted() {
-		this.parsedMounts = JSON.parse(this.settings.mounts);
-		this.parsedMounts = this.parsedMounts.map(mount => ({ ...mount, isEncrypted: mount.encrypt === 1}));
-
 		// Code in here runs before component is mounted to DOM
-		console.log('XD1',this.settings,'XD2');
-		this.beeClient = new Bee("http://localhost:1633");
-		// Be aware, this creates on-chain transactions that spend Eth and BZZ!
-		// const batchId = await this.beeClient.createPostageBatch('100', 17)
-		// const fileHash = await this.beeClient.uploadData(batchId, "bee is awesome!")
-		// const data = await this.beeClient.downloadData(fileHash)
+		this.parsedMounts = JSON.parse(this.settings.mounts);
+		this.parsedMounts = this.parsedMounts.map(mount => ({ ...mount, isEncrypted: mount.encrypt === 1, batches: mount.batches.map(b => ({ ...b, topUpValue: 0 })) }));
+
+		this.newBatchAmounts = Array(this.parsedMounts.length).fill('');
+		this.newBatchDepths = Array(this.parsedMounts.length).fill('');
+		this.newBatchLabel = Array(this.parsedMounts.length).fill('');
+		this.newBatchBtnDisabled = Array(this.parsedMounts.length).fill(false);
+		this.topUpValue = Array(this.parsedMounts.length).fill('');
+		this.toggleNode = Array(this.parsedMounts.length).fill(true);
 	},
 	methods: {
-		toggleNode (evt) {
-			console.log(evt);
+		getRequestOptions(authUser, authPassword) {
+			let requestOptions = null;
+			if (authUser && authPassword) {
+				requestOptions = {
+					headers: 'Authorization: Basic ' + btoa(authUser + ":" + authPassword)
+				};
+			}
+			return requestOptions;
 		},
-		alertme (evt) {
-		 	alert(evt);
+		showNode(mountIdx) {
+			const newToggleNode = [...this.toggleNode];
+			newToggleNode[mountIdx] = !newToggleNode[mountIdx];
+			this.toggleNode = newToggleNode;
 		},
 		toggleEncryption(mountIdx) {
-      		this.parsedMounts[mountIdx].encrypt = this.parsedMounts[mountIdx].isEncrypted ? 1 : 0;
-  		},
+			this.parsedMounts[mountIdx].encrypt = this.parsedMounts[mountIdx].isEncrypted ? 1 : 0;
+		},
+		toggleActiveBatch(mountIdx, batchIdx, activeBatchId) {
+			this.parsedMounts[mountIdx].batchid = "";
+			if (this.parsedMounts[mountIdx].batches[batchIdx].isActive) {
+				this.parsedMounts[mountIdx].batchid = activeBatchId;
+			}
+			const tmpParsedMounts = [...this.parsedMounts];
+			let bIdx = 0;
+			for (const batch of tmpParsedMounts[mountIdx].batches) {
+				if (batchIdx !== bIdx && batch.isActive) {
+					batch.isActive = !batch.isActive;
+					console.log("Set batch.isActive 1 = " + batch.isActive + " (" + bIdx + ")");
+				}
+				bIdx++;
+			}
+			this.parsedMounts = tmpParsedMounts;
+		},
+		handleTopUpChange(x, mountIdx) {
+			const newTopUp = [...this.topUpValue];
+			newTopUp[mountIdx] = x;
+			this.topUpValue = newTopUp;
+		},
+		async topupBatch(mountIdx, batchIdx, activeBatchId) {
+			const requestOptions = this.getRequestOptions(this.parsedMounts[mountIdx].mount_urloptions.user, this.parsedMounts[mountIdx].mount_urloptions.password);
+			const endpoint = this.parsedMounts[mountIdx].mount_urloptions.ip + ":" + this.parsedMounts[mountIdx].mount_urloptions.debug_api_port;
+			console.log("batch,amount=" + activeBatchId + "," + Number(this.topUpValue[mountIdx]));
+
+			try {
+				this.beeClient = new BeeDebug(endpoint);
+				await this.beeClient.topUpBatch(activeBatchId, Number(this.topUpValue[mountIdx]), requestOptions);
+			}
+			catch (err) {
+				console.log(err);
+			}
+		},
+		async buyPostage(mountidx, evt) {
+			if (evt) {
+				evt.preventDefault();
+			}
+			let newBatchlabel = [...this.newBatchLabel];
+			newBatchlabel[mountidx] = "Status...";
+			this.newBatchLabel = newBatchlabel;
+
+			this.newBatchBtnDisabled[mountidx] = true;
+			let endpoint = this.parsedMounts[mountidx].mount_urloptions.ip + ":" + this.parsedMounts[mountidx].mount_urloptions.debug_api_port;
+			if (!endpoint.toLowerCase().startsWith("http")) {
+				endpoint = "http://" + endpoint;
+			}
+			const requestOptions = this.getRequestOptions(this.parsedMounts[mountidx].mount_urloptions.user, this.parsedMounts[mountidx].mount_urloptions.password);
+			console.log("batch,depth=" + this.newBatchAmounts[mountidx] + "," + this.newBatchDepths[mountidx]);
+
+			newBatchlabel = [...this.newBatchLabel];
+			try {
+				this.beeClient = new BeeDebug(endpoint);
+
+				// this.newBatchLabel[mountidx] = await this.beeClient.getAllPostageBatch(requestOptions);
+				const newBatchId = await this.beeClient.createPostageBatch(Number(this.newBatchAmounts[mountidx]), Number(this.newBatchDepths[mountidx]), requestOptions);
+
+				newBatchlabel[mountidx] = "Success: Created new batch " + newBatchId;
+				this.newBatchLabel = newBatchlabel;
+
+				this.parsedMounts[mountidx].batches.push({ batchID: newBatchId, amount: this.newBatchAmounts[mountidx], batchTTL: '', isActive: false, isDisabled: false, });
+
+				this.newBatchBtnDisabled[mountidx] = false;
+			}
+			catch (err) {
+				console.log(err);
+				newBatchlabel[mountidx] = err;
+				this.newBatchLabel = newBatchlabel;
+				this.newBatchBtnDisabled[mountidx] = false;
+			}
+		},
+		saveSettings(evt) {
+			if (evt) {
+				evt.preventDefault();
+			}
+			console.log("save evt" + evt);
+			console.log("json=" + this.parsedMounts + ";len=" + this.parsedMounts.length);
+		}
 	},
 };
 /* eslint-enable no-console */
@@ -167,11 +306,11 @@ export default {
 
 <style scoped>
 input[type=text][name='batchid'] {
-	width:450px;
+	width: 450px;
 }
 
 input[type=text] {
-	width:250px;
+	width: 250px;
 }
 
 .hide {
