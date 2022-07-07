@@ -61,4 +61,17 @@ class SettingsController extends Controller {
 			$this->config->setAppValue($this->appName, "storageconfig", "");
 		}
 	}
+
+	/**
+	 * @NoCSRFRequired
+     * @NoAdminRequired
+	 * Save the storage config settings
+	 */
+	public function save(): void {
+		if ($this->request->getParam("storageconfig")) {
+			$this->config->setAppValue($this->appName, "storageconfig", $this->request->getParam("storageconfig"));
+		} else {
+			$this->config->setAppValue($this->appName, "storageconfig", "");
+		}
+	}
 }

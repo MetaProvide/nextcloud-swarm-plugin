@@ -2,144 +2,134 @@
 	<AppContent>
 		<div class="section">
 			<h2 class="inlineblock">External Storage: Swarm</h2>
-
+			<a target="_blank" rel="noreferrer" class="icon-info" title="Open documentation"
+				href="https://github.com/MetaProvide/nextcloud-swarm-plugin/"></a>
+			<p class="settings-hint">View the current status of the Swarm node(s) configured in 'External Storage'
+				section of NextCloud.</p>
 			<div v-for="(mount, mountidx) in parsedMounts" :key="mount.mount_id">
-				<h3>Swarm Node: <b>{{ mount.mount_name }}</b>
-					<Actions>
-						<ActionButton icon="icon-caret-dark" @click="showNode(mountidx)"></ActionButton>
-					</Actions>
-				</h3>
+				<div @click="setSaveMessage(mountidx, '')">
+					<h3>Swarm Node: <b>{{ mount.mount_name }}</b>
+						<Actions>
+							<ActionButton icon="icon-caret-dark" @click="showNode(mountidx)"></ActionButton>
+						</Actions>
+					</h3>
 
-				<div>
-					parseMounts={{ parsedMounts[mountidx] }}
-				</div>
-
-				<div v-if="toggleNode[mountidx]">
-					<!--<Actions>
-					<ActionButton icon="icon-delete" @click="alert('Delete')">Delete</ActionButton>
-				</Actions>
-
-				<Actions>
-					<ActionText icon="icon-edit" title="Please edit the text" value="This is a textarea with title" />
-					<ActionTextEditable icon="icon-edit" value="This is a text editable area" />
-				</Actions>
-
-				<Actions>
-					<ActionTextEditable icon="icon-edit" :disabled="true" value="This is a disabled editable textarea" />
-					<ActionTextEditable icon="icon-edit" title="Please edit the text" value="This is a textarea editable with title" />
-				</Actions>-->
 					<div>
-						<CheckboxRadioSwitch :checked.sync="mount.isEncrypted" type="switch"
-							@update:checked="toggleEncryption(mountidx)">Enable encryption</CheckboxRadioSwitch>
-						<!-- selected: {{mount.encrypt}} mountid: "ethswarm_encrypt_{{mount.mount_id}}" -->
+						<!-- parseMounts={{ parsedMounts[mountidx] }}-->
 					</div>
 
-					<div>
-						Available chequebook balance (bzz): <input type="text" :value="mount.chequebalance"
-							maxlength="200" readonly />
-					</div>
-
-					<Actions>
-
-					</Actions>
-
-					<div><u>Stamp batches:</u></div>
-
-					<div>
-						<!--v-if="!batch"-->
-						<div v-for="(batch, batchidx) in mount.batches" :key="batchidx">
-							mountBatch{{ batchidx }}={{ batch }}
+					<div v-if="toggleNode[mountidx]">
+						<div>
+							<CheckboxRadioSwitch :checked.sync="mount.isEncrypted" type="switch"
+								@update:checked="toggleEncryption(mountidx)">Enable encryption</CheckboxRadioSwitch>
 						</div>
-					</div>
 
-					<div>
-						<!--style="overflow-x: auto;"-->
-						<table id="externalStorage" class="grid">
-							<!--class="grid" uses 100% width -->
-							<thead>
-								<tr>
-									<th>Batch Id</th>
-									<th>Bzz purchased</th>
-									<th>Balance</th>
-									<th>Active</th>
-									<th>Actions</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr v-for="(batch, batchidx) in mount.batches" :key="batchidx">
-									<td><input type="text" name="batchid" :value="batch.batchID" maxlength="200" /></td>
-									<td><input type="text" name="bzz" :value="batch.amount" maxlength="200" readonly />
-									</td>
-									<td><input type="text" name="balance" :value="batch.batchTTL" maxlength="200"
-											readonly /></td>
-									<td>
-										<CheckboxRadioSwitch :checked.sync="batch.isActive" type="switch"
-											name="toggleActiveBatchName"
-											@update:checked="toggleActiveBatch(mountidx, batchidx, batch.batchID)">
-										</CheckboxRadioSwitch>
-									</td>
-									<td>
-										<Actions>
-											<ActionInput type="number" :editable="true" icon="icon-add"
-												:value="batch.topUpValue"
-												@update:value="x => handleTopUpChange(x, mountidx)"
-												@submit="topupBatch(mountidx, batchidx, batch.batchID)">Top up (Bzz)
-											</ActionInput>
-											<ActionSeparator title="" />
-											<ActionButton :disabled="false" icon="icon-toggle">Set as active
-											</ActionButton>
-										</Actions>
-									</td>
-								</tr>
-								<tr>
-									<td colspan="5">Active batchId: {{ parsedMounts[mountidx].batchid }}</td>
-								</tr>
-								<tr>
-									<td colspan="5"><input type="submit" value="Save settings"
-											@click="saveSettings" />&nbsp;&nbsp;&nbsp;</td>
-								</tr>
-							</tbody>
-						</table>
-					</div>
+						<div>
+							Available chequebook balance (bzz): <input type="text" :value="mount.chequebalance"
+								maxlength="200" readonly />
+						</div>
 
-					<div style="border-bottom: 1px solid #ccc !important; padding: 20px 20px 20px 20px;"></div>
+						<div><u>Stamp batches:</u></div>
 
-					<div><u>Purchase new Stamp:</u></div>
+						<!--div>
+							<div v-for="(batch, batchidx) in mount.batches" :key="batchidx">
+								mountBatch{{ batchidx }}={{ batch }}
+							</div>
+						</div-->
 
-					<div>
-						<form @submit.prevent>
-							<table id="" style="border-style: solid;">
+						<div>
+							<table id="externalStorage" class="grid">
 								<thead>
 									<tr>
-										<th>Amount:</th>
-										<th>Depth</th>
-										<th></th>
+										<th>Batch Id</th>
+										<th>Bzz purchased</th>
+										<th>Balance</th>
+										<th>Active</th>
+										<th v-if="true">Actions</th>
 									</tr>
 								</thead>
 								<tbody>
-									<tr>
-										<td><input v-model="newBatchAmounts[mountidx]" type="number" value=""
-												maxlength="10" /></td>
-										<td><input v-model="newBatchDepths[mountidx]" type="number" value=""
-												maxlength="17" />
-
+									<tr v-for="(batch, batchidx) in mount.batches" :key="batchidx">
+										<td><input type="text" name="batchid" :value="batch.batchID" maxlength="200"
+												readonly /></td>
+										<td><input type="text" name="bzz" :value="batch.amount" maxlength="200"
+												readonly />
+										</td>
+										<td><input type="text" name="balance" :value="batch.batchTTL" maxlength="200"
+												readonly /></td>
+										<td>
+											<CheckboxRadioSwitch :checked.sync="batch.isActive" type="switch"
+												name="toggleActiveBatchName"
+												@update:checked="toggleActiveBatch(mountidx, batchidx, batch.batchID)">
+											</CheckboxRadioSwitch>
 										</td>
 										<td>
-											<input type="submit" :disabled="newBatchBtnDisabled[mountidx]" value="Buy"
-												@click="buyPostage(mountidx, $event)" />&nbsp;&nbsp;&nbsp;{{
-														newBatchLabel[mountidx]
+											<Actions v-if="true">
+												<ActionButton :disabled="true" icon="icon-add">Top up (Bzz)
+												</ActionButton>
+												<ActionInput type="number" :editable="true" :value="batch.topUpValue"
+													@update:value="x => handleTopUpChange(x, mountidx)"
+													@submit="topupBatch(mountidx, batchidx, batch.batchID)">
+												</ActionInput>
+												<ActionSeparator title="" />
+											</Actions>
+										</td>
+									</tr>
+									<tr>
+										<td colspan="5">
+											<!--Active batchId: {{ parsedMounts[mountidx].batchid }}-->
+										</td>
+									</tr>
+									<tr>
+										<td colspan="5"><input type="submit" :value="saveSettingsValue[mountidx]"
+												:disabled="saveSettingsBtn[mountidx]"
+												@click="saveSettings(mountidx, $event)" />&nbsp;&nbsp;&nbsp;{{
+														saveSettingsLabel[mountidx]
 												}}
-											<!--Button type="secondary" disabled="newBatchBtnDisabled" value="Buy" @click="buyPostage(mountidx, $event)"/-->
-											<br />
-											<br />
 										</td>
 									</tr>
 								</tbody>
 							</table>
-						</form>
-					</div>
+						</div>
 
-					<div style="border-bottom: 2px solid #ccc !important; padding: 20px 20px 20px 20px;"></div>
+						<div style="border-bottom: 1px solid #ccc !important; padding: 20px 20px 20px 20px;"></div>
+
+						<div><u>Purchase new Stamp:</u></div>
+
+						<div>
+							<form @submit.prevent>
+								<table id="" style="border-style: solid;">
+									<thead>
+										<tr>
+											<th>Amount:</th>
+											<th>Depth</th>
+											<th></th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr>
+											<td><input v-model="newBatchAmounts[mountidx]" type="number" value=""
+													maxlength="10" /></td>
+											<td><input v-model="newBatchDepths[mountidx]" type="number" value=""
+													maxlength="17" />
+
+											</td>
+											<td>
+												<input type="submit" :disabled="newBatchBtnDisabled[mountidx]"
+													value="Buy"
+													@click="buyPostage(mountidx, $event)" />&nbsp;&nbsp;&nbsp;{{
+															newBatchLabel[mountidx]
+													}}
+												<br />
+												<br />
+											</td>
+										</tr>
+									</tbody>
+								</table>
+							</form>
+						</div>
+						<div style="border-bottom: 2px solid #ccc !important; padding: 20px 20px 20px 20px;"></div>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -150,17 +140,13 @@
 /* eslint-disable no-console */
 import AppContent from "@nextcloud/vue/dist/Components/AppContent";
 import Actions from '@nextcloud/vue/dist/Components/Actions';
-/* import ActionText from '@nextcloud/vue/dist/Components/ActionText';
-import ActionTextEditable from '@nextcloud/vue/dist/Components/ActionTextEditable'; */
 import ActionButton from '@nextcloud/vue/dist/Components/ActionButton';
 import CheckboxRadioSwitch from '@nextcloud/vue/dist/Components/CheckboxRadioSwitch';
 import ActionInput from '@nextcloud/vue/dist/Components/ActionInput';
 import ActionSeparator from '@nextcloud/vue/dist/Components/ActionSeparator';
-// import Button from '@nextcloud/vue/dist/Components/Button';
-// More components and docs here: https://nextcloud-vue-components.netlify.app/
 import { BeeDebug } from "@ethersphere/bee-js";
-
-// import axios from "axios";
+import axios from "axios";
+import { generateUrl } from '@nextcloud/router';
 
 export default {
 	name: "App",
@@ -176,17 +162,19 @@ export default {
 		},
 	},
 	data() {
-		// Here the component data is stored
+		// Here the component data is stored with inital values
 		return {
-			beeClient: null, // with inital values
+			beeClient: null,
 			show: true,
 			parsedMounts: null,
 			newBatchAmounts: [],
 			newBatchDepths: [],
 			newBatchLabel: [],
 			newBatchBtnDisabled: [],
-			// topUpValue: [],
 			toggleNode: [],
+			saveSettingsValue: [],
+			saveSettingsBtn: [],
+			saveSettingsLabel: [],
 		};
 	},
 	computed: {
@@ -201,7 +189,10 @@ export default {
 		this.newBatchLabel = Array(this.parsedMounts.length).fill('');
 		this.newBatchBtnDisabled = Array(this.parsedMounts.length).fill(false);
 		this.topUpValue = Array(this.parsedMounts.length).fill('');
-		this.toggleNode = Array(this.parsedMounts.length).fill(true);
+		this.toggleNode = Array(this.parsedMounts.length).fill(false);
+		this.saveSettingsValue = Array(this.parsedMounts.length).fill('Save Settings');
+		this.saveSettingsBtn = Array(this.parsedMounts.length).fill(false);
+		this.saveSettingsLabel = Array(this.parsedMounts.length).fill('');
 	},
 	methods: {
 		getRequestOptions(authUser, authPassword) {
@@ -292,13 +283,46 @@ export default {
 				this.newBatchBtnDisabled[mountidx] = false;
 			}
 		},
-		saveSettings(evt) {
+		async saveSettings(mountidx, evt) {
 			if (evt) {
 				evt.preventDefault();
 			}
-			console.log("save evt" + evt);
-			console.log("json=" + this.parsedMounts + ";len=" + this.parsedMounts.length);
-		}
+			this.setSaveBtnValue(mountidx, "Saving...");
+			this.setSaveMessage(mountidx, "");
+			this.saveSettingsBtn[mountidx] = true;
+
+			const url = generateUrl('/apps/files_external_ethswarm/save');
+			const parsedMountsToSave = this.parsedMounts.map(mount => ({ mount_id: mount.mount_id, encrypt: mount.encrypt, batchid: mount.batchid }));
+			console.log("json=" + JSON.stringify(this.parsedMounts) + ";len=" + this.parsedMounts.length + ";url=" + url + ";newparse=" + JSON.stringify(parsedMountsToSave));
+			await axios
+				.post(url, {
+					storageconfig: JSON.stringify(parsedMountsToSave),
+				})
+				.then((response) => {
+					this.setSaveMessage(mountidx, "Saved!");
+				})
+				.catch((error) => {
+					console.log("response err=" + error.response + ";mesg=" + error.response.data.message + "error.msg=" + error.message);
+					this.setSaveMessage(mountidx, "Failed to save: " + (error.response
+						? error.response.data.message
+						: error));
+				});
+
+			this.setSaveBtnValue(mountidx, "Save Settings");
+			this.saveSettingsBtn[mountidx] = false;
+		},
+		setSaveMessage(mountidx, message) {
+			// Set label
+			const newSaveSettingsLabel = [...this.saveSettingsLabel];
+			newSaveSettingsLabel[mountidx] = message;
+			this.saveSettingsLabel = newSaveSettingsLabel;
+		},
+		setSaveBtnValue(mountidx, message) {
+			// Set new button value
+			const newsaveSettingsValue = [...this.saveSettingsValue];
+			newsaveSettingsValue[mountidx] = message;
+			this.saveSettingsValue = newsaveSettingsValue;
+		},
 	},
 };
 /* eslint-enable no-console */

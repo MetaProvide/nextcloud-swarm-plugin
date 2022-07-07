@@ -25,7 +25,4 @@
 ?>
 <!-- Element to inject Vue app, anchoring server params in data attribute -->
 <div id="app" data-params="<?php p(json_encode($_['params'])); ?>"></div>
-<?php
-	// Get configured storage mounts from parameters
-//	$params = json_decode($_['params'], true);
-
+<?php>

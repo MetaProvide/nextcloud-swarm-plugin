@@ -25,8 +25,8 @@ declare(strict_types=1);
  */
 return ['routes' => [
 	[
-		'name' => 'Settings#admin',
-		'url' => '/settings/admin',
-		'verb' => 'POST'
+		'name' => 'Settings#save',
+		'url' => '/save',
+		'verb' => 'POST',
 	],
 ]];
