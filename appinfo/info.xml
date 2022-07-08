@@ -33,5 +33,4 @@
 		<admin>OCA\Files_External_Ethswarm\Settings\Admin</admin>
 		<admin-section>OCA\Files_External_Ethswarm\Settings\Section</admin-section>
 	</settings>
-
 </info>

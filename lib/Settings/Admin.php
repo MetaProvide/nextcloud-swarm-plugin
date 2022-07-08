@@ -25,8 +25,10 @@ namespace OCA\Files_External_Ethswarm\Settings;
 use OCA\Files_External\Service\BackendService;
 use OCA\Files_External\Service\GlobalStoragesService;
 use OCP\AppFramework\Http\TemplateResponse;
+use OCP\AppFramework\Http\ContentSecurityPolicy;
 use OCP\IConfig;
 use OCP\Settings\ISettings;
+use OCP\Util;
 
 class Admin implements ISettings {
 
@@ -78,9 +80,28 @@ class Admin implements ISettings {
 			// Is it configured?
 			$key = array_search($backendId, $mountIds);
 			if (!empty($key) || $key === 0) {
+				$mounts[$key]['mount_urloptions'] = $urlOptions;
 				$mounts[$key]['mount_name'] = $backendName;
 				$batchId = isset($mounts[$key]['batchid']) ? $mounts[$key]['batchid'] : "";
-				$mounts[$key]['batchbalance'] = $this->getBatchBalance($batchId, $urlOptions);
+				$batches = $this->getBatches($urlOptions);
+				if ($batches === null) {
+					// Dummy
+					$batches = json_decode("{ \"stamps\": [ { \"batchID\": \"unknown\", \"amount\": \"\", \"bucketDepth\": 16, \"batchTTL\": 0}]}", true);
+				}
+
+				foreach($batches["stamps"] as $batch) {
+				 	$newbatch = [
+				 		"batchID" => $batch["batchID"],
+				 		"amount" => $batch["amount"],
+				 		"batchTTL" => $batch["batchTTL"],
+				 		"isActive" => ( $batch["batchID"] === $batchId ? true : false),
+						"isDisabled" => ( $batch["batchID"] === $batchId ? true : false),
+				   ];
+				   $batcharray[] = $newbatch;
+				}
+				$mounts[$key]['batches'] = $batcharray;
+				unset($batcharray);
+				//$mounts[$key]['batchbalance'] = $this->getBatchBalance($batchId, $urlOptions);
 				$mounts[$key]['chequebalance'] = $this->getChequebookBalance($urlOptions);
 			}
 			else {
@@ -96,7 +117,10 @@ class Admin implements ISettings {
 			'visibilityType' => BackendService::VISIBILITY_ADMIN,
 			'mounts' => json_encode($mounts),
 		];
-		return new TemplateResponse($this->appName, 'admin-settings', $parameters, '');
+
+		Util::addScript($this->appName, 'nextcloud-swarm-plugin-main');
+		$response = new TemplateResponse($this->appName, 'vue-admin-settings', ['params' => $parameters], '');
+		return $response;
 	}
 
 	/**
@@ -115,6 +139,19 @@ class Admin implements ISettings {
 	 */
 	public function getPriority(): int {
 		return 5;
+	}
+
+	public function getBatches($urlOptions) {
+		$uri = "/stamps";
+		$curl = $this->setCurl($uri, $urlOptions);
+
+		$output = curl_exec($curl);
+
+		$response_data = json_decode($output, true);
+
+		curl_close($curl);
+
+		return $response_data;
 	}
 
 	public function getBatchBalance(string $batchId, $urlOptions) {

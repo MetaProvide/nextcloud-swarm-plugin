@@ -323,13 +323,18 @@ class BeeSwarm extends \OC\Files\Storage\Common
 	}
 
 	public function writeStream(string $path, $stream, int $size = null): int {
+		if (empty($this->stampBatchId)) {
+			fclose($stream);
+			throw new \Exception("File not uploaded: There is no active Batch associated with this storage. Please check your Administration Settings.");
+		}
+
 		// Write to temp file
 		$tmpFile = $this->toTmpFile($stream);
 		$tmpFilesize = (file_exists($tmpFile) ? filesize($tmpFile) : -1);
 		$mimetype = mime_content_type($tmpFile);
 
 		try {
-		 	//$result = $this->upload_file($path, $tmpFile, $tmpFilesize);
+
 			$result = $this->upload_stream($path, $stream, $tmpFile, $mimetype, $tmpFilesize);
 			$reference = (isset($result["reference"]) ? $result['reference'] : null);
 
