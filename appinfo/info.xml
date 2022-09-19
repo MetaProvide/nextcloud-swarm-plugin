@@ -6,7 +6,7 @@
     <description><![CDATA[The BeeSwarm Backend allows administrators and users to add their own Bee node as folders in Nextcloud. This offers an easy way for users to access the Bee node data in the same place where they find their other files.]]></description>
     <version>0.0.3</version>
     <licence>agpl</licence>
-    <author>Metaprovide</author>
+    <author>MetaProvide</author>
     <namespace>Files_External_Ethswarm</namespace>
     <types>
 	    <filesystem/>
@@ -33,5 +33,4 @@
 		<admin>OCA\Files_External_Ethswarm\Settings\Admin</admin>
 		<admin-section>OCA\Files_External_Ethswarm\Settings\Section</admin-section>
 	</settings>
-
 </info>

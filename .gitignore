@@ -4,3 +4,4 @@
 /vendor
 /.php_cs.cache
 /dev-environment
+js/nextcloud-swarm-plugin*.*
