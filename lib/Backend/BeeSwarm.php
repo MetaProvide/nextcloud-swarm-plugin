@@ -44,7 +44,7 @@ class BeeSwarm extends Backend
             ->setStorageClass('\OCA\Files_External_Ethswarm\Storage\BeeSwarm')
             ->setText($l->t('Swarm'))
             ->addParameters([
-				(new DefinitionParameter('ip', $l->t('IP Address')))->setTooltip($l->t("Add http:// or https:// at the start of the parameter")),
+				(new DefinitionParameter('ip', $l->t('URL')))->setTooltip($l->t("Add http:// or https:// at the start of the parameter")),
 				(new DefinitionParameter('port', $l->t('API Port')))->setTooltip($l->t("The API-endpoint port that exposes all functionality with the Swarm network. By default, it runs on port 1633")),
 				(new DefinitionParameter('debug_api_port', $l->t('Debug API Port')))->setTooltip($l->t("The Debug API exposes functionality to inspect the state of your Bee node while it is running.  By default, it runs on port 1635")),
 			])
