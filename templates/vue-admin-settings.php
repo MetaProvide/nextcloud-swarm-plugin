@@ -1,11 +1,10 @@
 <?php
-
-declare(strict_types=1);
-
 /**
- * @copyright Copyright (c) 2022, MetaProvide Holding EKF
+ * External Storage: Swarm
  *
- * @author Ron Trevor <ecoron@proton.me>
+ * @copyright Copyright (C) 2022  Henry Bergström <metahenry@metaprovide.org>
+ *
+ * @author Henry Bergström <metahenry@metaprovide.org>
  *
  * @license GNU AGPL version 3 or any later version
  *
@@ -23,10 +22,7 @@ declare(strict_types=1);
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-return ['routes' => [
-	[
-		'name' => 'Settings#save',
-		'url' => '/save',
-		'verb' => 'POST',
-	],
-]];
+?>
+<!-- Element to inject Vue app, anchoring server params in data attribute -->
+<div id="app" data-params="<?php p(json_encode($_['params'])); ?>"></div>
+<?php>

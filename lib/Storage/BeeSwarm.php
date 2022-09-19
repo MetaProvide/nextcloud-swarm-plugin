@@ -23,6 +23,7 @@
 
 namespace OCA\Files_External_Ethswarm\Storage;
 
+use Exception;
 use OCP\Constants;
 use OCA\Files_External_Ethswarm\Storage\BeeSwarmTrait;
 use OCP\Files\IMimeTypeLoader;
@@ -89,12 +90,15 @@ class BeeSwarm extends \OC\Files\Storage\Common
 			$this->config = \OC::$server->get(IConfig::class);
 			$configSettings = $this->config->getAppValue(SELF::APP_NAME,"storageconfig","");	//default
 			$mounts = json_decode($configSettings, true);
-			$mountIds = array_column($mounts, 'mount_id');
-			$key = array_search($mountId, $mountIds);
-			if (!empty($key) || $key === 0) {
-				$isConfigured = true;
-				$this->isEncrypted = $mounts[$key]['encrypt'] == "1" ? true : false;
-				$this->stampBatchId = $mounts[$key]['batchid'];
+			if (is_array($mounts))
+			{
+				$mountIds = array_column($mounts, 'mount_id');
+				$key = array_search($mountId, $mountIds);
+				if (!empty($key) || $key === 0) {
+					$isConfigured = true;
+					$this->isEncrypted = $mounts[$key]['encrypt'] == "1" ? true : false;
+					$this->stampBatchId = $mounts[$key]['batchid'];
+				}
 			}
 		}
 	}
@@ -110,6 +114,10 @@ class BeeSwarm extends \OC\Files\Storage\Common
 
 	public function test()
 	{
+		if ((!str_starts_with(strtolower($this->api_url), "http://")) && (!str_starts_with(strtolower($this->api_url), "https://"))) {
+			throw new Exception("The URL must start with http:// or https://");
+		}
+
 		return $this->getConnection();
 	}
 
@@ -196,6 +204,9 @@ class BeeSwarm extends \OC\Files\Storage\Common
 	 * @return bool
 	 */
 	public function is_dir($path) {
+		if (stripos("/",$path) === false) {
+			return false;
+		}
 		return true;
 	}
 
@@ -323,13 +334,18 @@ class BeeSwarm extends \OC\Files\Storage\Common
 	}
 
 	public function writeStream(string $path, $stream, int $size = null): int {
+		if (empty($this->stampBatchId)) {
+			fclose($stream);
+			throw new \Exception("File not uploaded: There is no active Batch associated with this storage. Please check your Administration Settings.");
+		}
+
 		// Write to temp file
 		$tmpFile = $this->toTmpFile($stream);
 		$tmpFilesize = (file_exists($tmpFile) ? filesize($tmpFile) : -1);
 		$mimetype = mime_content_type($tmpFile);
 
 		try {
-		 	//$result = $this->upload_file($path, $tmpFile, $tmpFilesize);
+
 			$result = $this->upload_stream($path, $stream, $tmpFile, $mimetype, $tmpFilesize);
 			$reference = (isset($result["reference"]) ? $result['reference'] : null);
 
