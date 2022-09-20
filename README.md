@@ -29,7 +29,7 @@ File handling operations involving the swarm node are integrated in the External
 <em>View, download, and file view actions in Nextcloud</em>
 
 
-The main file operations that are available in Nextcloud are:
+Using our plugin, the main file operations that are available in Nextcloud are:
 
 - Upload file(s) to a swarm node
 - Download and view files
