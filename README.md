@@ -3,7 +3,7 @@
 This is a plugin for bridging [Nextcloud](https://nextcloud.com) and [Swarm](https://www.ethswarm.org/).
 The goal with the plugin is to interact seamlessly with Swarm decentralized storage directly in Nextcloud using its common External storage feature.
 
-<img width="1045" alt="View when enabling the plugin" src="https://user-images.githubusercontent.com/3958329/136574298-d87d320f-b3c3-46e8-95f0-2a17974d48f7.png">
+<img alt="View file and action menu" src="/assets/images/swarm_Files.png">
 <em>File view when using the plugin in Nextcloud</em>
 
 ## Table of Contents
@@ -25,7 +25,7 @@ The plugin itself contains two distinct parts, the External Storage portion and 
 
 File handling operations involving the swarm node are integrated in the External Storage ("Files") section of Nextcloud.
 
-<img alt="View file and action menu" src="/assets/images/swarm_Files.png">
+<img alt="View file and action menu" src="/assets/images/swarm_Files_Intro.png">
 <em>View, download, and file view actions in Nextcloud</em>
 
 
