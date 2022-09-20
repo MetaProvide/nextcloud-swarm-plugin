@@ -56,7 +56,7 @@ Since every operation in Swarm costs money, it is important to view how much mon
 - How much BZZ is available to the node
 - Any purchased stamp batches and the remaining balances
 - Have the option to purchase a new batch of stamps
-- Make active/inactive the batch to be used for uploading files
+- Toggle the batch active/inactive to be used for uploading files
 
 <img alt="Setup Swarm External Storage" src="/assets/images/swarm_Setup_Ethswarm_buyStamp1.png">
 <em>Advanced configuration of Swarm in Nextcloud administration</em>
