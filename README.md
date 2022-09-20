@@ -1,7 +1,8 @@
 # Nextcloud Swarm Plugin
 
-This is a plugin for bridging [Nextcloud](https://nextcloud.com) and [Swarm](https://www.ethswarm.org/).
-The goal with the plugin is to interact seamlessly with Swarm decentralized storage directly in Nextcloud using its common External storage feature.
+*Decentralized Sovereign cloud-storage comes to Nextcloud!*
+
+This plugin brings [Swarm](https://www.ethswarm.org/) to [Nextcloud](https://nextcloud.com) - decentralized file-storage, connected to the blockchain.
 
 <img alt="View file and action menu" src="/assets/images/swarm_Files.png">
 <em>File view when using the plugin in Nextcloud</em>
@@ -11,7 +12,7 @@ The goal with the plugin is to interact seamlessly with Swarm decentralized stor
 - [General Architecture](#general-architecture)
 - [External storage](#external-storage)
 - [Settings](#settings)
-- [Setup / Installation](#setup/installation)
+- [Setup and Installation](#setup-and-installation)
 - [Using the Swarm](#using-the-swarm)
 - [Limitations](#limitations)
 - [License](#license)
@@ -63,7 +64,7 @@ Since every operation in Swarm costs money, it is important to view how much mon
 
 It utilises the [ethersphere bee-js](https://github.com/ethersphere/bee-js) Javascript client library for handling communication with the Swarm decentralized storage and uses Vue.js for the UI.
 
-## Setup/Installation
+## Setup and Installation
 
 First it is necessary to have a Swarm node running.
 For Swarm installation instructions, follow the offical [ethswarm documentation](https://www.ethswarm.org/build#run)
