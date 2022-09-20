@@ -1,14 +1,15 @@
 # This file is licensed under the Affero General Public License version 3 or
 # later. See the LICENSE file.
 
-app_name=files_external_ethswarm
+app_name=nextcloud-swarm-plugin
+app_id=files_external_ethswarm
 build_directory=$(CURDIR)/build
 temp_build_directory=$(build_directory)/temp
 build_tools_directory=$(CURDIR)/build/tools
 
-all: dev-setup lint
+all: dev-setup lint build-js-production
 
-release: build-tarball
+release: npm-init build-js-production build-tarball
 
 dev-setup: clean-dev composer npm-init
 
@@ -28,6 +29,19 @@ npm-init:
 
 npm-update:
 	npm update
+
+# Building
+build-js:
+	npm run dev
+
+build-js-production:
+	npm run build
+
+watch-js:
+	npm run watch
+
+serve-js:
+	npm run serve
 
 # Linting
 eslint:
@@ -68,20 +82,27 @@ build-tarball:
 	--exclude=".git" \
 	--exclude=".github" \
 	--exclude=".vscode" \
-	--exclude="node_modules" \
 	--exclude="build" \
+	--exclude="dev-environment" \
+	--exclude="docker" \
+	--exclude="node_modules" \
 	--exclude="vendor" \
 	--exclude=".editorconfig" \
+	--exclude=".eslintrc.js" \
 	--exclude=".gitignore" \
+	--exclude=".php_cs.cache" \
 	--exclude=".php_cs.dist" \
-	--exclude=".prettierrc" \
-	--exclude=".stylelintrc.json" \
+	--exclude=".prettierignore" \
+	--exclude=".prettierrc.json" \
+	--exclude="babel.config.js" \
 	--exclude="composer.json" \
 	--exclude="composer.lock" \
+	--exclude="docker-compose.yaml" \
 	--exclude="Makefile" \
 	--exclude="package-lock.json" \
 	--exclude="package.json" \
-	../$(app_name)/ $(temp_build_directory)/$(app_name)
+	--exclude="stylelint.config.js" \
+	--exclude="webpack.config.js" \
+	../$(app_name)/ $(temp_build_directory)/$(app_id)
 	tar czf $(build_directory)/$(app_name).tar.gz \
-		-C $(temp_build_directory) $(app_name)
-
+		-C $(temp_build_directory) $(app_id)
