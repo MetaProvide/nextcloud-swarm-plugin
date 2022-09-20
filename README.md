@@ -8,13 +8,13 @@ The goal with the plugin is to interact seamlessly with Swarm decentralized stor
 
 ## Table of Contents
 
-- [General Architecture](##general-architecture)
-- [External storage](###external-storage)
-- [Settings](###settings)
-- [Setup / Installation](##setup/installation)
-- [Using the Swarm](##using-the-swarm)
-- [Limitations](##limitations)
-- [License](##license)
+- [General Architecture](#general-architecture)
+- [External storage](#external-storage)
+- [Settings](#settings)
+- [Setup / Installation](#setup/installation)
+- [Using the Swarm](#using-the-swarm)
+- [Limitations](#limitations)
+- [License](#license)
 
 ## General Architecture
 
@@ -28,16 +28,13 @@ File handling operations involving the swarm node are integrated in the External
 <img alt="View file and action menu" src="/assets/images/swarm_Files.png">
 <em>View, download, and file view actions in Nextcloud</em>
 
+
 The main file operations that are available in Nextcloud are:
 
 - Upload file(s) to a swarm node
 - Download and view files
 - Copy/Move files from any External Storage to a swarm node
 - Copy files from a swarm node to any External Storage
-
-
-<img alt="View file and action menu" src="/assets/images/swarm_Files_ViewFile.png">
-<em>View, download, and file view actions in Nextcloud</em>
 
 File metadata, like with all files in Nextcloud, are stored in the Nextcloud database, such as the swarm reference that is used to uniquely identify each file and its mimetype, file size etc. The rest of the metadata is stored in the normal filecache table which is common to all External File storages.
 
@@ -47,8 +44,9 @@ The backend of the plugin is written in PHP which essentially allows communicati
 
 Available to users with administrative credentials, the external storage accepts configuration options from two places, the normal External Storage settings, which allows a user to configure the basic connection properties of a Swarm node:
 
-<img alt="Setup Swarm External Storage" src="/assets/images/swarm_Setup_ExtStorage">
+<img alt="Setup Swarm External Storage" src="/assets/images/swarm_Setup_ExtStorage.png">
 <em>Basic Swarm setup in External Storage in Nextcloud administration</em>
+
 
 Since every operation in Swarm costs money, it is important to view how much money is available to the Swarm node directly and also provide a convenient way of handling the payment system in Swarm - all managed directly in Nextcloud. This is in a specific section with more advanced configuration for the Swarm node, where the following settings can be viewed and edited:
 
@@ -60,7 +58,7 @@ Since every operation in Swarm costs money, it is important to view how much mon
 - Have the option to purchase a new batch of stamps
 - Make active/inactive the batch to be used for uploading files
 
-<img alt="Setup Swarm External Storage" src="/assets/images/swarm_Setup_Ethswarm_buyStamp1">
+<img alt="Setup Swarm External Storage" src="/assets/images/swarm_Setup_Ethswarm_buyStamp1.png">
 <em>Advanced configuration of Swarm in Nextcloud administration</em>
 
 It utilises the [ethersphere bee-js](https://github.com/ethersphere/bee-js) Javascript client library for handling communication with the Swarm decentralized storage and uses Vue.js for the UI.
@@ -92,6 +90,11 @@ Once setup and configured, the swarm node is ready to use.
 <em>Upload file to swarm in Nextcloud</em>
 
 - Once uploaded, it can be viewed internally or downloaded. It can also be copied to another storage.
+
+<img alt="View file and action menu" src="/assets/images/swarm_Files_ViewFile.png">
+<em>View, download, and file view actions in Nextcloud</em>
+
+
 - Files from another Nextcloud storage can also be copied/moved to the Swarm node. Choose the Swarm node as the target Folder
 
 <img alt="Upload file" src="/assets/images/swarm_CopyMove.png">
