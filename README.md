@@ -71,6 +71,7 @@ For Swarm installation instructions, follow the offical [ethswarm documentation]
 
 The following steps explain how to configure a Swarm node in NextCloud.
 
+- Make sure the "External Storage" plugin is enabled
 - Install the "External Storage: Swarm" app from the Nextcloud App store
 - Navigate to External Storage Administration (Profile menu -> Settings -> External Storage)
 - Add the connection settings for a new Swarm node
