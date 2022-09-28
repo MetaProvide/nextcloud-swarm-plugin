@@ -85,10 +85,12 @@ build-tarball:
 	--exclude=".git" \
 	--exclude=".github" \
 	--exclude=".vscode" \
+	--exclude="assets" \
 	--exclude="build" \
 	--exclude="dev-environment" \
 	--exclude="docker" \
 	--exclude="node_modules" \
+	--exclude="src" \
 	--exclude="vendor" \
 	--exclude=".editorconfig" \
 	--exclude=".eslintrc.js" \
@@ -117,10 +119,12 @@ build-appstore-tarball:
 	--exclude=".git" \
 	--exclude=".github" \
 	--exclude=".vscode" \
+	--exclude="assets" \
 	--exclude="build" \
 	--exclude="dev-environment" \
 	--exclude="docker" \
 	--exclude="node_modules" \
+	--exclude="src" \
 	--exclude="vendor" \
 	--exclude=".editorconfig" \
 	--exclude=".eslintrc.js" \

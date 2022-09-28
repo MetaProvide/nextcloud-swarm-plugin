@@ -1,9 +1,81 @@
 <?xml version="1.0"?>
-<info xmlns:xsi= "http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://apps.nextcloud.com/schema/apps/info.xsd">
+<info xmlns:xsi= "http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="https://apps.nextcloud.com/schema/apps/info.xsd">
     <id>files_external_ethswarm</id>
     <name>External Storage: Swarm</name>
-    <summary>Integrate Bee swarm as an external storage</summary>
-    <description><![CDATA[The BeeSwarm Backend allows administrators and users to add their own Bee node as folders in Nextcloud. This offers an easy way for users to access the Bee node data in the same place where they find their other files.]]></description>
+    <summary>Bringing Swarm to Nextcloud - decentralized file-storage, connected to the blockchain</summary>
+    <description><![CDATA[
+# Nextcloud Swarm Plugin
+
+*Decentralized Sovereign cloud-storage comes to Nextcloud!*
+
+This plugin brings [Swarm](https://www.ethswarm.org/) to [Nextcloud](https://nextcloud.com) - decentralized file-storage, connected to the blockchain.
+
+## Table of Contents
+
+- [Dependencies](#dependencies)
+- [Setup and Installation](#setup-and-installation)
+- [Usage](#usage)
+	- [Settings](#settings)
+	- [Using Swarm](#using-swarm)
+- [License](#license)
+
+## Dependencies
+
+To use the plugin you need the following
+
+* A Nextcloud instance
+* A Bee node
+
+## Setup and Installation
+
+For setting up a Bee node please have a look at the [official documentation](https://docs.ethswarm.org/docs/installation/quick-start)
+
+The following steps explain how to configure a Bee node in Nextcloud.
+
+- Make sure the "External Storage" plugin is enabled
+- Install the "External Storage: Swarm" app from the Nextcloud App store
+- Navigate to External Storage Administration (Profile menu -> Settings -> External Storage)
+- Add the connection settings for a new Bee node
+- Navigate to Ethswarm Storage Administration (Profile menu -> Settings -> Ethswarm Storage)
+- Configure the Bee node - by default, encryption is active
+- To use a Bee node, it is necessary to [Purchase a Batch of new stamps](https://docs.ethswarm.org/docs/access-the-swarm/keep-your-data-alive) from the funds in the chequebook
+- Once the new batch is purchased, a unique batchId is generated. Once your batch has been purchased, it will take a few minutes for other Bee nodes in the Swarm to catch up and register your batch. Allow some time for your batch to propagate in the network before proceeding to the next step. This is indicated by the checkbox "Usable".
+- Uploading files to the swarm costs Bzz, so it is necessary to select a Batch as "Active". Only 1 batch is allowed to be Active for a given Bee node. Then click "Save Settings".
+
+## Usage
+
+File handling operations involving the Bee node are integrated in the External Storage ("Files") section of Nextcloud.
+
+Using the plugin, the main file operations that are available in Nextcloud are:
+
+- Upload file(s) to a Bee node
+- Download and view files
+- Copy/Move files from any External Storage to a Bee node
+- Copy files from a Bee node to any External Storage
+
+### Settings
+
+Available to users with administrative credentials, the external storage accepts configuration options from two places, the normal External Storage settings, which allows a user to configure the basic connection properties of a Bee node.
+
+Since every operation in Swarm costs money, it is important to view how much money is available to the Bee node directly and also provide a convenient way of handling the payment system in Swarm - all managed directly in Nextcloud. This is in a specific section with more advanced configuration for the Bee node, where the following settings can be viewed and edited:
+
+- Configure which Bee node to manage
+- View current status of the Bee node
+- Option to toggle encryption on and off
+- How much BZZ is available to the node
+- Any purchased stamp batches and the remaining balances
+- Have the option to purchase a new batch of stamps
+- Toggle the batch used for uploading files active/inactive
+
+### Using Swarm
+
+Once setup and configured, the Bee node is ready to use.
+- Navigate to "Files" option on the menu -> "External Storage" and then the name of the Bee node.
+- You can then upload files just like you normally would in Nextcloud.
+- Once uploaded, it can be viewed internally or downloaded. It can also be copied to another storage.
+- Files from another Nextcloud storage can also be copied/moved to the Bee node.
+    ]]></description>
     <version>0.1.0</version>
     <licence>agpl</licence>
     <author>MetaProvide</author>
@@ -16,6 +88,7 @@
     <website>https://github.com/MetaProvide/nextcloud-swarm-plugin</website>
     <bugs>https://github.com/MetaProvide/nextcloud-swarm-plugin/issues</bugs>
     <repository type="git">https://github.com/MetaProvide/nextcloud-swarm-plugin.git</repository>
+	<screenshot>https://raw.githubusercontent.com/MetaProvide/nextcloud-swarm-plugin/main/assets/images/swarm_Files.png</sreenshot>
     <dependencies>
         <nextcloud min-version="23.0" max-version="24.0"/>
     </dependencies>

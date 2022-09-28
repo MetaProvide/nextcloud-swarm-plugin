@@ -36,7 +36,6 @@ The following steps explain how to configure a Bee node in Nextcloud.
 - Navigate to Ethswarm Storage Administration (Profile menu -> Settings -> Ethswarm Storage)
 - Configure the Bee node - by default, encryption is active
 - To use a Bee node, it is necessary to [Purchase a Batch of new stamps](https://docs.ethswarm.org/docs/access-the-swarm/keep-your-data-alive) from the funds in the chequebook
-
 - Once the new batch is purchased, a unique batchId is generated. Once your batch has been purchased, it will take a few minutes for other Bee nodes in the Swarm to catch up and register your batch. Allow some time for your batch to propagate in the network before proceeding to the next step. This is indicated by the checkbox "Usable".
 - Uploading files to the swarm costs Bzz, so it is necessary to select a Batch as "Active". Only 1 batch is allowed to be Active for a given Bee node. Then click "Save Settings".
 
