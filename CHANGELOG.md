@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## 0.1.3 - 2022-09-29
+
+### Fixed
+
+-   Fixed typo in screenshot XML tag
+
 ## 0.1.2 - 2022-09-29
 
 ### Fixed
