@@ -5,6 +5,7 @@
 This plugin brings [Swarm](https://www.ethswarm.org/) to [Nextcloud](https://nextcloud.com) - decentralized file-storage, connected to the blockchain.
 
 ![View file and action menu](assets/images/swarm_Files.png "View file and action menu")
+
 <em>File view when using the plugin in Nextcloud</em>
 
 ## Table of Contents
@@ -44,6 +45,7 @@ The following steps explain how to configure a Bee node in Nextcloud.
 File handling operations involving the Bee node are integrated in the External Storage ("Files") section of Nextcloud.
 
 ![View file and action menu](assets/images/swarm_Files_Intro.png "View file and action menu")
+
 <em>View, download, and file view actions in Nextcloud</em>
 
 Using the plugin, the main file operations that are available in Nextcloud are:
@@ -58,6 +60,7 @@ Using the plugin, the main file operations that are available in Nextcloud are:
 Available to users with administrative credentials, the external storage accepts configuration options from two places, the normal External Storage settings, which allows a user to configure the basic connection properties of a Bee node:
 
 ![Setup Swarm External Storage](assets/images/swarm_Setup_ExtStorage.png "Setup Swarm External Storage")
+
 <em>Basic Swarm setup in External Storage in Nextcloud administration</em>
 
 Since every operation in Swarm costs money, it is important to view how much money is available to the Bee node directly and also provide a convenient way of handling the payment system in Swarm - all managed directly in Nextcloud. This is in a specific section with more advanced configuration for the Bee node, where the following settings can be viewed and edited:
@@ -71,6 +74,7 @@ Since every operation in Swarm costs money, it is important to view how much mon
 - Toggle the batch used for uploading files active/inactive
 
 ![Setup Swarm External Storage](assets/images/swarm_Setup_Ethswarm_buyStamp1.png "Setup Swarm External Storage")
+
 <em>Advanced configuration of Swarm in Nextcloud administration</em>
 
 ### Using Swarm
@@ -80,17 +84,20 @@ Once setup and configured, the Bee node is ready to use.
 - Click to Upload file(s):
 
 ![Upload file](assets/images/swarm_Files_UploadFile.png "Upload file")
+
 <em>Upload file to swarm in Nextcloud</em>
 
 - Once uploaded, it can be viewed internally or downloaded. It can also be copied to another storage.
 
 ![View file and action menu](assets/images/swarm_Files_ViewFile.png "View file and action menu")
+
 <em>View, download, and file view actions in Nextcloud</em>
 
 
 - Files from another Nextcloud storage can also be copied/moved to the Bee node. Choose the Bee node as the target Folder
 
 ![Copy file](assets/images/swarm_CopyMove.png "Copy file")
+
 <em>Upload file to swarm in Nextcloud</em>
 
 ## License
