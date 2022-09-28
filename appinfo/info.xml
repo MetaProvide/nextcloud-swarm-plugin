@@ -16,16 +16,6 @@
     <website>https://github.com/MetaProvide/nextcloud-swarm-plugin</website>
     <bugs>https://github.com/MetaProvide/nextcloud-swarm-plugin/issues</bugs>
     <repository type="git">https://github.com/MetaProvide/nextcloud-swarm-plugin.git</repository>
-
-    <screenshot>
-
-    </screenshot>
-    <screenshot>
-
-    </screenshot>
-    <screenshot>
-
-    </screenshot>
     <dependencies>
         <nextcloud min-version="23.0" max-version="24.0"/>
     </dependencies>
