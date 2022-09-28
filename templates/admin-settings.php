@@ -38,7 +38,7 @@ script('files_external_ethswarm', 'settings');
 		$mountId = $mount['mount_id'];
 		$mountName = $mount['mount_name'];
 		$encrypted = $mount['encrypt'];
-		$batchId =  isset($mount['batchid']) ? $mount['batchid'] : "";
+		$batchId = isset($mount['batchid']) ? $mount['batchid'] : "";
 		$batchBalance = isset($mount['batchbalance']) ? $mount['batchbalance'] : "";
 		$chequeBalance = isset($mount['chequebalance']) ? $mount['chequebalance'] : "";
 	?>

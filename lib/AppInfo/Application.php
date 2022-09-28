@@ -24,6 +24,7 @@
 declare(strict_types=1);
 
 namespace OCA\Files_External_Ethswarm\AppInfo;
+
 use OCA\Files_External_Ethswarm\Backend\BeeSwarm;
 use OCA\Files_External_Ethswarm\Auth\HttpBasicAuth;
 use OCA\Files_External\Lib\Config\IBackendProvider;
@@ -40,45 +41,41 @@ use OCP\Security\CSP\AddContentSecurityPolicyEvent;
 /**
  * @package OCA\Files_external_beeswarm\AppInfo
  */
-class Application extends App implements IBootstrap, IBackendProvider,IAuthMechanismProvider
-{
+class Application extends App implements IBootstrap, IBackendProvider, IAuthMechanismProvider {
 	public const APP_ID = 'files_external_ethswarm';
 
-    public function __construct(array $urlParams = array())
-    {
-        parent::__construct(self::APP_ID, $urlParams);
-    }
+	public function __construct(array $urlParams = []) {
+		parent::__construct(self::APP_ID, $urlParams);
+	}
 
 	/**
-     * @{inheritdoc}
-     */
-    public function getBackends()
-    {
-        $container = $this->getContainer();
-        return [
+	 * @{inheritdoc}
+	 */
+	public function getBackends() {
+		$container = $this->getContainer();
+		return [
 			$container->query(BeeSwarm::class)
 		];
-    }
+	}
 
 	public function boot(IBootContext $context): void {
-		 $context->injectFn([$this, 'registerEventsScripts']);
+		$context->injectFn([$this, 'registerEventsScripts']);
 
-		 $context->injectFn(function (BackendService $backendService) {
+		$context->injectFn(function (BackendService $backendService) {
 			$backendService->registerBackendProvider($this);
 			$backendService->registerAuthMechanismProvider($this);
 		});
 
 
-		 $this->getAuthMechanisms();
-    }
+		$this->getAuthMechanisms();
+	}
 
 	public function registerEventsScripts(IEventDispatcher $dispatcher) {
 	}
 
-	public function register(IRegistrationContext $context): void
-    {
+	public function register(IRegistrationContext $context): void {
 		$context->registerEventListener(AddContentSecurityPolicyEvent::class, CSPListener::class);
-    }
+	}
 
 	public function getAuthMechanisms() {
 		$container = $this->getContainer();
@@ -87,5 +84,4 @@ class Application extends App implements IBootstrap, IBackendProvider,IAuthMecha
 			$container->get(HttpBasicAuth::class),
 		];
 	}
-
 }

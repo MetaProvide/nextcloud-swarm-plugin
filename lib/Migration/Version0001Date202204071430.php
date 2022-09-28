@@ -32,8 +32,7 @@ use OCP\Migration\SimpleMigrationStep;
 use OCP\DB\Types;
 
 class Version0001Date202204071430 extends SimpleMigrationStep {
-
-	const _TABLENAME = "files_swarm";
+	public const _TABLENAME = "files_swarm";
 	/**
 	 * @param IOutput $output
 	 * @param Closure $schemaClosure The `\Closure` returns a `ISchemaWrapper`
@@ -82,8 +81,8 @@ class Version0001Date202204071430 extends SimpleMigrationStep {
 			$table->addIndex(['storage'], 'storage_index');
 		}
 		return $schema;
-}
+	}
 
-public function postSchemaChange(IOutput $output, \Closure $schemaClosure, array $options) {
-}
+	public function postSchemaChange(IOutput $output, \Closure $schemaClosure, array $options) {
+	}
 }

@@ -22,7 +22,7 @@
  */
 namespace OCA\Files_External_Ethswarm\Storage;
 
-trait BeeSwarmTrait  {
+trait BeeSwarmTrait {
 
 	/** @var string */
 	protected $ip;
@@ -109,8 +109,7 @@ trait BeeSwarmTrait  {
 		$curl = $this->setCurl($url_endpoint);
 
 		$fh = fopen($tmpfile, 'r');
-		if ($fh === false || !is_resource($fh))
-		{
+		if ($fh === false || !is_resource($fh)) {
 			throw new \Exception("Failed to open temporary file $tmpfile");
 		}
 
@@ -122,12 +121,12 @@ trait BeeSwarmTrait  {
 		curl_setopt($curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
 		curl_setopt($curl, CURLOPT_VERBOSE, true);
 
-		curl_setopt($curl, CURLOPT_HTTPHEADER, array(
+		curl_setopt($curl, CURLOPT_HTTPHEADER, [
 			'swarm-postage-batch-id: ' . $this->stampBatchId,
 			'Content-Type: ' . $mimetype,
 			($this->isEncrypted ? 'Swarm-Encrypt: true' : ''),
 			($this->isBasicAuth ? $this->addBasicAuthHeaders($this->username, $this->password) : '')
-		));
+		]);
 
 		$output = curl_exec($curl);
 		$this->checkCurlResult($curl, $output);
@@ -141,17 +140,17 @@ trait BeeSwarmTrait  {
 		$url_endpoint .= "?name=logo_meta.png"; // . basename($uploadpath);
 		$curl = $this->setCurl($url_endpoint);
 
-		curl_setopt($curl, CURLOPT_HTTPHEADER, array(
+		curl_setopt($curl, CURLOPT_HTTPHEADER, [
 			'swarm-postage-batch-id: ' . $this->stampBatchId,
 			'Content-Type: application/octet-stream',	// this is necessary, otherwise produces server error 500: "could not store directory". File can then be Open or Save in browser.
 			($this->isEncrypted ? 'Swarm-Encrypt: true' : '')
-			 ));
+		]);
 		curl_setopt($curl, CURLOPT_POST, true);
 
 		// Create a CURLFile object
 		$cfile = curl_file_create($tmppath); //,'image/jpeg','mytest');
 		// Assign POST data
-		$post_data = array('file=' => $cfile);
+		$post_data = ['file=' => $cfile];
 
 		curl_setopt($curl, CURLOPT_POSTFIELDS, $post_data);
 
@@ -170,9 +169,9 @@ trait BeeSwarmTrait  {
 
 		$curl = $this->setCurl($url_endpoint);
 
-		curl_setopt($curl, CURLOPT_HTTPHEADER, array(
-		  	'Content-Type: application/octet-stream',
-		  	 ));
+		curl_setopt($curl, CURLOPT_HTTPHEADER, [
+			'Content-Type: application/octet-stream',
+		]);
 
 		curl_setopt($curl, CURLOPT_HEADER, true);
 		$output = curl_exec($curl);
@@ -189,18 +188,17 @@ trait BeeSwarmTrait  {
 		$context = null;
 		if ($this->isBasicAuth) {
 			$hdr = $this->addBasicAuthHeaders($this->username, $this->password);
-			$opts = array(
-				'http'=>array(
-					'method'=>"GET",
-					'header'=>$hdr
-				)
-				);
-				$context = stream_context_create($opts);
+			$opts = [
+				'http' => [
+					'method' => "GET",
+					'header' => $hdr
+				]
+			];
+			$context = stream_context_create($opts);
 		}
 		$output = fopen($url_endpoint, 'r', false, $context);
 
-		if (!$output)
-		{
+		if (!$output) {
 			fclose($output);
 			throw new \Exception("Unable to get file $path from swarm");
 		}
@@ -219,15 +217,14 @@ trait BeeSwarmTrait  {
 		$curl = $this->setCurl($url_endpoint);
 
 		curl_setopt($curl, CURLOPT_HEADER, false);
-		curl_setopt($curl, CURLOPT_HTTPHEADER, array(
+		curl_setopt($curl, CURLOPT_HTTPHEADER, [
 			($this->isBasicAuth ? $this->addBasicAuthHeaders($this->username, $this->password) : '')
-		));
+		]);
 		$output = curl_exec($curl);
 		$this->checkCurlResult($curl, $output);
 		curl_close($curl);
 
-		if (trim($output) === self::$CONNECTIONSTATUS)
-		{
+		if (trim($output) === self::$CONNECTIONSTATUS) {
 			return true;
 		}
 		return false;

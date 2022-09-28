@@ -31,35 +31,33 @@ use OCA\Files_External\Lib\DefinitionParameter;
 use OCA\Files_External\Lib\StorageConfig;
 use OCP\IUser;
 
-class BeeSwarm extends Backend
-{
-    /**
-     * ethswarm constructor.
-     * @param IL10N $l
-     */
-    public function __construct(IL10N $l) {
-        $this
-            ->setIdentifier('files_external_ethswarm')
-            ->addIdentifierAlias('\OC\Files\External_Storage\BeeSwarm') // legacy compat
-            ->setStorageClass('\OCA\Files_External_Ethswarm\Storage\BeeSwarm')
-            ->setText($l->t('Swarm'))
-            ->addParameters([
+class BeeSwarm extends Backend {
+	/**
+	 * ethswarm constructor.
+	 * @param IL10N $l
+	 */
+	public function __construct(IL10N $l) {
+		$this
+			->setIdentifier('files_external_ethswarm')
+			->addIdentifierAlias('\OC\Files\External_Storage\BeeSwarm') // legacy compat
+			->setStorageClass('\OCA\Files_External_Ethswarm\Storage\BeeSwarm')
+			->setText($l->t('Swarm'))
+			->addParameters([
 				(new DefinitionParameter('ip', $l->t('URL')))->setTooltip($l->t("Add http:// or https:// at the start of the parameter")),
 				(new DefinitionParameter('port', $l->t('API Port')))->setTooltip($l->t("The API-endpoint port that exposes all functionality with the Swarm network. By default, it runs on port 1633")),
 				(new DefinitionParameter('debug_api_port', $l->t('Debug API Port')))->setTooltip($l->t("The Debug API exposes functionality to inspect the state of your Bee node while it is running.  By default, it runs on port 1635")),
 			])
 			->addAuthScheme(AuthMechanism::SCHEME_NULL)
 			->addAuthScheme(HttpBasicAuth::SCHEME_HTTP_BASIC);
-            //->addCustomJs("../../../$appWebPath/js/beeswarm");
-    }
+		//->addCustomJs("../../../$appWebPath/js/beeswarm");
+	}
 
 	public function manipulateStorageConfig(StorageConfig &$storage, IUser $user = null) {
 		$auth = $storage->getAuthMechanism();
 
-		if ($auth->getScheme() != HttpBasicAuth::SCHEME_HTTP_BASIC ) {
+		if ($auth->getScheme() != HttpBasicAuth::SCHEME_HTTP_BASIC) {
 			$storage->setBackendOption('user', '');
 			$storage->setBackendOption('password', '');
 		}
 	}
 }
-
