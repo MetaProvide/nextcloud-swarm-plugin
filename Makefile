@@ -6,10 +6,13 @@ app_id=files_external_ethswarm
 build_directory=$(CURDIR)/build
 temp_build_directory=$(build_directory)/temp
 build_tools_directory=$(CURDIR)/build/tools
+cert_directory=$(HOME)/.nextcloud/certificates
 
 all: dev-setup lint build-js-production
 
 release: npm-init build-js-production build-tarball
+
+appstore: npm-init build-js-production build-appstore-tarball
 
 dev-setup: clean-dev composer npm-init
 
@@ -105,4 +108,43 @@ build-tarball:
 	--exclude="webpack.config.js" \
 	../$(app_name)/ $(temp_build_directory)/$(app_id)
 	tar czf $(build_directory)/$(app_name).tar.gz \
+		-C $(temp_build_directory) $(app_id)
+
+build-appstore-tarball:
+	rm -rf $(build_directory)
+	mkdir -p $(temp_build_directory)
+	rsync -a \
+	--exclude=".git" \
+	--exclude=".github" \
+	--exclude=".vscode" \
+	--exclude="build" \
+	--exclude="dev-environment" \
+	--exclude="docker" \
+	--exclude="node_modules" \
+	--exclude="vendor" \
+	--exclude=".editorconfig" \
+	--exclude=".eslintrc.js" \
+	--exclude=".gitignore" \
+	--exclude=".php_cs.cache" \
+	--exclude=".php_cs.dist" \
+	--exclude=".prettierignore" \
+	--exclude=".prettierrc.json" \
+	--exclude="babel.config.js" \
+	--exclude="composer.json" \
+	--exclude="composer.lock" \
+	--exclude="docker-compose.yaml" \
+	--exclude="Makefile" \
+	--exclude="package-lock.json" \
+	--exclude="package.json" \
+	--exclude="stylelint.config.js" \
+	--exclude="webpack.config.js" \
+	../$(app_id)/ $(temp_build_directory)/$(app_id)
+	@if [ -f $(cert_directory)/$(app_id).key ]; then \
+		echo "Signing app files…"; \
+		php ../occ integrity:sign-app \
+			--privateKey=$(cert_directory)/$(app_id).key\
+			--certificate=$(cert_directory)/$(app_id).crt\
+			--path=$(temp_build_directory)/$(app_id); \
+	fi
+	tar czf $(build_directory)/$(app_id).tar.gz \
 		-C $(temp_build_directory) $(app_id)
