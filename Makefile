@@ -96,7 +96,7 @@ build-tarball:
 	--exclude=".eslintrc.js" \
 	--exclude=".gitignore" \
 	--exclude=".php_cs.cache" \
-	--exclude=".php_cs.dist" \
+	--exclude=".php-cs-fixer.dist.php" \
 	--exclude=".prettierignore" \
 	--exclude=".prettierrc.json" \
 	--exclude="babel.config.js" \
@@ -130,7 +130,7 @@ build-appstore-tarball:
 	--exclude=".eslintrc.js" \
 	--exclude=".gitignore" \
 	--exclude=".php_cs.cache" \
-	--exclude=".php_cs.dist" \
+	--exclude=".php-cs-fixer.dist.php" \
 	--exclude=".prettierignore" \
 	--exclude=".prettierrc.json" \
 	--exclude="babel.config.js" \
