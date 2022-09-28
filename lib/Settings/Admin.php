@@ -25,7 +25,6 @@ namespace OCA\Files_External_Ethswarm\Settings;
 use OCA\Files_External\Service\BackendService;
 use OCA\Files_External\Service\GlobalStoragesService;
 use OCP\AppFramework\Http\TemplateResponse;
-use OCP\AppFramework\Http\ContentSecurityPolicy;
 use OCP\IConfig;
 use OCP\Settings\ISettings;
 use OCP\Util;
@@ -61,9 +60,8 @@ class Admin implements ISettings {
 		// Get Mount settings
 		$mounts_json = $this->config->getAppValue($this->appName,"storageconfig","");	//default
 		$mounts = json_decode($mounts_json,  true);
-		if (!is_array($mounts))
-		{
-			$mounts=[];
+		if (!is_array($mounts)) {
+			$mounts = [];
 		}
 		// remove configurations that are no longer in Storages
 		foreach ($mounts as $key => $mount) {
@@ -94,14 +92,14 @@ class Admin implements ISettings {
 			}
 
 			$batcharray = [];
-			foreach($batches["stamps"] as $batch) {
+			foreach ($batches["stamps"] as $batch) {
 				$newbatch = [
 					"batchID" => $batch["batchID"],
 					"amount" => $batch["amount"],
 					"batchTTL" => $batch["batchTTL"],
-					"isActive" => ( $batch["batchID"] === $batchId ? true : false),
-					"isDisabled" => ( $batch["batchID"] === $batchId ? true : false),
-					"isUsable" => ( $batch["usable"]),
+					"isActive" => ($batch["batchID"] === $batchId ? true : false),
+					"isDisabled" => ($batch["batchID"] === $batchId ? true : false),
+					"isUsable" => ($batch["usable"]),
 				];
 				$batcharray[] = $newbatch;
 			}
@@ -164,8 +162,7 @@ class Admin implements ISettings {
 		curl_close($curl);
 		if (isset($response_data["batchTTL"])) {
 			return $response_data["batchTTL"];
-		}
-		else if (isset($response_data["message"])) {
+		} elseif (isset($response_data["message"])) {
 			return $response_data["message"];
 		}
 		return null;
@@ -182,8 +179,7 @@ class Admin implements ISettings {
 		curl_close($curl);
 		if (isset($response_data["totalBalance"])) {
 			return $response_data["totalBalance"];
-		}
-		else if (isset($response_data["message"])) {
+		} elseif (isset($response_data["message"])) {
 			return $response_data["message"];
 		}
 		return null;
@@ -205,7 +201,7 @@ class Admin implements ISettings {
 		if (!empty($urlOptions['user']) && !empty($urlOptions['password'])) {
 			$base64EncodedAuth = base64_encode($urlOptions['user'] . ':' . $urlOptions['password']);
 			$header = 'Authorization: Basic ' . $base64EncodedAuth;
-			curl_setopt($curl, CURLOPT_HTTPHEADER, array($header));
+			curl_setopt($curl, CURLOPT_HTTPHEADER, [$header]);
 		}
 		return $curl;
 	}

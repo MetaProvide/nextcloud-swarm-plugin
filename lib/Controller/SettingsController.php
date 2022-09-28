@@ -32,8 +32,8 @@ use OCP\IRequest;
 
 class SettingsController extends Controller {
 
-    /** @var string */
-    protected $appName;
+	/** @var string */
+	protected $appName;
 
 	/** @var IConfig */
 	private $config;
@@ -64,7 +64,7 @@ class SettingsController extends Controller {
 
 	/**
 	 * @NoCSRFRequired
-     * @NoAdminRequired
+	 * @NoAdminRequired
 	 * Save the storage config settings
 	 */
 	public function save(): void {
