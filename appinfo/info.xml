@@ -4,7 +4,7 @@
     <name>External Storage: Swarm</name>
     <summary>Integrate Bee swarm as an external storage</summary>
     <description><![CDATA[The BeeSwarm Backend allows administrators and users to add their own Bee node as folders in Nextcloud. This offers an easy way for users to access the Bee node data in the same place where they find their other files.]]></description>
-    <version>0.0.4</version>
+    <version>0.1.0</version>
     <licence>agpl</licence>
     <author>MetaProvide</author>
     <namespace>Files_External_Ethswarm</namespace>
@@ -27,7 +27,7 @@
 
     </screenshot>
     <dependencies>
-        <nextcloud min-version="22.0" max-version="23.0"/>
+        <nextcloud min-version="23.0" max-version="24.0"/>
     </dependencies>
 	<settings>
 		<admin>OCA\Files_External_Ethswarm\Settings\Admin</admin>
