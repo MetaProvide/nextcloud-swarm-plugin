@@ -25,7 +25,6 @@ namespace OCA\Files_External_Ethswarm\Storage;
 
 use Exception;
 use OCP\Constants;
-use OCA\Files_External_Ethswarm\Storage\BeeSwarmTrait;
 use OCP\Files\IMimeTypeLoader;
 use OCA\Files_External_Ethswarm\Db\SwarmFileMapper;
 use OCP\Files\Config\IUserMountCache;
@@ -34,11 +33,10 @@ use OCP\IConfig;
 use OCP\ILogger;
 use Sabre\DAV\Exception\BadRequest;
 
-class BeeSwarm extends \OC\Files\Storage\Common
-{
+class BeeSwarm extends \OC\Files\Storage\Common {
 	use BeeSwarmTrait;
 
-	const APP_NAME = 'files_external_ethswarm';
+	public const APP_NAME = 'files_external_ethswarm';
 
 	/** @var int */
 	protected $storageId;
@@ -68,8 +66,7 @@ class BeeSwarm extends \OC\Files\Storage\Common
 	/** @var \OC\Files\Cache\Cache */
 	private $cacheHandler;
 
-	public function __construct($params)
-	{
+	public function __construct($params) {
 		$this->parseParams($params);
 		$this->id = 'ethswarm::' . $this->ip . ':' . $this->port;
 		$this->storageId = $this->getStorageCache()->getNumericId();
@@ -90,8 +87,7 @@ class BeeSwarm extends \OC\Files\Storage\Common
 			$this->config = \OC::$server->get(IConfig::class);
 			$configSettings = $this->config->getAppValue(SELF::APP_NAME,"storageconfig","");	//default
 			$mounts = json_decode($configSettings, true);
-			if (is_array($mounts))
-			{
+			if (is_array($mounts)) {
 				$mountIds = array_column($mounts, 'mount_id');
 				$key = array_search($mountId, $mountIds);
 				if (!empty($key) || $key === 0) {
@@ -107,13 +103,11 @@ class BeeSwarm extends \OC\Files\Storage\Common
 		return true;
 	}
 
-	public function getId()
-	{
+	public function getId() {
 		return $this->id;
 	}
 
-	public function test()
-	{
+	public function test() {
 		if ((!str_starts_with(strtolower($this->api_url), "http://")) && (!str_starts_with(strtolower($this->api_url), "https://"))) {
 			throw new Exception("The URL must start with http:// or https://");
 		}
@@ -124,7 +118,7 @@ class BeeSwarm extends \OC\Files\Storage\Common
 	public function file_exists($path) {
 		if ($path === '' || $path === '/' || $path === '.') {
 			// Return true always the creation of the root folder
-		 	return true;
+			return true;
 		}
 		return false;
 	}
@@ -145,14 +139,13 @@ class BeeSwarm extends \OC\Files\Storage\Common
 	 * @return string
 	 */
 	public function getETag($path) {
-	 	return null;
+		return null;
 	}
 
 	/**
 	 * @return bool
 	 */
-	public function needsPartFile()
-	{
+	public function needsPartFile() {
 		return false;
 	}
 
@@ -171,22 +164,20 @@ class BeeSwarm extends \OC\Files\Storage\Common
 			$data['storage_mtime'] = time();
 			$data['size'] = 0; //unknown
 			$data['etag'] = null;
-		}
-		else
-        {
+		} else {
 			// Get record from table
 			$swarmFile = $this->filemapper->find($path, $this->storageId);
-            $data['name'] = $path;
-            $data['permissions'] = Constants::PERMISSION_READ;
+			$data['name'] = $path;
+			$data['permissions'] = Constants::PERMISSION_READ;
 			// Set mimetype as a string, get by using its ID (int)
 			$mimetypeId = $swarmFile->getMimetype();
-            $data['mimetype'] = $this->mimeTypeHandler->getMimetypeById($mimetypeId);
-            $data['mtime'] = time();
-            $data['storage_mtime'] = $swarmFile->getStorageMtime();
-            $data['size'] = $swarmFile->getSize();
-            $data['etag'] = null;
-        }
-	 	return $data;
+			$data['mimetype'] = $this->mimeTypeHandler->getMimetypeById($mimetypeId);
+			$data['mtime'] = time();
+			$data['storage_mtime'] = $swarmFile->getStorageMtime();
+			$data['size'] = $swarmFile->getSize();
+			$data['etag'] = null;
+		}
+		return $data;
 	}
 
 	public function mkdir($path) {
@@ -263,8 +254,7 @@ class BeeSwarm extends \OC\Files\Storage\Common
 	/**
 	 * @return bool
 	 */
-	public function isUpdatable($path)
-	{
+	public function isUpdatable($path) {
 		return true;
 	}
 
@@ -273,7 +263,6 @@ class BeeSwarm extends \OC\Files\Storage\Common
 	}
 
 	public function fopen($path, $mode) {
-
 		$swarmFile = $this->filemapper->find($path, $this->storageId);
 		$reference = $swarmFile->getSwarmReference();
 
@@ -287,7 +276,6 @@ class BeeSwarm extends \OC\Files\Storage\Common
 			case 'w+':	// Open for reading and writing
 			case 'wb':
 			case 'wb+':
-				// no break
 			case 'a':
 			case 'ab':
 			case 'r+':	// Open for reading and writing. place the file pointer at the beginning of the file
@@ -308,13 +296,13 @@ class BeeSwarm extends \OC\Files\Storage\Common
 		return true;
 	}
 
-	public function file_get_contents($path)	{
+	public function file_get_contents($path) {
 	}
 
-	public function file_put_contents($path, $data)	{
+	public function file_put_contents($path, $data) {
 	}
 
-	public function getDirectDownload($path)	{
+	public function getDirectDownload($path) {
 	}
 
 	/* Enabling this function causes a fatal exception "Call to a member function getId() on null /var/www/html/lib/private/Files/Mount/MountPoint.php - line 276: OC\Files\Cache\Wrapper\CacheWrapper->getId("")
@@ -345,33 +333,29 @@ class BeeSwarm extends \OC\Files\Storage\Common
 		$mimetype = mime_content_type($tmpFile);
 
 		try {
-
 			$result = $this->upload_stream($path, $stream, $tmpFile, $mimetype, $tmpFilesize);
 			$reference = (isset($result["reference"]) ? $result['reference'] : null);
 
-			if (!isset($reference))
-			{
+			if (!isset($reference)) {
 				throw new BadRequest("Failed to upload file to " . $this->id . ": " . $result['message']);
 			}
-		}
-		catch (\Exception $e) {
+		} catch (\Exception $e) {
 			throw new \Exception($e->getMessage());
-		}
-		finally {
-		  	fclose($stream);
+		} finally {
+			fclose($stream);
 		}
 
 		// Write metadata to table
 		$uploadfiles = [
-		"name" => $path,
-		"permissions" => Constants::PERMISSION_READ,
-		"mimetype" => $this->mimeTypeHandler->getId($mimetype),
-		"mtime" => time(),
-		"storage_mtime" => time(),
-		"size" => $tmpFilesize,
-		"etag" => null,
-		"reference" => $reference,
-		"storage" => $this->storageId,
+			"name" => $path,
+			"permissions" => Constants::PERMISSION_READ,
+			"mimetype" => $this->mimeTypeHandler->getId($mimetype),
+			"mtime" => time(),
+			"storage_mtime" => time(),
+			"size" => $tmpFilesize,
+			"etag" => null,
+			"reference" => $reference,
+			"storage" => $this->storageId,
 		];
 		$this->filemapper->createFile($uploadfiles);
 

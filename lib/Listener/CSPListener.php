@@ -25,9 +25,7 @@ declare(strict_types=1);
 
 namespace OCA\Files_External_Ethswarm\Listener;
 
-use OCA\Files_External_Ethswarm\Config;
 use OCP\IConfig;
-use OCA\Files_External_Ethswarm\Storage\BeeSwarm;
 use OCP\AppFramework\Http\ContentSecurityPolicy;
 use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
@@ -35,8 +33,7 @@ use OCP\Security\CSP\AddContentSecurityPolicyEvent;
 use OCA\Files_External\Service\GlobalStoragesService;
 
 class CSPListener implements IEventListener {
-
-	const APP_NAME = 'files_external_ethswarm';
+	public const APP_NAME = 'files_external_ethswarm';
 
 	/** @var GlobalStoragesService */
 	private $globalStoragesService;
@@ -65,4 +62,3 @@ class CSPListener implements IEventListener {
 		$event->addPolicy($csp);
 	}
 }
-?>
