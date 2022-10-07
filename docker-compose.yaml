@@ -29,8 +29,7 @@ services:
       MYSQL_PASSWORD: nextcloud
 
   nextcloud:
-    #build: ./docker/nextcloud
-    image: nextcloud:23
+    build: ./docker/nextcloud
     restart: always
     depends_on:
       - mariadb
