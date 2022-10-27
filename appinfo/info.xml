@@ -76,7 +76,7 @@ Once setup and configured, the Bee node is ready to use.
 - Once uploaded, it can be viewed internally or downloaded. It can also be copied to another storage.
 - Files from another Nextcloud storage can also be copied/moved to the Bee node.
     ]]></description>
-    <version>0.1.3</version>
+    <version>0.1.4</version>
     <licence>agpl</licence>
     <author>MetaProvide</author>
     <namespace>Files_External_Ethswarm</namespace>
@@ -96,4 +96,9 @@ Once setup and configured, the Bee node is ready to use.
 		<admin>OCA\Files_External_Ethswarm\Settings\Admin</admin>
 		<admin-section>OCA\Files_External_Ethswarm\Settings\Section</admin-section>
 	</settings>
+	<sabre>
+		<plugins>
+			<plugin>OCA\Files_External_Ethswarm\Sabre\PropfindPlugin</plugin>
+		</plugins>
+	</sabre>
 </info>

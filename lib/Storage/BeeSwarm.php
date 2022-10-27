@@ -171,13 +171,14 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 			$data['permissions'] = Constants::PERMISSION_READ;
 			// Set mimetype as a string, get by using its ID (int)
 			$mimetypeId = $swarmFile->getMimetype();
-			$data['mimetype'] = $this->mimeTypeHandler->getMimetypeById($mimetypeId);
-			$data['mtime'] = time();
-			$data['storage_mtime'] = $swarmFile->getStorageMtime();
-			$data['size'] = $swarmFile->getSize();
-			$data['etag'] = null;
-		}
-		return $data;
+            $data['mimetype'] = $this->mimeTypeHandler->getMimetypeById($mimetypeId);
+            $data['mtime'] = time();
+            $data['storage_mtime'] = $swarmFile->getStorageMtime();
+            $data['size'] = $swarmFile->getSize();
+            $data['etag'] = null;
+			$data['swarm_ref'] = $swarmFile->getSwarmReference();
+        }
+	 	return $data;
 	}
 
 	public function mkdir($path) {
