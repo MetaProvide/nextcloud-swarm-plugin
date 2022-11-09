@@ -68,7 +68,7 @@ class Application extends App implements IBootstrap, IBackendProvider, IAuthMech
 		});
 
 		Util::addScript(SELF::APP_ID, "fileactions");
-		Util::addScript(SELF::APP_ID, 'filewebdav');
+		//Util::addScript(SELF::APP_ID, 'filewebdav');
 
 		$this->getAuthMechanisms();
 	}

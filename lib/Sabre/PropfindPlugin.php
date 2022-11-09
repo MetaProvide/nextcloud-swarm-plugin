@@ -75,7 +75,6 @@ class PropfindPlugin extends ServerPlugin {
 		if (!str_starts_with($mountpoint, "ethswarm")) {
 			return "";
 		}
-		//$class = \OC::$server->get(IEthswarm::class);
 		$class = $this->EthswarmService;
 		$propFind->handle(self::ETHSWARM_FILEREF, function () use ($class, $storageid, $filename)
 		{
