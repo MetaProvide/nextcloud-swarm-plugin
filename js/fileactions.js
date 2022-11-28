@@ -1,9 +1,21 @@
 //const { debug } = require("webpack");
-$(document).ready(function () {
+$(window).on('load', function () {
+	//$(document).ready(function () {
 	var actionSwarm = {
 		init: function () {
 			// Logic to show/hide the menu could be put here in this if statement?
-			if (1 == 1) {
+			//console.log(OCA.Files.FileList);
+			mountdir = new URLSearchParams(location.search).get("dir").replace("/", "");
+			console.log("mountdir=" + mountdir);
+			//console.log("ms=" + OCA.Files_External.StatusManager.mountStatus);
+			//console.log("issw=" + OCA.Files_External.StatusManager.mountStatus["Bee-Remote"].backend);
+			//console.log("issw2=" + OCA.Files_External.StatusManager.getMountPointListElement(mountdir).backend);
+			console.log("issw3=" + OCA.Files_External.StatusManager.getMountPointListElement("Bee-Remote"));
+			console.log("issw4=" + JSON.stringify(OCA.Files_External.StatusManager.mountPointList));
+			//isSwarmMount = (mountdir && OCA.Files_External.StatusManager.getMountPointListElement(mountdir).backend == "files_external_ethswarm");
+			isSwarmMount = true;
+
+			if (isSwarmMount) {
 				OCA.Files.fileActions.registerAction({
 					name: 'EthswarmCopyRef',
 					displayName: t('files_external_ethswarm', 'Copy Swarm reference'),
@@ -18,23 +30,6 @@ $(document).ready(function () {
 						// if (context.fileInfoModel.attributes.mountType && !context.fileInfoModel.attributes.mountType.startsWith("external")) {
 						// 	return null;
 						// }
-					},
-					shouldRender(context) {
-						msg = "context=";
-						alert(msg);
-						for (let property in context) {
-							msg = msg + (property + " = " + context[property]);
-							msg = msg + "; "
-						}
-						debug.log("msg1=" + msg);
-						console.debug("msg1=" + msg);
-						msg = "context.$file=";
-						for (let property in context.$file) {
-							msg = msg + (property + " = " + context[property]);
-							msg = msg + "; "
-						}
-						debug.log("msg2=" + msg);
-						return true;
 					},
 					actionHandler: function (filename, context) {
 						msg = "context.fileInfoModel.attributes=";
@@ -63,11 +58,11 @@ $(document).ready(function () {
 								navigator.clipboard.writeText(swarmref).then(
 									() => {
 										/* clipboard successfully set */
-										OC.dialogs.alert(t('files_external_ethswarm', 'Clipboard copied: ' + swarmref));
+										OC.dialogs.info(t('files_external_ethswarm', 'Copied: ' + swarmref), t('files_external_ethswarm', 'Swarm reference to clipboard'));
 									},
 									() => {
 										/* clipboard write failed */
-										OC.dialogs.alert(t('files_external_ethswarm', 'Unable to copy the reference:' + swarmref));
+										OC.dialogs.info(t('files_external_ethswarm', 'Unable to copy:' + swarmref), t('files_external_ethswarm', 'Swarm reference to clipboard'));
 									}
 								);
 							}
@@ -77,5 +72,24 @@ $(document).ready(function () {
 			}
 		},
 	}
+	// mountdir = new URLSearchParams(location.search).get("dir").replace("/", "");
+	// mountpoint = OCA.Files_External.StatusManager.getMountPointListElement(mountdir).backend;
 	actionSwarm.init();
+
+	if (!OCA?.Sharing?.ShareTabSections) {
+		return
+	}
+	import(/* webpackChunkName: "sharing" */'./SharingSidebarApp.js').then((Module) => {
+		OCA.Sharing.ShareTabSections.registerSection((el, fileInfo) => {
+			if (fileInfo.mountType !== 'external') {
+				return
+			}
+			return Module.default
+		})
+	})
 });
+
+// window.addEventListener('DOMContentLoaded', () => {
+// 	console.log("issw3=" + OCA.Files_External.StatusManager); //.getMountPointListElement("Bee-Remote"));
+// 	alert("here");
+// })

@@ -18,39 +18,26 @@
 				<a href="externalstorages">"External Storage"</a> Administration
 				section.
 			</div>
-			<div
-				v-for="(mount, mountidx) in parsedMounts"
-				:key="mount.mount_id"
-			>
+			<div v-for="(mount, mountidx) in parsedMounts" :key="mount.mount_id">
 				<div @click="setSaveMessage(mountidx, '')">
 					<h3>
 						Swarm Node: <b>{{ mount.mount_name }}</b>
 						<Actions>
-							<ActionButton
-								icon="icon-caret-dark"
-								@click="showNode(mountidx)"
-							></ActionButton>
+							<ActionButton icon="icon-caret-dark" @click="showNode(mountidx)"></ActionButton>
 						</Actions>
 					</h3>
 
 					<div v-if="toggleNode[mountidx]">
 						<div>
-							<CheckboxRadioSwitch
-								:checked.sync="mount.isEncrypted"
-								type="switch"
-								@update:checked="toggleEncryption(mountidx)"
-								>Enable encryption</CheckboxRadioSwitch
-							>
+							<CheckboxRadioSwitch :checked.sync="mount.isEncrypted" type="switch"
+								@update:checked="toggleEncryption(mountidx)">
+								Enable encryption
+							</CheckboxRadioSwitch>
 						</div>
 
 						<div>
 							Available chequebook balance (bzz):
-							<input
-								type="text"
-								:value="mount.chequebalance"
-								maxlength="200"
-								readonly
-							/>
+							<input type="text" :value="mount.chequebalance" maxlength="200" readonly />
 						</div>
 
 						<div><u>Stamp batches:</u></div>
