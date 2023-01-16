@@ -23,14 +23,10 @@ declare(strict_types=1);
  */
 namespace OCA\Files_External_Ethswarm\Sabre;
 
-use OCA\DAV\Connector\Sabre\FilesPlugin;
-use OCP\IPreview;
 use Sabre\DAV\INode;
 use Sabre\DAV\PropFind;
 use Sabre\DAV\Server;
 use Sabre\DAV\ServerPlugin;
-use OCA\Files_External_Ethswarm\Storage\BeeSwarm;
-use OCA\Files_External_Ethswarm\Sabre\IEthswarm;
 use OCA\Files_External_Ethswarm\Service\EthswarmService;
 
 class PropfindPlugin extends ServerPlugin {
@@ -39,23 +35,11 @@ class PropfindPlugin extends ServerPlugin {
 	/** @var Server */
 	private $server;
 
-	/** @var BeeSwarm */
-	private $bee;
-
-	/** @var IEthswarm */
-	private $IEthswarm;
-
 	/** @var EthswarmService */
 	private $EthswarmService;
 
-	public function __construct(EthswarmService $service) { //BeeSwarm $bee
-									// IEthswarm $iEthswarm
-		// $params = [];
-		// $this->bee = new BeeSwarm($params);
-		//$this->IEthswarm = $iSwarm;
+	public function __construct(EthswarmService $service) {
 		$this->EthswarmService = $service;
-		// $class = \OC::$server->get(IEthswarm::class);
-		// $this->IEthswarm = $class;
 	}
 
 	public function initialize(Server $server) {
