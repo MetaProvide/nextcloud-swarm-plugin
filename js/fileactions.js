@@ -1,10 +1,22 @@
 /*
- * Copyright (c) 2014
+ * @copyright Copyright (c) 2023, MetaProvide Holding EKF
  *
- * This file is licensed under the Affero General Public License version 3
- * or later.
+ * @author Ron Trevor <ecoron@proton.me>
  *
- * See the COPYING-README file.
+ * @license GNU AGPL version 3 or any later version
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 window.addEventListener('DOMContentLoaded', () => {
@@ -37,11 +49,11 @@ window.addEventListener('DOMContentLoaded', () => {
 							navigator.clipboard.writeText(swarmref).then(
 								() => {
 									/* clipboard successfully set */
-									OC.dialogs.info(t('files_external_ethswarm', 'Copied: ' + swarmref), t('files_external_ethswarm', 'Swarm reference to clipboard'));
+									OC.dialogs.info(t('files_external_ethswarm', 'The following Swarm reference has been copied to the clipboard: ') + swarmref, t('files_external_ethswarm', 'Swarm reference'));
 								},
 								() => {
 									/* clipboard write failed */
-									OC.dialogs.info(t('files_external_ethswarm', 'Unable to copy:' + swarmref), t('files_external_ethswarm', 'Swarm reference to clipboard'));
+									OC.dialogs.info(t('files_external_ethswarm', 'Unable to write to the clipboard, you can manually copy the Swarm reference below: ' + swarmref), t('files_external_ethswarm', 'Swarm reference'));
 								}
 							);
 						}
@@ -49,21 +61,9 @@ window.addEventListener('DOMContentLoaded', () => {
 				}
 			});
 		},
-		init: function (mountPointList) {
-			// Logic to show/hide the menu. Obtain querystring to determine storage name
-			if (!location.search) {
-				return;
-			}
-			mountdir = new URLSearchParams(location.search).get("dir").split('/')[1];
-			isSwarmMount = mountPointList?.find(el => el.mount_point == mountdir && el.backend == "files_external_ethswarm");
-			if (isSwarmMount) {
-				actionSwarm.registerMenu('all');
-			}
-		},
 	}
 	// For initial page load
 	if (OCA?.Files_External?.StatusManager) {
-		//OCA.Files_External.StatusManager.getMountPointList(actionSwarm.init);
 		OCA.Files_External.StatusManager.getMountPointList(actionSwarm.registerMenu('all'));
 	}
 });

@@ -54,6 +54,7 @@ Using the plugin, the main file operations that are available in Nextcloud are:
 -   Download and view files
 -   Copy/Move files from any External Storage to a Bee node
 -   Copy files from a Bee node to any External Storage
+-   View and copy the unique swarm reference to the clipboard for any file stored on a Bee node
 
 ### Settings
 
@@ -98,7 +99,11 @@ Once setup and configured, the Bee node is ready to use.
 
 ![Copy file](assets/images/swarm_CopyMove.png "Copy file")
 
-<em>Upload file to swarm in Nextcloud</em>
+-   Right-click on a swarm file to copy the swarm reference (or hash) to the clipboard. Alternatively click the 3 dots of the Actions menu and select the menu option "Copy swarm reference". The swarm reference is the unique address of the file on the swarm.
+
+![Copy swarm reference to clipboard](assets/images/swarm_Files_CopySwarmRef "Copy swarm reference to clipboard")
+
+<em>Copy swarm reference to clipboard</em>
 
 ## License
 
