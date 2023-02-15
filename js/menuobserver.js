@@ -31,7 +31,8 @@ window.addEventListener('DOMContentLoaded', () => {
 	}
 
 	// fileActionsMenu mutation observer
-	const fileActionsTargetNode = document.getElementById("filestable");
+	const fileActionsTargetNode = document.querySelector("#app-content-files > table.list-container");
+
 	const fileActionsConfig = { attributes: false, childList: true, subtree: true };
 	const fileActionsCallback = (mutationList, observer) => {
 		for (const mutation of mutationList) {

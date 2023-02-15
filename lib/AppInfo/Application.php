@@ -67,8 +67,11 @@ class Application extends App implements IBootstrap, IBackendProvider, IAuthMech
 			$backendService->registerAuthMechanismProvider($this);
 		});
 
-		Util::addScript(SELF::APP_ID, "fileactions");
-		Util::addScript(SELF::APP_ID, "menuobserver");
+		$eventDispatcher = \OC::$server->getEventDispatcher();
+		$eventDispatcher->addListener('OCA\Files::loadAdditionalScripts', function() {
+			script(SELF::APP_ID, 'fileactions');
+			script(SELF::APP_ID, 'menuobserver');
+		});
 
 		$this->getAuthMechanisms();
 	}
