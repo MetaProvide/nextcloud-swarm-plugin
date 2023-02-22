@@ -2,8 +2,7 @@
 	<AppContent>
 		<div class="section">
 			<h2 class="inlineblock">External Storage: Swarm</h2>
-			<a
-target="_blank" rel="noreferrer" class="icon-info" title="Open documentation"
+			<a target="_blank" rel="noreferrer" class="icon-info" title="Open documentation"
 				href="https://github.com/MetaProvide/nextcloud-swarm-plugin/"></a>
 			<p class="settings-hint">
 				View the current status of the Swarm node(s) configured in
@@ -25,8 +24,7 @@ target="_blank" rel="noreferrer" class="icon-info" title="Open documentation"
 
 					<div v-if="toggleNode[mountidx]">
 						<div>
-							<CheckboxRadioSwitch
-:checked.sync="mount.isEncrypted" type="switch"
+							<CheckboxRadioSwitch :checked.sync="mount.isEncrypted" type="switch"
 								@update:checked="toggleEncryption(mountidx)">Enable encryption</CheckboxRadioSwitch>
 						</div>
 
@@ -50,34 +48,28 @@ target="_blank" rel="noreferrer" class="icon-info" title="Open documentation"
 									</tr>
 								</thead>
 								<tbody>
-									<tr
-v-for="(
+									<tr v-for="(
 											batch, batchidx
 										) in mount.batches" :key="batchidx">
 										<td>
-											<input
-type="text" name="batchid" :value="batch.batchID" maxlength="200"
+											<input type="text" name="batchid" :value="batch.batchID" maxlength="200"
 												readonly />
 										</td>
 										<td>
-											<input
-type="text" name="bzz" :value="batch.amount" maxlength="200"
+											<input type="text" name="bzz" :value="batch.amount" maxlength="200"
 												readonly />
 										</td>
 										<td>
-											<input
-type="text" name="balance" :value="batch.batchTTL" maxlength="200"
+											<input type="text" name="balance" :value="batch.batchTTL" maxlength="200"
 												readonly />
 										</td>
 										<td>
-											<CheckboxRadioSwitch
-:checked.sync="batch.isUsable" :disabled="true"
+											<CheckboxRadioSwitch :checked.sync="batch.isUsable" :disabled="true"
 												type="switch" name="toggleUsableBatchName">
 											</CheckboxRadioSwitch>
 										</td>
 										<td>
-											<CheckboxRadioSwitch
-:checked.sync="batch.isActive" type="switch"
+											<CheckboxRadioSwitch :checked.sync="batch.isActive" type="switch"
 												name="toggleActiveBatchName" @update:checked="
 													toggleActiveBatch(
 														mountidx,
@@ -91,8 +83,7 @@ type="text" name="balance" :value="batch.batchTTL" maxlength="200"
 											<Actions>
 												<ActionButton :disabled="true" icon="icon-add">Top up (Bzz)
 												</ActionButton>
-												<ActionInput
-type="number" :editable="true" :value="batch.topUpValue"
+												<ActionInput type="number" :editable="true" :value="batch.topUpValue"
 													@update:value="
 														(x) =>
 															handleTopUpChange(
@@ -113,8 +104,7 @@ type="number" :editable="true" :value="batch.topUpValue"
 									</tr>
 									<tr>
 										<td colspan="6">
-											<input
-type="submit" :value="
+											<input type="submit" :value="
 												saveSettingsValue[mountidx]
 											" :disabled="
 	saveSettingsBtn[mountidx]
@@ -149,22 +139,19 @@ type="submit" :value="
 									<tbody>
 										<tr>
 											<td>
-												<input
-v-model="
+												<input v-model="
 													newBatchAmounts[
 													mountidx
 													]
 												" type="number" value="" maxlength="10" />
 											</td>
 											<td>
-												<input
-v-model="
+												<input v-model="
 													newBatchDepths[mountidx]
 												" type="number" value="" maxlength="17" />
 											</td>
 											<td>
-												<input
-type="submit" :disabled="
+												<input type="submit" :disabled="
 													newBatchBtnDisabled[
 													mountidx
 													]
@@ -182,6 +169,48 @@ type="submit" :disabled="
 								</table>
 							</form>
 						</div>
+
+						<div name="sectionline"></div>
+						<div><u>Upload swarm file to NextCloud:</u></div>
+						<div>
+							<form @submit.prevent>
+								<table>
+									<thead>
+										<tr>
+											<th>Swarm reference:</th>
+											<th>Filename:</th>
+											<th>&nbsp;</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr>
+											<td>
+												<input v-model="
+													uploadSwarmFileRef[
+													mountidx
+													]
+												" type="text" value="" maxlength="64" />
+											</td>
+											<td>
+												<input v-model="
+													uploadSwarmFilename[mountidx]
+												" type="text" value="" maxlength="100" />
+											</td>
+											<td>
+												<input type="submit" :disabled="
+													newBatchBtnDisabled[
+													mountidx
+													]
+												" value="Upload" @click="prevent" />&nbsp;&nbsp;&nbsp;{{
+	uploadSwarmLabel[mountidx]
+}}
+											</td>
+										</tr>
+									</tbody>
+								</table>
+							</form>
+						</div>
+
 						<div name="mainline"></div>
 					</div>
 				</div>
@@ -234,6 +263,9 @@ export default {
 			saveSettingsBtn: [],
 			saveSettingsLabel: [],
 			debugConsole: false, // set true to write to console.log, false to disable console.log
+			uploadSwarmFileRef: [],
+			uploadSwarmFilename: [],
+			uploadSwarmLabel: [],
 		};
 	},
 	computed: {},
@@ -262,6 +294,9 @@ export default {
 				console[methods[i]] = function () { };
 			}
 		}
+		this.uploadSwarmFileRef = Array(this.parsedMounts.length).fill("");
+		this.uploadSwarmFilename = Array(this.parsedMounts.length).fill("");
+		this.uploadSwarmLabel = Array(this.parsedMounts.length).fill("");
 	},
 	methods: {
 		getRequestOptions(authUser, authPassword) {
