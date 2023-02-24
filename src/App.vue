@@ -171,7 +171,7 @@
 						</div>
 
 						<div name="sectionline"></div>
-						<div><u>Upload swarm file to NextCloud:</u></div>
+						<div><u>Add a swarm file to NextCloud:</u></div>
 						<div>
 							<form @submit.prevent>
 								<table>
@@ -186,14 +186,14 @@
 										<tr>
 											<td>
 												<input v-model="
-													uploadSwarmFileRef[
+													addSwarmFileRef[
 													mountidx
 													]
-												" type="text" value="" maxlength="64" />
+												" type="text" value="" maxlength="64" name="addSwarmFileRef" />
 											</td>
 											<td>
 												<input v-model="
-													uploadSwarmFilename[mountidx]
+													addSwarmFilename[mountidx]
 												" type="text" value="" maxlength="100" />
 											</td>
 											<td>
@@ -201,8 +201,13 @@
 													newBatchBtnDisabled[
 													mountidx
 													]
-												" value="Upload" @click="prevent" />&nbsp;&nbsp;&nbsp;{{
-	uploadSwarmLabel[mountidx]
+												" value="Add" @click="
+	addToSwarm(
+		mountidx,
+		$event
+	)
+" />&nbsp;&nbsp;&nbsp;{{
+	addSwarmLabel[mountidx]
 }}
 											</td>
 										</tr>
@@ -262,10 +267,11 @@ export default {
 			saveSettingsValue: [],
 			saveSettingsBtn: [],
 			saveSettingsLabel: [],
-			debugConsole: false, // set true to write to console.log, false to disable console.log
-			uploadSwarmFileRef: [],
-			uploadSwarmFilename: [],
-			uploadSwarmLabel: [],
+			debugConsole: true, // set true to write to console.log, false to disable console.log
+			addSwarmFileRef: [],
+			addSwarmFilename: [],
+			addSwarmLabel: [],
+			addSwarmBtnDisabled: [],
 		};
 	},
 	computed: {},
@@ -294,9 +300,11 @@ export default {
 				console[methods[i]] = function () { };
 			}
 		}
-		this.uploadSwarmFileRef = Array(this.parsedMounts.length).fill("");
-		this.uploadSwarmFilename = Array(this.parsedMounts.length).fill("");
-		this.uploadSwarmLabel = Array(this.parsedMounts.length).fill("");
+		this.addSwarmFileRef = Array(this.parsedMounts.length).fill("");
+		this.addSwarmFilename = Array(this.parsedMounts.length).fill("");
+		this.addSwarmLabel = Array(this.parsedMounts.length).fill("");
+		this.addSwarmBtnDisabled = Array(this.parsedMounts.length).fill(false);
+
 	},
 	methods: {
 		getRequestOptions(authUser, authPassword) {
@@ -497,6 +505,66 @@ export default {
 			newsaveSettingsValue[mountidx] = message;
 			this.saveSettingsValue = newsaveSettingsValue;
 		},
+		async addToSwarm(mountidx, evt) {
+			if (evt) {
+				evt.preventDefault();
+			}
+			let newaddSwarmLabel = [...this.addSwarmLabel];
+			newaddSwarmLabel[mountidx] = "Status...";
+			this.addSwarmLabel = newaddSwarmLabel;
+
+			this.addSwarmBtnDisabled[mountidx] = true;
+			console.log(
+				"ref,name=" +
+				this.addSwarmFileRef[mountidx] +
+				"," +
+				this.addSwarmFilename[mountidx]
+			);
+
+			newaddSwarmLabel = [...this.addSwarmLabel];
+
+			const url = generateUrl("/apps/files_external_ethswarm/addFileToSwarm");
+			const addFileToSwarm = ({
+				mount_id: this.parsedMounts[mountidx].mount_id,
+				mount_name: this.parsedMounts[mountidx].mount_name,
+				swarmfileref: this.addSwarmFileRef[mountidx],
+				swarmfilename: this.addSwarmFilename[mountidx],
+				ip: this.parsedMounts[mountidx].mount_urloptions.ip,
+				port: this.parsedMounts[mountidx].mount_urloptions.port,
+				debug_api_port: this.parsedMounts[mountidx].mount_urloptions.debug_api_port,
+			});
+			console.log(
+				"json=" +
+				JSON.stringify(this.parsedMounts) +
+				";len=" +
+				this.parsedMounts.length +
+				";url=" +
+				url +
+				";newparse=" +
+				JSON.stringify(addFileToSwarm)
+			);
+			await axios
+				.post(url, {
+					addswarmParam: JSON.stringify(addFileToSwarm),
+				})
+				.then((response) => {
+					newaddSwarmLabel[mountidx] = "Success: Swarm reference added!";
+					this.addSwarmLabel = newaddSwarmLabel;
+				})
+				.catch((error) => {
+					console.log(
+						"response err=" +
+						error.response +
+						";mesg=" +
+						error.response.data.message +
+						"error.msg=" +
+						error.message
+					);
+					newaddSwarmLabel[mountidx] = "Failed to add";
+					this.addSwarmLabel = newaddSwarmLabel;
+				});
+			this.addSwarmBtnDisabled[mountidx] = false;
+		},
 	},
 };
 /* eslint-enable no-console */
@@ -504,6 +572,10 @@ export default {
 
 <style scoped>
 input[type="text"][name="batchid"] {
+	width: 450px;
+}
+
+input[type="text"][name="addSwarmFileRef"] {
 	width: 450px;
 }
 

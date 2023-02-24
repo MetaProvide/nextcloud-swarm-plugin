@@ -363,4 +363,7 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 		// //TODO: Read back from swarm to return filesize?
 		return $tmpFilesize;
 	}
+	public function addSwarmRef($params ): void {
+		$swarmfile = $this->filemapper->createFile($params);
+	}
 }

@@ -49,7 +49,6 @@ class BeeSwarm extends Backend {
 			])
 			->addAuthScheme(AuthMechanism::SCHEME_NULL)
 			->addAuthScheme(HttpBasicAuth::SCHEME_HTTP_BASIC);
-		//->addCustomJs("../../../$appWebPath/js/beeswarm");
 	}
 
 	public function manipulateStorageConfig(StorageConfig &$storage, IUser $user = null) {
