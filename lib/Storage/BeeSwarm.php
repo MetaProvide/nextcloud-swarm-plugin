@@ -41,17 +41,13 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 	/** @var int */
 	protected $storageId;
 
-	/**
-	 * @var bool
-	 */
+	/** @var bool */
 	private $isEncrypted;
 
 	/** @var string */
 	protected $stampBatchId;
 
-	/**
-	 * @var ILogger
-	 */
+	/** @var ILogger */
 	protected $logger;
 
 	/** @var SwarmFileMapper */
@@ -63,8 +59,8 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 	/** @var \OCP\Files\IMimeTypeLoader */
 	private $mimeTypeHandler;
 
-	/** @var \OC\Files\Cache\Cache */
-	private $cacheHandler;
+	/** @var OCP\IConfig */
+	private $config;
 
 	public function __construct($params) {
 		$this->parseParams($params);
@@ -75,9 +71,9 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 		$dbConnection = \OC::$server->get(IDBConnection::class);
 		$this->filemapper = new SwarmFileMapper($dbConnection);
 		$this->mimeTypeHandler = \OC::$server->get(IMimeTypeLoader::class);
-
 		$mountHandler = \OC::$server->get(IUserMountCache::class);
 		$storageMounts = $mountHandler->getMountsForStorageId($this->storageId);
+
 		$isConfigured = false;
 		if (is_array($storageMounts) && isset($storageMounts[0])) {
 			// Parse array for config of requested storage
@@ -363,7 +359,12 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 		// //TODO: Read back from swarm to return filesize?
 		return $tmpFilesize;
 	}
-	public function addSwarmRef($params ): void {
+	public function addSwarmRef($params): void {
+		$params["storage"] = $this->storageId;
 		$swarmfile = $this->filemapper->createFile($params);
+		if ($swarmfile) {
+			// insert into filecache table
+			$filecache = $this->getCache()->put($params["name"], $params);
+		}
 	}
 }

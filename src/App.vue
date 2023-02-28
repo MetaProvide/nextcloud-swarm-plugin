@@ -510,6 +510,13 @@ export default {
 				evt.preventDefault();
 			}
 			let newaddSwarmLabel = [...this.addSwarmLabel];
+
+			if (!this.addSwarmFileRef[mountidx] || !this.addSwarmFilename[mountidx]) {
+				newaddSwarmLabel[mountidx] = "Please enter valid Swarm reference and filename";
+				this.addSwarmLabel = newaddSwarmLabel;
+				return false;
+			}
+
 			newaddSwarmLabel[mountidx] = "Status...";
 			this.addSwarmLabel = newaddSwarmLabel;
 
@@ -550,6 +557,8 @@ export default {
 				.then((response) => {
 					newaddSwarmLabel[mountidx] = "Success: Swarm reference added!";
 					this.addSwarmLabel = newaddSwarmLabel;
+					this.addSwarmFileRef[mountidx] = "";
+					this.addSwarmFilename[mountidx] = "";
 				})
 				.catch((error) => {
 					console.log(

@@ -29,4 +29,9 @@ return ['routes' => [
 		'url' => '/save',
 		'verb' => 'POST',
 	],
+	[
+		'name' => 'Settings#addFileToSwarm',
+		'url' => '/addFileToSwarm',
+		'verb' => 'POST',
+	],
 ]];
