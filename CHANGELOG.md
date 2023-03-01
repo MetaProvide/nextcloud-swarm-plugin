@@ -7,7 +7,7 @@
 ### Added
 
 -	[#27](https://github.com/MetaProvide/nextcloud-swarm-plugin/issues/27) Add support for Nextcloud 25
--	[#27](https://github.com/MetaProvide/nextcloud-swarm-plugin/issues/27) Right click and file actions option to copy Swarm reference on files stored in Swarm
+-	[#25](https://github.com/MetaProvide/nextcloud-swarm-plugin/issues/25) Right click and file actions option to copy Swarm reference on files stored in Swarm
 
 ## 0.1.3 - 2022-09-29
 
