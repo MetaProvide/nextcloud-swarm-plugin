@@ -39,8 +39,9 @@
 								:checked.sync="mount.isEncrypted"
 								type="switch"
 								@update:checked="toggleEncryption(mountidx)"
-								>Enable encryption</CheckboxRadioSwitch
 							>
+								Enable encryption
+							</CheckboxRadioSwitch>
 						</div>
 
 						<div>

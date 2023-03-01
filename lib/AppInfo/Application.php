@@ -31,6 +31,7 @@ use OCA\Files_External\Lib\Config\IBackendProvider;
 use OCA\Files_External\Service\BackendService;
 use OCA\Files_External\Lib\Config\IAuthMechanismProvider;
 use OCP\AppFramework\App;
+use OCP\Util;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use OCP\AppFramework\Bootstrap\IBootContext;
 use OCP\AppFramework\Bootstrap\IBootstrap;
@@ -66,6 +67,12 @@ class Application extends App implements IBootstrap, IBackendProvider, IAuthMech
 			$backendService->registerAuthMechanismProvider($this);
 		});
 
+		/** @var IEventDispatcher $dispatcher */
+		$dispatcher = $context->getAppContainer()->get(IEventDispatcher::class);
+		$dispatcher->addListener('OCA\Files::loadAdditionalScripts', function () {
+			Util::addScript(SELF::APP_ID, 'fileactions');
+			Util::addScript(SELF::APP_ID, 'menuobserver');
+		});
 
 		$this->getAuthMechanisms();
 	}
