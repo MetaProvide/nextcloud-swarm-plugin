@@ -49,15 +49,14 @@
 								</thead>
 								<tbody>
 									<tr v-for="(
-											batch, batchidx
-										) in mount.batches" :key="batchidx">
+																																														batch, batchidx
+																																													) in mount.batches" :key="batchidx">
 										<td>
 											<input type="text" name="batchid" :value="batch.batchID" maxlength="200"
 												readonly />
 										</td>
 										<td>
-											<input type="text" name="bzz" :value="batch.amount" maxlength="200"
-												readonly />
+											<input type="text" name="bzz" :value="batch.amount" maxlength="200" readonly />
 										</td>
 										<td>
 											<input type="text" name="balance" :value="batch.batchTTL" maxlength="200"
@@ -189,7 +188,7 @@
 													addSwarmFileRef[
 													mountidx
 													]
-												" type="text" value="" maxlength="64" name="addSwarmFileRef" />
+												" type="text" value="" maxlength="250" name="addSwarmFileRef" />
 											</td>
 											<td>
 												<input v-model="
@@ -232,7 +231,7 @@ import ActionButton from "@nextcloud/vue/dist/Components/ActionButton";
 import CheckboxRadioSwitch from "@nextcloud/vue/dist/Components/CheckboxRadioSwitch";
 import ActionInput from "@nextcloud/vue/dist/Components/ActionInput";
 import ActionSeparator from "@nextcloud/vue/dist/Components/ActionSeparator";
-import { BeeDebug } from "@ethersphere/bee-js";
+import { Bee, BeeDebug } from "@ethersphere/bee-js";
 import axios from "axios";
 import { generateUrl } from "@nextcloud/router";
 
@@ -519,60 +518,88 @@ export default {
 
 			newaddSwarmLabel[mountidx] = "Status...";
 			this.addSwarmLabel = newaddSwarmLabel;
-
 			this.addSwarmBtnDisabled[mountidx] = true;
-			console.log(
-				"ref,name=" +
-				this.addSwarmFileRef[mountidx] +
-				"," +
-				this.addSwarmFilename[mountidx]
-			);
-
 			newaddSwarmLabel = [...this.addSwarmLabel];
 
-			const url = generateUrl("/apps/files_external_ethswarm/addFileToSwarm");
-			const addFileToSwarm = ({
-				mount_id: this.parsedMounts[mountidx].mount_id,
-				mount_name: this.parsedMounts[mountidx].mount_name,
-				swarmfileref: this.addSwarmFileRef[mountidx],
-				swarmfilename: this.addSwarmFilename[mountidx],
-				ip: this.parsedMounts[mountidx].mount_urloptions.ip,
-				port: this.parsedMounts[mountidx].mount_urloptions.port,
-				debug_api_port: this.parsedMounts[mountidx].mount_urloptions.debug_api_port,
-			});
-			console.log(
-				"json=" +
-				JSON.stringify(this.parsedMounts) +
-				";len=" +
-				this.parsedMounts.length +
-				";url=" +
-				url +
-				";newparse=" +
-				JSON.stringify(addFileToSwarm)
+			const requestOptions = this.getRequestOptions(
+				this.parsedMounts[mountidx].mount_urloptions.user,
+				this.parsedMounts[mountidx].mount_urloptions.password
 			);
-			await axios
-				.post(url, {
-					addswarmParam: JSON.stringify(addFileToSwarm),
-				})
-				.then((response) => {
-					newaddSwarmLabel[mountidx] = "Success: Swarm reference added!";
-					this.addSwarmLabel = newaddSwarmLabel;
-					this.addSwarmFileRef[mountidx] = "";
-					this.addSwarmFilename[mountidx] = "";
-				})
-				.catch((error) => {
-					console.log(
-						"response err=" +
-						error.response +
-						";mesg=" +
-						error.response.data.message +
-						"error.msg=" +
-						error.message
-					);
-					newaddSwarmLabel[mountidx] = "Failed to add";
-					this.addSwarmLabel = newaddSwarmLabel;
+			let endpoint =
+				this.parsedMounts[mountidx].mount_urloptions.ip +
+				":" +
+				this.parsedMounts[mountidx].mount_urloptions.port;
+			if (!endpoint.toLowerCase().startsWith("http")) {
+				endpoint = "http://" + endpoint;
+			}
+			console.log(
+				"ref,name,endpoint=" +
+				this.addSwarmFileRef[mountidx] +
+				"," +
+				this.addSwarmFilename[mountidx] +
+				"," +
+				endpoint
+			);
+			let isValidSwarm = true;
+			let statusMsg = "";
+			try {
+				this.beeClient = new Bee(endpoint);
+				await this.beeClient.isReferenceRetrievable(
+					this.addSwarmFileRef[mountidx],
+					requestOptions
+				);
+			} catch (err) {
+				console.log(err);
+				isValidSwarm = false;
+				statusMsg = "Invalid swarm reference (" + err.message + ")";
+			}
+
+			if (isValidSwarm) {
+				const url = generateUrl("/apps/files_external_ethswarm/addFileToSwarm");
+				const addFileToSwarm = ({
+					mount_id: this.parsedMounts[mountidx].mount_id,
+					mount_name: this.parsedMounts[mountidx].mount_name,
+					swarmfileref: this.addSwarmFileRef[mountidx],
+					swarmfilename: this.addSwarmFilename[mountidx],
+					ip: this.parsedMounts[mountidx].mount_urloptions.ip,
+					port: this.parsedMounts[mountidx].mount_urloptions.port,
+					debug_api_port: this.parsedMounts[mountidx].mount_urloptions.debug_api_port,
 				});
-			this.addSwarmBtnDisabled[mountidx] = false;
+				console.log(
+					"json=" +
+					JSON.stringify(this.parsedMounts) +
+					";len=" +
+					this.parsedMounts.length +
+					";url=" +
+					url +
+					";newparse=" +
+					JSON.stringify(addFileToSwarm)
+				);
+				await axios
+					.post(url, {
+						addswarmParam: JSON.stringify(addFileToSwarm),
+					})
+					.then((response) => {
+						console.log("response", response);
+						if (response.data !== "") {
+							statusMsg = response.data.msg;
+						}
+						this.addSwarmFileRef[mountidx] = "";
+						this.addSwarmFilename[mountidx] = "";
+					})
+					.catch((error) => {
+						console.log(
+							"err=" +
+							error +
+							";mesg=" +
+							error.response.data.msg
+						);
+						statusMsg = error.response.data.msg;
+					});
+				this.addSwarmBtnDisabled[mountidx] = false;
+			}
+			newaddSwarmLabel[mountidx] = statusMsg;
+			this.addSwarmLabel = newaddSwarmLabel;
 		},
 	},
 };

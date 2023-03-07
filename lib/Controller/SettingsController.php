@@ -31,6 +31,7 @@ use OCP\IConfig;
 use OCP\IRequest;
 use OCP\Constants;
 use OCA\Files_External_Ethswarm\Storage\BeeSwarm;
+use OCP\AppFramework\Http\DataResponse;
 
 class SettingsController extends Controller {
 
@@ -82,7 +83,7 @@ class SettingsController extends Controller {
 	 * @NoAdminRequired
 	 * Add a swarm file reference to the Swarm External storage in NextCloud
 	 */
-	public function addFileToSwarm(): void {
+	public function addFileToSwarm(): DataResponse {
 		$params = $this->request->getParam("addswarmParam");
 		$tmpFilesize = 0;
 		if ($params) {
@@ -92,7 +93,7 @@ class SettingsController extends Controller {
 				$addfile = [
 					"name" => $params['swarmfilename'],
 					"permissions" => Constants::PERMISSION_READ,
-					"mimetype" => "21", //$this->mimeTypeHandler->getId($mimetype),
+					"mimetype" => "15", //$this->mimeTypeHandler->getId($mimetype),
 					"mtime" => time(),
 					"storage_mtime" => time(),
 					"size" => $tmpFilesize,
@@ -101,7 +102,8 @@ class SettingsController extends Controller {
 					"storage" =>  $params['mount_id'],
 				];
 				$beeclass = new BeeSwarm($params);
-				$beeclass->addSwarmRef($addfile);
+				$response = $beeclass->addSwarmRef($addfile);
+				return $response;
 			}
 		}
 	}

@@ -32,6 +32,8 @@ use OCP\IDBConnection;
 use OCP\IConfig;
 use OCP\ILogger;
 use Sabre\DAV\Exception\BadRequest;
+use OCP\AppFramework\Http\DataResponse;
+use OCP\AppFramework\Http;
 
 class BeeSwarm extends \OC\Files\Storage\Common {
 	use BeeSwarmTrait;
@@ -359,12 +361,20 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 		// //TODO: Read back from swarm to return filesize?
 		return $tmpFilesize;
 	}
-	public function addSwarmRef($params): void {
+
+
+	/* @throws /Exception */
+	public function addSwarmRef($params): DataResponse {
 		$params["storage"] = $this->storageId;
+		if (($exists = $this->filemapper->findswarmfile($params["name"], $params["reference"], $params["storage"])) > 0) {
+			return new DataResponse(array('msg' => 'Filename or reference already exists in this storage. Please check.'), Http::STATUS_CONFLICT);
+		}
+
 		$swarmfile = $this->filemapper->createFile($params);
 		if ($swarmfile) {
 			// insert into filecache table
 			$filecache = $this->getCache()->put($params["name"], $params);
 		}
+		return new DataResponse(array('msg' => 'Success! Swarm reference added'), Http::STATUS_OK);
 	}
 }

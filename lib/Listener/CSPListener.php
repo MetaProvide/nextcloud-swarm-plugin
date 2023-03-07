@@ -58,6 +58,8 @@ class CSPListener implements IEventListener {
 			$urlOptions = $backend->getBackendOptions();
 			$url_endpoint = $urlOptions['ip'] . ":" . $urlOptions['debug_api_port'];
 			$csp->addAllowedConnectDomain($url_endpoint);
+			$url_endpoint = $urlOptions['ip'] . ":" . $urlOptions['port'];
+			$csp->addAllowedConnectDomain($url_endpoint);
 		}
 		$event->addPolicy($csp);
 	}
