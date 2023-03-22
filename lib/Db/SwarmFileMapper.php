@@ -76,19 +76,19 @@ class SwarmFileMapper extends QBMapper {
 	 * @param string $swarmref
 	 * @param int $storage
 	 *
-	 * @return SwarmFile
+	 * @return array
 	 * @throws DoesNotExistException
 	 */
-	public function findswarmfile(string $name, string $swarmref, int $storage): int {
+	public function findswarmfile(string $name, string $swarmref, int $storage): array {
 		$qb = $this->db->getQueryBuilder();
 
 		$select = $qb
-			->select('id')
+			->select('id', 'name', 'swarm_reference')
 			->from($this->getTableName())
 			->where($qb->expr()->eq('name', $qb->createNamedParameter($name, $qb::PARAM_STR)))
 			->orWhere($qb->expr()->eq('swarm_reference', $qb->createNamedParameter($swarmref, $qb::PARAM_STR)))
 			->andWhere($qb->expr()->eq('storage', $qb->createNamedParameter($storage, $qb::PARAM_INT)));
-		return sizeof($this->findEntities($select));
+		return ($this->findEntities($select));
 	}
 
 	public function createFile(array $filearray): SwarmFile {

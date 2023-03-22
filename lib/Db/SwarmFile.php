@@ -54,10 +54,10 @@ class SwarmFile extends Entity {
 	protected $fileid;
 
 	/** @var string */
-	protected $name;
+	public $name;
 
 	/** @var string|null */
-	protected $swarmReference;
+	public $swarmReference;
 
 	/** @var string|null */
 	protected $swarmTag;

@@ -85,7 +85,6 @@ class SettingsController extends Controller {
 	 */
 	public function addFileToSwarm(): DataResponse {
 		$params = $this->request->getParam("addswarmParam");
-		$tmpFilesize = 0;
 		if ($params) {
 			$params = json_decode($params, true);
 			if (is_array($params)) {
@@ -93,13 +92,12 @@ class SettingsController extends Controller {
 				$addfile = [
 					"name" => $params['swarmfilename'],
 					"permissions" => Constants::PERMISSION_READ,
-					"mimetype" => "15", //$this->mimeTypeHandler->getId($mimetype),
 					"mtime" => time(),
 					"storage_mtime" => time(),
-					"size" => $tmpFilesize,
 					"etag" => null,
 					"reference" => $params['swarmfileref'],
 					"storage" =>  $params['mount_id'],
+					"allowdownload" => $params['allowdownload'],
 				];
 				$beeclass = new BeeSwarm($params);
 				$response = $beeclass->addSwarmRef($addfile);

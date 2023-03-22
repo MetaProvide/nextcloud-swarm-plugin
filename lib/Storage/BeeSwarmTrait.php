@@ -163,7 +163,7 @@ trait BeeSwarmTrait {
 	}
 
 	private function get_stream_by_curl(string $path, string $reference) {
-		$url_endpoint = $this->api_url . '/bzz/';
+		$url_endpoint = $this->api_url . '/bytes/';
 		$url_params = $reference;
 		$url_endpoint .= $url_params;
 

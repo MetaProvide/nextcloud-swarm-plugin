@@ -362,17 +362,62 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 		return $tmpFilesize;
 	}
 
-
-	/* @throws /Exception */
+	/** **/
+	/* @param array $params
+	/* @return DataResponse */
 	public function addSwarmRef($params): DataResponse {
 		$params["storage"] = $this->storageId;
-		if (($exists = $this->filemapper->findswarmfile($params["name"], $params["reference"], $params["storage"])) > 0) {
-			return new DataResponse(array('msg' => 'Filename or reference already exists in this storage. Please check.'), Http::STATUS_CONFLICT);
+
+		$exists = $this->filemapper->findswarmfile($params["name"], $params["reference"], $params["storage"]);
+		if (sizeof($exists) > 0) {
+			if ($exists[0]->name === $params["name"]) {
+				$msg="Filename already exists in this storage.";
+				if ($exists[0]->swarmReference === $params["reference"]) {
+					$msg="This filename and Swarm reference already exist in this storage.";
+				}
+			} else {
+				$msg="Swarm reference already exists in this storage.";
+			}
+			$msg .= " Please check.";
+			return new DataResponse(array('msg' => $msg), Http::STATUS_CONFLICT);
 		}
 
+		// Set default mimetype and filesize
+		$size = 0;
+		$mimetype = "application/octet-stream";
+		if ($params["allowdownload"]) {
+			$stream = $this->get_stream_by_curl($params["name"],  $params["reference"]);
+			// Determine response header status
+			$httpresponse = "404";
+			$matches = [];
+			preg_match('/^HTTP.+\s(200|404)/', $stream, $matches);
+			if (isset($matches[1])) {
+				$httpresponse = $matches[1];
+			}
+			if ($httpresponse === '404') {
+				$msg = "No swarm file found with this reference.";
+				return new DataResponse(array('msg' => $msg), Http::STATUS_CONFLICT);
+			}
+
+			if ($stream !== false) {
+				$matches = [];
+				preg_match('/Content-Length: (\d+)/', $stream, $matches);
+				if (isset($matches[1])) {
+					$size = $matches[1];
+				}
+				$matches = [];
+				preg_match('/"Content-Type":"(.+)",/', $stream, $matches);
+				if (isset($matches[1])) {
+					$mimetype = $matches[1];
+				}
+			}
+		}
+		$params["size"] = $size;
+		$params["mimetype"] = $this->mimeTypeHandler->getId($mimetype);
+
+		// insert into filecache and swarm table
 		$swarmfile = $this->filemapper->createFile($params);
 		if ($swarmfile) {
-			// insert into filecache table
 			$filecache = $this->getCache()->put($params["name"], $params);
 		}
 		return new DataResponse(array('msg' => 'Success! Swarm reference added'), Http::STATUS_OK);

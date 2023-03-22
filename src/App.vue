@@ -49,8 +49,9 @@
 								</thead>
 								<tbody>
 									<tr v-for="(
-																																														batch, batchidx
-																																													) in mount.batches" :key="batchidx">
+																																																																																																									batch, batchidx
+																																																																																																								) in mount.batches"
+										:key="batchidx">
 										<td>
 											<input type="text" name="batchid" :value="batch.batchID" maxlength="200"
 												readonly />
@@ -173,22 +174,32 @@
 						<div><u>Add a swarm file to NextCloud:</u></div>
 						<div>
 							<form @submit.prevent>
+								<div>
+
+								</div>
 								<table>
 									<thead>
+										<tr>
+											<th colspan="2">
+												<CheckboxRadioSwitch type="switch"
+													:checked.sync="allowBtnDownload[mountidx]">
+													Allow background file download to verify that file exists and to
+													populate file metadata</CheckboxRadioSwitch>
+											</th>
+											<th><a target="_blank" rel="noreferrer" class="icon-info"
+													title="This could incur the expenditure of Bzz." href="#"></a></th>
+										</tr>
+									</thead>
+									<tbody>
 										<tr>
 											<th>Swarm reference:</th>
 											<th>Filename:</th>
 											<th>&nbsp;</th>
 										</tr>
-									</thead>
-									<tbody>
 										<tr>
 											<td>
-												<input v-model="
-													addSwarmFileRef[
-													mountidx
-													]
-												" type="text" value="" maxlength="250" name="addSwarmFileRef" />
+												<input v-model="addSwarmFileRef[mountidx]" type="text" value=""
+													maxlength="250" name="addSwarmFileRef" />
 											</td>
 											<td>
 												<input v-model="
@@ -267,6 +278,7 @@ export default {
 			saveSettingsBtn: [],
 			saveSettingsLabel: [],
 			debugConsole: true, // set true to write to console.log, false to disable console.log
+			allowBtnDownload: [],
 			addSwarmFileRef: [],
 			addSwarmFilename: [],
 			addSwarmLabel: [],
@@ -299,13 +311,38 @@ export default {
 				console[methods[i]] = function () { };
 			}
 		}
+		this.allowBtnDownload = Array(this.parsedMounts.length).fill(false);
 		this.addSwarmFileRef = Array(this.parsedMounts.length).fill("");
 		this.addSwarmFilename = Array(this.parsedMounts.length).fill("");
 		this.addSwarmLabel = Array(this.parsedMounts.length).fill("");
 		this.addSwarmBtnDisabled = Array(this.parsedMounts.length).fill(false);
-
 	},
 	methods: {
+		/**
+		 * Checks whether the given file name and reference is valid.
+		 *
+		 * @param {string} name file name to check
+		 * @param {string} reference reference to check
+		 * @return {boolean} true if the file name is valid.
+		 * Throws a string exception with an error message if
+		 * the file name is not valid
+		 *
+		 * NOTE: This function is duplicated in the filepicker inside core/src/OC/dialogs.js
+		 */
+		isInputValid(name, reference) {
+			const trimmedName = name.trim();
+			const trimmedRef = reference.trim();
+			if (trimmedRef.length === 0) {
+				throw t('files_external_ethswarm', 'Please enter a valid Swarm reference.');
+			} else if (trimmedName === '.' || trimmedName === '..') {
+				throw t('files_external_ethswarm', '"{name}" is an invalid file name.', { name });
+			} else if (trimmedName.length === 0) {
+				throw t('files_external_ethswarm', 'File name cannot be empty.');
+			} else if (trimmedName.indexOf('/') !== -1) {
+				throw t('files_external_ethswarm', '"/" is not allowed inside a file name.');
+			}
+			return true;
+		},
 		getRequestOptions(authUser, authPassword) {
 			let requestOptions = null;
 			if (authUser && authPassword) {
@@ -509,9 +546,13 @@ export default {
 				evt.preventDefault();
 			}
 			let newaddSwarmLabel = [...this.addSwarmLabel];
-
-			if (!this.addSwarmFileRef[mountidx] || !this.addSwarmFilename[mountidx]) {
-				newaddSwarmLabel[mountidx] = "Please enter valid Swarm reference and filename";
+			const swarmref = this.addSwarmFileRef[mountidx];
+			const filename = this.addSwarmFilename[mountidx];
+			try {
+				this.isInputValid(filename, swarmref);
+			}
+			catch (errorMessage) {
+				newaddSwarmLabel[mountidx] = errorMessage;
 				this.addSwarmLabel = newaddSwarmLabel;
 				return false;
 			}
@@ -532,20 +573,12 @@ export default {
 			if (!endpoint.toLowerCase().startsWith("http")) {
 				endpoint = "http://" + endpoint;
 			}
-			console.log(
-				"ref,name,endpoint=" +
-				this.addSwarmFileRef[mountidx] +
-				"," +
-				this.addSwarmFilename[mountidx] +
-				"," +
-				endpoint
-			);
 			let isValidSwarm = true;
 			let statusMsg = "";
 			try {
 				this.beeClient = new Bee(endpoint);
 				await this.beeClient.isReferenceRetrievable(
-					this.addSwarmFileRef[mountidx],
+					swarmref,
 					requestOptions
 				);
 			} catch (err) {
@@ -559,8 +592,9 @@ export default {
 				const addFileToSwarm = ({
 					mount_id: this.parsedMounts[mountidx].mount_id,
 					mount_name: this.parsedMounts[mountidx].mount_name,
-					swarmfileref: this.addSwarmFileRef[mountidx],
-					swarmfilename: this.addSwarmFilename[mountidx],
+					swarmfileref: swarmref,
+					swarmfilename: filename,
+					allowdownload: this.allowBtnDownload[mountidx],
 					ip: this.parsedMounts[mountidx].mount_urloptions.ip,
 					port: this.parsedMounts[mountidx].mount_urloptions.port,
 					debug_api_port: this.parsedMounts[mountidx].mount_urloptions.debug_api_port,
