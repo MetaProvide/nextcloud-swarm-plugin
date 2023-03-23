@@ -25,4 +25,3 @@
 ?>
 <!-- Element to inject Vue app, anchoring server params in data attribute -->
 <div id="app" data-params="<?php p(json_encode($_['params'])); ?>"></div>
-<?php>
