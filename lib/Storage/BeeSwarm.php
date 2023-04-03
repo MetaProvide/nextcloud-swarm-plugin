@@ -257,8 +257,16 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 		return true;
 	}
 
+	public function isDeletable($path) {
+	 	return true;
+	}
+
 	public function unlink($path) {
 		return true;
+	}
+
+	public function delete() {
+		$var = 0;
 	}
 
 	public function fopen($path, $mode) {
@@ -347,7 +355,7 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 		// Write metadata to table
 		$uploadfiles = [
 			"name" => $path,
-			"permissions" => Constants::PERMISSION_READ,
+			"permissions" => Constants::PERMISSION_DELETE + Constants::PERMISSION_READ,
 			"mimetype" => $this->mimeTypeHandler->getId($mimetype),
 			"mtime" => time(),
 			"storage_mtime" => time(),

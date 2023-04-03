@@ -91,7 +91,7 @@ class SettingsController extends Controller {
 				// Write metadata to table
 				$addfile = [
 					"name" => $params['swarmfilename'],
-					"permissions" => Constants::PERMISSION_READ,
+					"permissions" => Constants::PERMISSION_DELETE + Constants::PERMISSION_READ,
 					"mtime" => time(),
 					"storage_mtime" => time(),
 					"etag" => null,
