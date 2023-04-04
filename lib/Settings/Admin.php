@@ -186,11 +186,26 @@ class Admin implements ISettings {
 	}
 
 	/**
+	 * Buys a new postage batch method by using the client libary handler
+	 * @return \mixed
+	 */
+	public function buyPostageStamp($amount, $depth, $urlOptions) : mixed {
+		$uri = "/stamps/" . $amount . "/" . $depth;
+		$curl = $this->setCurl($uri, $urlOptions);
+		curl_setopt($curl, CURLOPT_POST, 1);
+		$output = curl_exec($curl);
+		$response_data = json_decode($output, true);
+		curl_close($curl);
+
+		return $response_data;
+	}
+
+	/**
 	 * initializes a curl handler
 	 * @return \CurlHandle
 	 */
-	protected function setCurl(string $uri_params, array $urlOptions) : \CurlHandle {
-		$url_endpoint = $urlOptions['ip'] . ":" . $urlOptions['debug_api_port'];
+	protected function setCurl(string $uri_params, array $urlOptions, $debugflag = true) : \CurlHandle {
+		$url_endpoint = $urlOptions['ip'] . ":" . ($debugflag ? $urlOptions['debug_api_port'] : $urlOptions['port']);
 		$url_endpoint .= $uri_params;
 
 		$curl = curl_init();

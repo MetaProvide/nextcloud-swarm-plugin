@@ -29,4 +29,14 @@ return ['routes' => [
 		'url' => '/save',
 		'verb' => 'POST',
 	],
+	[
+		'name' => 'Admin#createPostageBatch',
+		'url' => '/bee/createPostageBatch',
+		'verb' => 'POST',
+	],
+	[
+		'name' => 'Admin#topUpBatch',
+		'url' => '/bee/topUpBatch',
+		'verb' => 'POST',
+	],
 ]];
