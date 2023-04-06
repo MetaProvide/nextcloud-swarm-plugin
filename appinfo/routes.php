@@ -30,12 +30,12 @@ return ['routes' => [
 		'verb' => 'POST',
 	],
 	[
-		'name' => 'Admin#createPostageBatch',
+		'name' => 'Bee#createPostageBatch',
 		'url' => '/bee/createPostageBatch',
 		'verb' => 'POST',
 	],
 	[
-		'name' => 'Admin#topUpBatch',
+		'name' => 'Bee#topUpBatch',
 		'url' => '/bee/topUpBatch',
 		'verb' => 'POST',
 	],

@@ -201,11 +201,26 @@ class Admin implements ISettings {
 	}
 
 	/**
+	 * Top up a postage batch by using the client libary handler
+	 * @return \mixed
+	 */
+	public function topUpPostageStamp($batchid, $amount, $urlOptions) : mixed {
+		$uri = "/stamps/topup/" . $batchid . "/" . $amount;
+		$curl = $this->setCurl($uri, $urlOptions);
+		curl_setopt($curl, CURLOPT_POST, 1);
+		$output = curl_exec($curl);
+		$response_data = json_decode($output, true);
+		curl_close($curl);
+
+		return $response_data;
+	}
+
+	/**
 	 * initializes a curl handler
 	 * @return \CurlHandle
 	 */
-	protected function setCurl(string $uri_params, array $urlOptions, $debugflag = true) : \CurlHandle {
-		$url_endpoint = $urlOptions['ip'] . ":" . ($debugflag ? $urlOptions['debug_api_port'] : $urlOptions['port']);
+	protected function setCurl(string $uri_params, array $urlOptions, $useDebugApi = true) : \CurlHandle {
+		$url_endpoint = $urlOptions['ip'] . ":" . ($useDebugApi ? $urlOptions['debug_api_port'] : $urlOptions['port']);
 		$url_endpoint .= $uri_params;
 
 		$curl = curl_init();

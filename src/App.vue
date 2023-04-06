@@ -51,8 +51,8 @@
 								</thead>
 								<tbody>
 									<tr v-for="(
-																																													batch, batchidx
-																																												) in mount.batches" :key="batchidx">
+																																																									batch, batchidx
+																																																								) in mount.batches" :key="batchidx">
 										<td>
 											<input type="text" name="batchid" :value="batch.batchID" maxlength="200"
 												readonly />
@@ -186,7 +186,6 @@ import ActionButton from "@nextcloud/vue/dist/Components/ActionButton";
 import CheckboxRadioSwitch from "@nextcloud/vue/dist/Components/CheckboxRadioSwitch";
 import ActionInput from "@nextcloud/vue/dist/Components/ActionInput";
 import ActionSeparator from "@nextcloud/vue/dist/Components/ActionSeparator";
-import { BeeDebug } from "@ethersphere/bee-js";
 import axios from "axios";
 import { generateUrl } from "@nextcloud/router";
 
@@ -221,7 +220,7 @@ export default {
 			saveSettingsValue: [],
 			saveSettingsBtn: [],
 			saveSettingsLabel: [],
-			debugConsole: false, // set true to write to console.log, false to disable console.log
+			debugConsole: true, // set true to write to console.log, false to disable console.log
 		};
 	},
 	computed: {},
@@ -302,31 +301,42 @@ export default {
 			this.topUpValue = newTopUp;
 		},
 		async topupBatch(mountIdx, batchIdx, activeBatchId) {
-			const requestOptions = this.getRequestOptions(
-				this.parsedMounts[mountIdx].mount_urloptions.user,
-				this.parsedMounts[mountIdx].mount_urloptions.password
-			);
-			const endpoint =
-				this.parsedMounts[mountIdx].mount_urloptions.ip +
-				":" +
-				this.parsedMounts[mountIdx].mount_urloptions.debug_api_port;
+			const url = generateUrl("/apps/files_external_ethswarm/bee/topUpBatch");
+			const postageBatch = this.parsedMounts[mountIdx];
+			postageBatch.activeBatchId = activeBatchId;
+			postageBatch.topUpValue = Number(this.topUpValue[mountIdx]);
 			console.log(
+				"json=" +
+				JSON.stringify(this.parsedMounts) +
+				";postageBatch=" +
+				JSON.stringify(postageBatch) +
 				"batch,amount=" +
 				activeBatchId +
 				"," +
 				Number(this.topUpValue[mountIdx])
 			);
 
-			try {
-				this.beeClient = new BeeDebug(endpoint);
-				await this.beeClient.topUpBatch(
-					activeBatchId,
-					Number(this.topUpValue[mountIdx]),
-					requestOptions
-				);
-			} catch (err) {
-				console.log(err);
-			}
+			await axios
+				.post(url, {
+					postageBatch: JSON.stringify(postageBatch),
+				})
+				.then((response) => {
+					console.log("Success", response.data.batchID);
+				})
+				.catch((error) => {
+					console.log(
+						"response err=" +
+						error.response +
+						";mesg=" +
+						error.response.data.msg +
+						"error.msg=" +
+						error.message
+					);
+					console.log(error);
+					// newBatchlabel[mountidx] = error.response.data.msg;;
+					// this.newBatchLabel = newBatchlabel;
+					// this.newBatchBtnDisabled[mountidx] = false;
+				});
 		},
 		async buyPostage(mountidx, evt) {
 			if (evt) {
@@ -392,34 +402,6 @@ export default {
 					this.newBatchLabel = newBatchlabel;
 					this.newBatchBtnDisabled[mountidx] = false;
 				});
-			// this.beeClient = new BeeDebug(endpoint);
-
-			// const newBatchId = await this.beeClient.createPostageBatch(
-			// 	Number(this.newBatchAmounts[mountidx]),
-			// 	Number(this.newBatchDepths[mountidx]),
-			// 	requestOptions
-			// );
-
-			// newBatchlabel[mountidx] =
-			// 	"Success: Created new batch " + newBatchId;
-			// this.newBatchLabel = newBatchlabel;
-
-			// this.parsedMounts[mountidx].batches.push({
-			// 	batchID: newBatchId,
-			// 	amount: this.newBatchAmounts[mountidx],
-			// 	batchTTL: "",
-			// 	isActive: false,
-			// 	isDisabled: false,
-			// 	isUsable: false,
-			// });
-
-			// this.newBatchBtnDisabled[mountidx] = false;
-			// } catch (err) {
-			// 	console.log(err);
-			// 	newBatchlabel[mountidx] = err;
-			// 	this.newBatchLabel = newBatchlabel;
-			// 	this.newBatchBtnDisabled[mountidx] = false;
-			// }
 		},
 		async saveSettings(mountidx, evt) {
 			if (evt) {
