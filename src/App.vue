@@ -51,8 +51,9 @@
 								</thead>
 								<tbody>
 									<tr v-for="(
-																																																									batch, batchidx
-																																																								) in mount.batches" :key="batchidx">
+																																																																																															batch, batchidx
+																																																																																														) in mount.batches"
+										:key="batchidx">
 										<td>
 											<input type="text" name="batchid" :value="batch.batchID" maxlength="200"
 												readonly />
@@ -133,7 +134,7 @@
 									<thead>
 										<tr>
 											<th>Amount:</th>
-											<th>Depth:</th>
+											<th>Depth (17-255):</th>
 											<th>&nbsp;</th>
 										</tr>
 									</thead>
@@ -300,6 +301,22 @@ export default {
 			newTopUp[mountIdx] = x;
 			this.topUpValue = newTopUp;
 		},
+		/**
+		 * User input validation
+		 *
+		 * @param {bigint} amount amount to check
+		 * @param {number} depth depth to check (optional)
+		 * @return {boolean} true if input is valid.
+		 * Throws a string exception with an error message
+		 */
+		isInputValid(amount, depth) {
+			if (amount <= 0) {
+				throw t('files_external_ethswarm', 'Please enter an amount');
+			} else if (depth !== undefined && (depth < 17 || depth > 255)) {
+				throw t('files_external_ethswarm', 'Please enter a valid depth between 17 and 255');
+			}
+			return true;
+		},
 		async topupBatch(mountIdx, batchIdx, activeBatchId) {
 			const url = generateUrl("/apps/files_external_ethswarm/bee/topUpBatch");
 			const postageBatch = this.parsedMounts[mountIdx];
@@ -313,9 +330,16 @@ export default {
 				"batch,amount=" +
 				activeBatchId +
 				"," +
-				Number(this.topUpValue[mountIdx])
+				postageBatch.topUpValue
 			);
 
+			try {
+				this.isInputValid(postageBatch.topUpValue);
+			}
+			catch (error) {
+				console.log(error);
+				return false;
+			}
 			await axios
 				.post(url, {
 					postageBatch: JSON.stringify(postageBatch),
@@ -333,32 +357,41 @@ export default {
 						error.message
 					);
 					console.log(error);
-					// newBatchlabel[mountidx] = error.response.data.msg;;
-					// this.newBatchLabel = newBatchlabel;
-					// this.newBatchBtnDisabled[mountidx] = false;
 				});
 		},
 		async buyPostage(mountidx, evt) {
 			if (evt) {
 				evt.preventDefault();
 			}
+			const postageBatch = this.parsedMounts[mountidx];
+			postageBatch.amount = Number(this.newBatchAmounts[mountidx]);
+			postageBatch.depth = Number(this.newBatchDepths[mountidx]);
+
+			console.log(
+				"amount,depth=" +
+				postageBatch.amount +
+				"," +
+				postageBatch.depth
+			);
+
 			let newBatchlabel = [...this.newBatchLabel];
+			try {
+				this.isInputValid(postageBatch.amount, postageBatch.depth);
+			}
+			catch (errorMessage) {
+				newBatchlabel[mountidx] = errorMessage;
+				this.newBatchLabel = newBatchlabel;
+				return false;
+			}
 			newBatchlabel[mountidx] = "Status...";
 			this.newBatchLabel = newBatchlabel;
 
 			this.newBatchBtnDisabled[mountidx] = true;
-			console.log(
-				"batch,depth=" +
-				this.newBatchAmounts[mountidx] +
-				"," +
-				this.newBatchDepths[mountidx]
-			);
+
 
 			newBatchlabel = [...this.newBatchLabel];
 			const url = generateUrl("/apps/files_external_ethswarm/bee/createPostageBatch");
-			const postageBatch = this.parsedMounts[mountidx];
-			postageBatch.amount = Number(this.newBatchAmounts[mountidx]);
-			postageBatch.depth = Number(this.newBatchDepths[mountidx]);
+
 			console.log(
 				"json=" +
 				JSON.stringify(this.parsedMounts) +
