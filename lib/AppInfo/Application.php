@@ -36,8 +36,6 @@ use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use OCP\AppFramework\Bootstrap\IBootContext;
 use OCP\AppFramework\Bootstrap\IBootstrap;
 use OCP\EventDispatcher\IEventDispatcher;
-use OCA\Files_External_Ethswarm\Listener\CSPListener;
-use OCP\Security\CSP\AddContentSecurityPolicyEvent;
 
 /**
  * @package OCA\Files_external_beeswarm\AppInfo
@@ -81,7 +79,7 @@ class Application extends App implements IBootstrap, IBackendProvider, IAuthMech
 	}
 
 	public function register(IRegistrationContext $context): void {
-		$context->registerEventListener(AddContentSecurityPolicyEvent::class, CSPListener::class);
+		// Register AddContentSecurityPolicyEvent for CSPListener class listenser here
 	}
 
 	public function getAuthMechanisms() {
