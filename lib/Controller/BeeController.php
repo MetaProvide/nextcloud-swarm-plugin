@@ -72,7 +72,7 @@ class BeeController extends Controller {
 			$response_data = $this->admin->buyPostageStamp($postageBatch["amount"],$postageBatch["depth"],$postageBatch["mount_urloptions"]);
 
 			if (isset($response_data["batchID"])) {
-				new DataResponse(array('batchID' => $response_data["batchID"]), Http::STATUS_OK);
+				return new DataResponse(array('batchID' => $response_data["batchID"]), Http::STATUS_OK);
 			} else if (isset($response_data["message"])) {
 				return new DataResponse(array('msg' => $response_data["message"]), $response_data["code"]);
 			}
@@ -92,7 +92,7 @@ class BeeController extends Controller {
 
 			$response_data = $this->admin->topUpPostageStamp($postageBatch["activeBatchId"],$postageBatch["topUpValue"],$postageBatch["mount_urloptions"]);
 			if (isset($response_data["batchID"])) {
-				new DataResponse(array('batchID' => $response_data["batchID"]), Http::STATUS_OK);
+				return new DataResponse(array('batchID' => $response_data["batchID"]), Http::STATUS_OK);
 			} else if (isset($response_data["message"])) {
 				return new DataResponse(array('msg' => $response_data["message"]), $response_data["code"]);
 			}
