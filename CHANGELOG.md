@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## 0.2.2 - 2023-10-20
+
+### Added
+
+-	[#39](https://github.com/MetaProvide/nextcloud-swarm-plugin/issues/39) Proxy request from bee node settings page through Nextcloud instead of directly to the bee node 
+
 ## 0.2.1 - 2023-03-23
 
 ### Fixed
