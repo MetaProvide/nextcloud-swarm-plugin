@@ -2,7 +2,8 @@
 	<AppContent>
 		<div class="section">
 			<h2 class="inlineblock">External Storage: Swarm</h2>
-			<a target="_blank" rel="noreferrer" class="icon-info" title="Open documentation"
+			<a
+target="_blank" rel="noreferrer" class="icon-info" title="Open documentation"
 				href="https://github.com/MetaProvide/nextcloud-swarm-plugin/"></a>
 			<p class="settings-hint">
 				View the current status of the Swarm node(s) configured in
@@ -24,7 +25,8 @@
 
 					<div v-if="toggleNode[mountidx]">
 						<div>
-							<CheckboxRadioSwitch :checked.sync="mount.isEncrypted" type="switch"
+							<CheckboxRadioSwitch
+:checked.sync="mount.isEncrypted" type="switch"
 								@update:checked="toggleEncryption(mountidx)">
 								Enable encryption
 							</CheckboxRadioSwitch>
@@ -50,28 +52,33 @@
 									</tr>
 								</thead>
 								<tbody>
-									<tr v-for="(
+									<tr
+v-for="(
 																																																																																															batch, batchidx
 																																																																																														) in mount.batches"
 										:key="batchidx">
 										<td>
-											<input type="text" name="batchid" :value="batch.batchID" maxlength="200"
+											<input
+type="text" name="batchid" :value="batch.batchID" maxlength="200"
 												readonly />
 										</td>
 										<td>
 											<input type="text" name="bzz" :value="batch.amount" maxlength="200" readonly />
 										</td>
 										<td>
-											<input type="text" name="balance" :value="batch.batchTTL" maxlength="200"
+											<input
+type="text" name="balance" :value="batch.batchTTL" maxlength="200"
 												readonly />
 										</td>
 										<td>
-											<CheckboxRadioSwitch :checked.sync="batch.isUsable" :disabled="true"
+											<CheckboxRadioSwitch
+:checked.sync="batch.isUsable" :disabled="true"
 												type="switch" name="toggleUsableBatchName">
 											</CheckboxRadioSwitch>
 										</td>
 										<td>
-											<CheckboxRadioSwitch :checked.sync="batch.isActive" type="switch"
+											<CheckboxRadioSwitch
+:checked.sync="batch.isActive" type="switch"
 												name="toggleActiveBatchName" @update:checked="
 													toggleActiveBatch(
 														mountidx,
@@ -85,7 +92,8 @@
 											<Actions>
 												<ActionButton :disabled="true" icon="icon-add">Top up (Bzz)
 												</ActionButton>
-												<ActionInput type="number" :editable="true" :value="batch.topUpValue"
+												<ActionInput
+type="number" :editable="true" :value="batch.topUpValue"
 													@update:value="
 														(x) =>
 															handleTopUpChange(
@@ -106,7 +114,8 @@
 									</tr>
 									<tr>
 										<td colspan="6">
-											<input type="submit" :value="
+											<input
+type="submit" :value="
 												saveSettingsValue[mountidx]
 											" :disabled="
 	saveSettingsBtn[mountidx]
@@ -141,19 +150,22 @@
 									<tbody>
 										<tr>
 											<td>
-												<input v-model="
+												<input
+v-model="
 													newBatchAmounts[
 													mountidx
 													]
 												" type="number" value="" maxlength="10" />
 											</td>
 											<td>
-												<input v-model="
+												<input
+v-model="
 													newBatchDepths[mountidx]
 												" type="number" value="" maxlength="17" />
 											</td>
 											<td>
-												<input type="submit" :disabled="
+												<input
+type="submit" :disabled="
 													newBatchBtnDisabled[
 													mountidx
 													]
