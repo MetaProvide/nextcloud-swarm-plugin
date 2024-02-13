@@ -313,15 +313,6 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 	}
 	*/
 
-	protected function toTmpFile($source) {
-		$extension = '';
-		$tmpFile = \OC::$server->getTempManager()->getTemporaryFile($extension);
-		$target = fopen($tmpFile, 'w');
-		\OC_Helper::streamCopy($source, $target);
-		fclose($target);
-		return $tmpFile;
-	}
-
 	public function writeStream(string $path, $stream, int $size = null): int {
 		if (empty($this->stampBatchId)) {
 			fclose($stream);
@@ -329,7 +320,8 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 		}
 
 		// Write to temp file
-		$tmpFile = $this->toTmpFile($stream);
+		// $tmpFile = $this->toTmpFile($stream);
+		$tmpFile = parent::toTmpFile($path);
 		$tmpFilesize = (file_exists($tmpFile) ? filesize($tmpFile) : -1);
 		$mimetype = mime_content_type($tmpFile);
 
