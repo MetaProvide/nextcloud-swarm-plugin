@@ -29,9 +29,11 @@ window.addEventListener('DOMContentLoaded', () => {
 		type: OCA.Files.FileActions.TYPE_DROPDOWN,
 		iconClass: 'icon-clippy',
 		actionHandler: function (filename, context) {
-			if (context.$file && context.fileInfoModel.attributes.mountType != "external") {
-				return;
+			if (context.$file) {
+				 if (context.fileInfoModel.attributes.mountType != "external" || !context.$file.attr('data-type') === 'file'){
+				return; }
 			}
+
 			remoteurl = OC.linkToRemoteBase("dav/files/" + OC.currentUser + context.fileInfoModel.attributes['path'] + "/" + filename);
 
 			$.ajax({

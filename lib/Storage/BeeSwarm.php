@@ -120,7 +120,11 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 			// Return true always the creation of the root folder
 			return true;
 		}
-		return false;
+		$exists = $this->filemapper->findExists($path, $this->storageId);
+		if ($exists == 0) {
+			return false;
+		}
+		return true;
 	}
 
 	public function filemtime($path) {
@@ -129,7 +133,14 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 	}
 
 	public function stat($path) {
-		return parent::stat($path);
+		// Based on FTP class
+		if (!$this->file_exists($path)) {
+			return false;
+		}
+		return [
+			'mtime' => $this->filemtime($path),
+			'size' => 0,
+		];
 	}
 
 	/**
@@ -149,43 +160,21 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 		return false;
 	}
 
-	/**
-	 * @param string $path
-	 * @return array|null
-	 */
-	public function getMetaData($path) {
-		$data = [];
-		if ($path === '' || $path === '/' || $path === '.') {
-			// This creates a root folder for the storage mount.
-			$data['name'] = '';
-			$data['permissions'] = Constants::PERMISSION_ALL;
-			$data['mimetype'] = 'httpd/unix-directory';		//$this->getMimeType($path);
-			$data['mtime'] = time();
-			$data['storage_mtime'] = time();
-			$data['size'] = 0; //unknown
-			$data['etag'] = null;
-		} else {
-			// Get record from table
-			$swarmFile = $this->filemapper->find($path, $this->storageId);
-			$data['name'] = $path;
-			$data['permissions'] = Constants::PERMISSION_READ;
-			// Set mimetype as a string, get by using its ID (int)
-			$mimetypeId = $swarmFile->getMimetype();
-            $data['mimetype'] = $this->mimeTypeHandler->getMimetypeById($mimetypeId);
-            $data['mtime'] = time();
-            $data['storage_mtime'] = $swarmFile->getStorageMtime();
-            $data['size'] = $swarmFile->getSize();
-            $data['etag'] = null;
-			$data['swarm_ref'] = $swarmFile->getSwarmReference();
-        }
-	 	return $data;
-	}
-
 	public function mkdir($path) {
-		return true;
+	 	return true;
 	}
 
 	public function rmdir($path) {
+	}
+
+	public function rename($path1, $path2) {
+		$rows = $this->filemapper->getPathTree($path1, $this->storageId);
+		foreach ($rows as $row) {
+			$oldpath =  $row->getName();
+			$newpath = substr_replace($oldpath, $path2, 0, strlen($path1));
+			$updateSwarmTable = $this->filemapper->updatePath($oldpath, $newpath, $this->storageId);
+		}
+		return true;
 	}
 
 	public function opendir($path) {
@@ -196,14 +185,28 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 	 * @return bool
 	 */
 	public function is_dir($path) {
-		if (stripos("/",$path) === false) {
+		if (stripos($path, "/") === false) {
 			return false;
 		}
 		return true;
 	}
 
+	public function is_file($path) {
+		return $this->filesize($path) !== false;
+	}
+
 	public function filetype($path) {
-		return true;
+		if ($path === 'FolderTest1')
+			return 'dir';
+		else
+			return 'file';
+		// try {
+		// 	return $this->getFileInfo($path)->isDirectory() ? 'dir' : 'file';
+		// } catch (NotFoundException $e) {
+		// 	return false;
+		// } catch (ForbiddenException $e) {
+		// 	return false;
+		// }
 	}
 
 	public function getPermissions($path) {
@@ -242,7 +245,9 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 		return isset($this->mountOptions[$name]) ? $this->mountOptions[$name] : $default;
 	}
 
-	public function verifyPath($path, $fileName) {
+	public function verifyPath($path, $fileName)
+	{
+
 	}
 
 	/**
@@ -313,6 +318,66 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 	}
 	*/
 
+	public function getDirectoryContent($directory): \Traversable {
+		$dh = $this->opendir("/");
+		$metadata=[];
+
+		// if (is_resource($dh)) {
+		// 	$basePath = rtrim($directory, '/');
+		// 	while (($file = readdir($dh)) !== false) {
+		// 		$childPath = $basePath . '/' . trim($file, '/');
+		// 		$metadata = $this->getMetaData($childPath);
+		// 		if ($metadata !== null) {
+		 			yield $metadata;
+		// 		}
+		// 	}
+		// }
+	}
+
+		/**
+	 * @param string $path
+	 * @return array|null
+	 */
+	public function getMetaData($path) {
+		$data = [];
+		if ($path === '' || $path === '/' || $path === '.') {
+			// This creates a root folder for the storage mount.
+			$data['name'] = '';
+			$data['permissions'] = Constants::PERMISSION_ALL;
+			$data['mimetype'] = 'httpd/unix-directory';
+			$data['mtime'] = time();
+			$data['storage_mtime'] = time();
+			$data['size'] = 0; //unknown
+			$data['etag'] = null;
+		}
+		// If not in swarm table, assume it's a folder
+		$exists = $this->filemapper->findExists($path, $this->storageId) !== 0;
+		if (!$exists) {
+			// Create a folder item
+			$data['name'] = $path;
+			$data['permissions'] = (Constants::PERMISSION_ALL - Constants:: PERMISSION_DELETE);
+			$data['mimetype'] = 'httpd/unix-directory';
+			$data['mtime'] = time();
+			$data['storage_mtime'] = time();
+			$data['size'] = 1; //unknown
+			$data['etag'] = uniqid();
+		}
+		else {
+			// Get record from table
+			$swarmFile = $this->filemapper->find($path, $this->storageId);
+			$data['name'] = basename($path); //TODO: Test
+			$data['permissions'] = Constants::PERMISSION_READ;
+			// Set mimetype as a string, get by using its ID (int)
+			$mimetypeId = $swarmFile->getMimetype();
+            $data['mimetype'] = $this->mimeTypeHandler->getMimetypeById($mimetypeId);
+            $data['mtime'] = time();
+            $data['storage_mtime'] = $swarmFile->getStorageMtime();
+            $data['size'] = $swarmFile->getSize();
+            $data['etag'] = uniqid();
+			$data['swarm_ref'] = $swarmFile->getSwarmReference();
+        }
+	 	return $data;
+	}
 	protected function toTmpFile($source) {
 		$extension = '';
 		$tmpFile = \OC::$server->getTempManager()->getTemporaryFile($extension);

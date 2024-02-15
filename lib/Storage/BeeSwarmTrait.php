@@ -199,7 +199,6 @@ trait BeeSwarmTrait {
 		$output = fopen($url_endpoint, 'r', false, $context);
 
 		if (!$output) {
-			fclose($output);
 			throw new \Exception("Unable to get file $path from swarm");
 		}
 		return $output;

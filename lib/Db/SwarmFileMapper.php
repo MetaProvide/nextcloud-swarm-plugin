@@ -71,6 +71,23 @@ class SwarmFileMapper extends QBMapper {
 		return $this->findEntity($select);
 	}
 
+	/**
+	 * @param string $name
+	 * @param int $storage
+	 *
+	 * @return count of elements in array
+	 */
+	public function findExists(string $name, int $storage): int {
+		$qb = $this->db->getQueryBuilder();
+
+		$select = $qb
+			->select('id')
+			->from($this->getTableName())
+			->where($qb->expr()->eq('name', $qb->createNamedParameter($name, $qb::PARAM_STR)))
+			->andWhere($qb->expr()->eq('storage', $qb->createNamedParameter($storage, $qb::PARAM_INT)));
+		return count($this->findEntities($select));
+	}
+
 	public function createFile(array $filearray): SwarmFile {
 		$swarm = new SwarmFile();
 		$swarm->setName($filearray["name"]);
@@ -82,4 +99,28 @@ class SwarmFileMapper extends QBMapper {
 		$swarm->setStorage($filearray["storage"]);
 		return $this->insert($swarm);
 	}
+
+	public function getPathTree(string $path1, int $storage): array {
+		// Get files from directory tree based on path parameter
+		$path1 .= '/';
+		$qb = $this->db->getQueryBuilder();
+		$select = $qb
+			->select('*')
+			->from($this->getTableName())
+			->where($qb->expr()->like('name', $qb->createNamedParameter($this->db->escapeLikeParameter($path1) . '%', $qb::PARAM_STR)))
+			->andWhere($qb->expr()->eq('storage', $qb->createNamedParameter($storage, $qb::PARAM_INT)));
+		return $this->findEntities($select);
+	}
+
+	public function updatePath(string $path1, string $path2, int $storage): int {
+		$qb = $this->db->getQueryBuilder();
+		$qb
+			->update($this->getTableName())
+			->set('name', $qb->createNamedParameter($path2))
+			->where($qb->expr()->eq('name', $qb->createNamedParameter($path1, $qb::PARAM_STR)))
+			->andWhere($qb->expr()->eq('storage', $qb->createNamedParameter($storage, $qb::PARAM_INT)));
+		$sql = $qb->getSQL();
+		return $qb->executeStatement();
+	}
+
 }
