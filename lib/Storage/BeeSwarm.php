@@ -269,6 +269,7 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 	}
 
 	public function fopen($path, $mode) {
+		\OC::$server->getLogger()->warning("\\apps\\nextcloud-swarm-plugin\\lib\\Storage\\BeeSwarm.php-fopen(): path=" . $path);
 		$swarmFile = $this->filemapper->find($path, $this->storageId);
 		$reference = $swarmFile->getSwarmReference();
 
@@ -318,18 +319,28 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 	}
 	*/
 
+	protected function toTempFile($source) {
+	 	$extension = '';
+	 	$tmpFile = \OC::$server->getTempManager()->getTemporaryFile($extension);
+	 	$target = fopen($tmpFile, 'w');
+	 	\OC_Helper::streamCopy($source, $target);
+	 	fclose($target);
+	 	return $tmpFile;
+	}
+
 	public function writeStream(string $path, $stream, int $size = null): int {
 		if (empty($this->stampBatchId)) {
 			fclose($stream);
 			throw new \Exception("File not uploaded: There is no active Batch associated with this storage. Please check your Administration Settings.");
 		}
-
+		\OC::$server->getLogger()->warning("\\apps\\nextcloud-swarm-plugin\\lib\\Storage\\BeeSwarm.php-writestream(): path=" . $path);
 		// Write to temp file
-		// $tmpFile = $this->toTmpFile($stream);
-		$tmpFile = parent::toTmpFile($path);
+		$tmpFile = $this->toTempFile($stream);
+		//$tmpFile = parent::toTmpFile($path);
+		\OC::$server->getLogger()->warning("\\apps\\nextcloud-swarm-plugin\\lib\\Storage\\BeeSwarm.php-writestream(): path=" . $path . ";tmp1 = ". $tmpFile );
 		$tmpFilesize = (file_exists($tmpFile) ? filesize($tmpFile) : -1);
 		$mimetype = mime_content_type($tmpFile);
-
+		\OC::$server->getLogger()->warning("\\apps\\nextcloud-swarm-plugin\\lib\\Storage\\BeeSwarm.php-writestream(): path=" . $path . ";tmpsize = ". $tmpFilesize );
 		try {
 			$result = $this->upload_stream($path, $stream, $tmpFile, $mimetype, $tmpFilesize);
 			$reference = (isset($result["reference"]) ? $result['reference'] : null);
