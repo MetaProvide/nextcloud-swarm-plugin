@@ -68,6 +68,7 @@ class SwarmFileMapper extends QBMapper {
 			->from($this->getTableName())
 			->where($qb->expr()->eq('name', $qb->createNamedParameter($name, $qb::PARAM_STR)))
 			->andWhere($qb->expr()->eq('storage', $qb->createNamedParameter($storage, $qb::PARAM_INT)));
+		\OC::$server->getLogger()->warning("\\apps\\nextcloud-swarm-plugin\\lib\\Db\\SwarmFileMapper.php-find(): name=" . $name);
 		return $this->findEntity($select);
 	}
 
