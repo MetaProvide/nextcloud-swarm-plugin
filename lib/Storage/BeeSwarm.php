@@ -210,7 +210,7 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 	}
 
 	public function getPermissions($path) {
-		return Constants::PERMISSION_ALL + Constants::PERMISSION_CREATE;
+		return Constants::PERMISSION_ALL + Constants::PERMISSION_CREATE + Constants::PERMISSION_SHARE;
 	}
 
 	public function free_space($path) {
