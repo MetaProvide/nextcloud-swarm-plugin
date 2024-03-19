@@ -210,7 +210,7 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 	}
 
 	public function getPermissions($path) {
-		return Constants::PERMISSION_ALL + Constants::PERMISSION_CREATE;
+		return (Constants::PERMISSION_ALL - Constants::PERMISSION_DELETE - Constants::PERMISSION_UPDATE);
 	}
 
 	public function free_space($path) {
@@ -355,7 +355,7 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 		if (!$exists) {
 			// Create a folder item
 			$data['name'] = $path;
-			$data['permissions'] = (Constants::PERMISSION_ALL - Constants:: PERMISSION_DELETE);
+			$data['permissions'] = (Constants::PERMISSION_ALL - Constants::PERMISSION_DELETE - Constants::PERMISSION_UPDATE);
 			$data['mimetype'] = 'httpd/unix-directory';
 			$data['mtime'] = time();
 			$data['storage_mtime'] = time();
@@ -366,7 +366,7 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 			// Get record from table
 			$swarmFile = $this->filemapper->find($path, $this->storageId);
 			$data['name'] = basename($path); //TODO: Test
-			$data['permissions'] = Constants::PERMISSION_READ;
+			$data['permissions'] = (Constants::PERMISSION_ALL - Constants::PERMISSION_DELETE - Constants::PERMISSION_UPDATE);
 			// Set mimetype as a string, get by using its ID (int)
 			$mimetypeId = $swarmFile->getMimetype();
             $data['mimetype'] = $this->mimeTypeHandler->getMimetypeById($mimetypeId);
@@ -378,7 +378,7 @@ class BeeSwarm extends \OC\Files\Storage\Common {
         }
 	 	return $data;
 	}
-	protected function toTmpFile($source) {
+	protected function toTempFile($source) {
 		$extension = '';
 		$tmpFile = \OC::$server->getTempManager()->getTemporaryFile($extension);
 		$target = fopen($tmpFile, 'w');
@@ -394,7 +394,7 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 		}
 
 		// Write to temp file
-		$tmpFile = $this->toTmpFile($stream);
+		$tmpFile = $this->toTempFile($stream);
 		$tmpFilesize = (file_exists($tmpFile) ? filesize($tmpFile) : -1);
 		$mimetype = mime_content_type($tmpFile);
 
@@ -414,7 +414,7 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 		// Write metadata to table
 		$uploadfiles = [
 			"name" => $path,
-			"permissions" => Constants::PERMISSION_READ,
+			"permissions" => (Constants::PERMISSION_ALL - Constants::PERMISSION_DELETE - Constants::PERMISSION_UPDATE),
 			"mimetype" => $this->mimeTypeHandler->getId($mimetype),
 			"mtime" => time(),
 			"storage_mtime" => time(),
