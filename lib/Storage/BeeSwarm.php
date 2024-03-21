@@ -185,28 +185,19 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 	 * @return bool
 	 */
 	public function is_dir($path) {
-		if (stripos($path, "/") === false) {
-			return false;
-		}
-		return true;
+		return $this->file_exists($path) == false;
 	}
 
 	public function is_file($path) {
-		return $this->filesize($path) !== false;
+		return $this->file_exists($path) == true;
 	}
 
 	public function filetype($path) {
-		if ($path === 'FolderTest1')
+		if ($this->file_exists($path))
+		{
 			return 'dir';
-		else
-			return 'file';
-		// try {
-		// 	return $this->getFileInfo($path)->isDirectory() ? 'dir' : 'file';
-		// } catch (NotFoundException $e) {
-		// 	return false;
-		// } catch (ForbiddenException $e) {
-		// 	return false;
-		// }
+		}
+		return 'file';
 	}
 
 	public function getPermissions($path) {
@@ -269,10 +260,12 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 	}
 
 	public function fopen($path, $mode) {
+		if ($path === '' || $path === '/' || $path === '.') {
+			return false;
+		}
 		$swarmFile = $this->filemapper->find($path, $this->storageId);
 		$reference = $swarmFile->getSwarmReference();
 
-		$useExisting = true;
 		switch ($mode) {
 			case 'r':
 			case 'rb':
@@ -291,7 +284,6 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 			case 'c':	// Open the file for writing only
 			case 'c+': 	// Open the file for reading and writing;
 		}
-
 		return false;
 	}
 
