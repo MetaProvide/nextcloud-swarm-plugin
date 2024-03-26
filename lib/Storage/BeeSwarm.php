@@ -187,17 +187,19 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 	public function is_dir($path) {
 		return $this->file_exists($path) == false;
 	}
-
+	/**
+	 * @return bool
+	 */
 	public function is_file($path) {
 		return $this->file_exists($path) == true;
 	}
 
 	public function filetype($path) {
-		if ($this->file_exists($path))
+		if ($this->is_file($path))
 		{
-			return 'dir';
+			return 'file';
 		}
-		return 'file';
+		return 'dir';
 	}
 
 	public function getPermissions($path) {
@@ -236,9 +238,7 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 		return isset($this->mountOptions[$name]) ? $this->mountOptions[$name] : $default;
 	}
 
-	public function verifyPath($path, $fileName)
-	{
-
+	public function verifyPath($path, $fileName) {
 	}
 
 	/**
@@ -255,6 +255,9 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 		return true;
 	}
 
+	/**
+	 * @return bool
+	 */
 	public function unlink($path) {
 		return true;
 	}
@@ -311,19 +314,6 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 	*/
 
 	public function getDirectoryContent($directory): \Traversable {
-		$dh = $this->opendir("/");
-		$metadata=[];
-
-		// if (is_resource($dh)) {
-		// 	$basePath = rtrim($directory, '/');
-		// 	while (($file = readdir($dh)) !== false) {
-		// 		$childPath = $basePath . '/' . trim($file, '/');
-		// 		$metadata = $this->getMetaData($childPath);
-		// 		if ($metadata !== null) {
-		 			yield $metadata;
-		// 		}
-		// 	}
-		// }
 	}
 
 		/**
@@ -365,11 +355,12 @@ class BeeSwarm extends \OC\Files\Storage\Common {
             $data['mtime'] = time();
             $data['storage_mtime'] = $swarmFile->getStorageMtime();
             $data['size'] = $swarmFile->getSize();
-            $data['etag'] = uniqid();
+            $data['etag'] = $swarmFile->getSwarmTag();
 			$data['swarm_ref'] = $swarmFile->getSwarmReference();
         }
 	 	return $data;
 	}
+
 	protected function toTempFile($source) {
 		$extension = '';
 		$tmpFile = \OC::$server->getTempManager()->getTemporaryFile($extension);
@@ -411,7 +402,7 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 			"mtime" => time(),
 			"storage_mtime" => time(),
 			"size" => $tmpFilesize,
-			"etag" => null,
+			"etag" => uniqid(),
 			"reference" => $reference,
 			"storage" => $this->storageId,
 		];
