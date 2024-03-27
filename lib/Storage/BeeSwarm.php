@@ -313,8 +313,8 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 	}
 	*/
 
-	public function getDirectoryContent($directory): \Traversable {
-	}
+	// public function getDirectoryContent($directory): \Traversable {
+	// }
 
 		/**
 	 * @param string $path
@@ -355,7 +355,7 @@ class BeeSwarm extends \OC\Files\Storage\Common {
             $data['mtime'] = time();
             $data['storage_mtime'] = $swarmFile->getStorageMtime();
             $data['size'] = $swarmFile->getSize();
-            $data['etag'] = $swarmFile->getSwarmTag();
+            $data['etag'] = uniqid();
 			$data['swarm_ref'] = $swarmFile->getSwarmReference();
         }
 	 	return $data;
@@ -402,7 +402,7 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 			"mtime" => time(),
 			"storage_mtime" => time(),
 			"size" => $tmpFilesize,
-			"etag" => uniqid(),
+			"etag" => null,
 			"reference" => $reference,
 			"storage" => $this->storageId,
 		];
