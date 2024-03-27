@@ -133,13 +133,13 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 	}
 
 	public function stat($path) {
-		// Based on FTP class
-		if (!$this->file_exists($path)) {
+		$data = $this->getMetaData($path);
+		if ($data['mimetype'] === 'httpd/unix-directory') {
 			return false;
 		}
 		return [
-			'mtime' => $this->filemtime($path),
-			'size' => 0,
+			'mtime' => $data['mtime'],
+			'size' => $data['size'],
 		];
 	}
 
