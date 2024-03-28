@@ -133,13 +133,13 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 	}
 
 	public function stat($path) {
-		// Based on FTP class
-		if (!$this->file_exists($path)) {
+		$data = $this->getMetaData($path);
+		if ($data['mimetype'] === 'httpd/unix-directory') {
 			return false;
 		}
 		return [
-			'mtime' => $this->filemtime($path),
-			'size' => 0,
+			'mtime' => $data['mtime'],
+			'size' => $data['size'],
 		];
 	}
 
@@ -185,32 +185,25 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 	 * @return bool
 	 */
 	public function is_dir($path) {
-		if (stripos($path, "/") === false) {
-			return false;
-		}
-		return true;
+		return $this->file_exists($path) == false;
 	}
-
+	/**
+	 * @return bool
+	 */
 	public function is_file($path) {
-		return $this->filesize($path) !== false;
+		return $this->file_exists($path) == true;
 	}
 
 	public function filetype($path) {
-		if ($path === 'FolderTest1')
-			return 'dir';
-		else
+		if ($this->is_file($path))
+		{
 			return 'file';
-		// try {
-		// 	return $this->getFileInfo($path)->isDirectory() ? 'dir' : 'file';
-		// } catch (NotFoundException $e) {
-		// 	return false;
-		// } catch (ForbiddenException $e) {
-		// 	return false;
-		// }
+		}
+		return 'dir';
 	}
 
 	public function getPermissions($path) {
-		return Constants::PERMISSION_ALL + Constants::PERMISSION_CREATE;
+		return (Constants::PERMISSION_ALL - Constants::PERMISSION_DELETE - Constants::PERMISSION_UPDATE);
 	}
 
 	public function free_space($path) {
@@ -245,9 +238,7 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 		return isset($this->mountOptions[$name]) ? $this->mountOptions[$name] : $default;
 	}
 
-	public function verifyPath($path, $fileName)
-	{
-
+	public function verifyPath($path, $fileName) {
 	}
 
 	/**
@@ -264,15 +255,20 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 		return true;
 	}
 
+	/**
+	 * @return bool
+	 */
 	public function unlink($path) {
 		return true;
 	}
 
 	public function fopen($path, $mode) {
+		if ($path === '' || $path === '/' || $path === '.') {
+			return false;
+		}
 		$swarmFile = $this->filemapper->find($path, $this->storageId);
 		$reference = $swarmFile->getSwarmReference();
 
-		$useExisting = true;
 		switch ($mode) {
 			case 'r':
 			case 'rb':
@@ -291,7 +287,6 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 			case 'c':	// Open the file for writing only
 			case 'c+': 	// Open the file for reading and writing;
 		}
-
 		return false;
 	}
 
@@ -318,21 +313,8 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 	}
 	*/
 
-	public function getDirectoryContent($directory): \Traversable {
-		$dh = $this->opendir("/");
-		$metadata=[];
-
-		// if (is_resource($dh)) {
-		// 	$basePath = rtrim($directory, '/');
-		// 	while (($file = readdir($dh)) !== false) {
-		// 		$childPath = $basePath . '/' . trim($file, '/');
-		// 		$metadata = $this->getMetaData($childPath);
-		// 		if ($metadata !== null) {
-		 			yield $metadata;
-		// 		}
-		// 	}
-		// }
-	}
+	// public function getDirectoryContent($directory): \Traversable {
+	// }
 
 		/**
 	 * @param string $path
@@ -355,7 +337,7 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 		if (!$exists) {
 			// Create a folder item
 			$data['name'] = $path;
-			$data['permissions'] = (Constants::PERMISSION_ALL - Constants:: PERMISSION_DELETE);
+			$data['permissions'] = (Constants::PERMISSION_ALL - Constants::PERMISSION_DELETE - Constants::PERMISSION_UPDATE);
 			$data['mimetype'] = 'httpd/unix-directory';
 			$data['mtime'] = time();
 			$data['storage_mtime'] = time();
@@ -366,7 +348,7 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 			// Get record from table
 			$swarmFile = $this->filemapper->find($path, $this->storageId);
 			$data['name'] = basename($path); //TODO: Test
-			$data['permissions'] = Constants::PERMISSION_READ;
+			$data['permissions'] = (Constants::PERMISSION_ALL - Constants::PERMISSION_DELETE - Constants::PERMISSION_UPDATE);
 			// Set mimetype as a string, get by using its ID (int)
 			$mimetypeId = $swarmFile->getMimetype();
             $data['mimetype'] = $this->mimeTypeHandler->getMimetypeById($mimetypeId);
@@ -378,7 +360,8 @@ class BeeSwarm extends \OC\Files\Storage\Common {
         }
 	 	return $data;
 	}
-	protected function toTmpFile($source) {
+
+	protected function toTempFile($source) {
 		$extension = '';
 		$tmpFile = \OC::$server->getTempManager()->getTemporaryFile($extension);
 		$target = fopen($tmpFile, 'w');
@@ -394,7 +377,7 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 		}
 
 		// Write to temp file
-		$tmpFile = $this->toTmpFile($stream);
+		$tmpFile = $this->toTempFile($stream);
 		$tmpFilesize = (file_exists($tmpFile) ? filesize($tmpFile) : -1);
 		$mimetype = mime_content_type($tmpFile);
 
@@ -414,7 +397,7 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 		// Write metadata to table
 		$uploadfiles = [
 			"name" => $path,
-			"permissions" => Constants::PERMISSION_READ,
+			"permissions" => (Constants::PERMISSION_ALL - Constants::PERMISSION_DELETE - Constants::PERMISSION_UPDATE),
 			"mimetype" => $this->mimeTypeHandler->getId($mimetype),
 			"mtime" => time(),
 			"storage_mtime" => time(),
