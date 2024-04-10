@@ -178,7 +178,8 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 	}
 
 	public function opendir($path) {
-		return opendir($path);
+		\OC::$server->getLogger()->warning("workspace\server\apps-extra\files_external_ethswarm\lib\Storage\BeeSwarm.php-opendir(): path=" . $path);
+	 	return false;
 	}
 
 	/**
@@ -337,7 +338,7 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 		if (!$exists) {
 			// Create a folder item
 			$data['name'] = $path;
-			$data['permissions'] = (Constants::PERMISSION_ALL - Constants::PERMISSION_DELETE - Constants::PERMISSION_UPDATE);
+			$data['permissions'] = (Constants::PERMISSION_ALL - Constants::PERMISSION_DELETE);
 			$data['mimetype'] = 'httpd/unix-directory';
 			$data['mtime'] = time();
 			$data['storage_mtime'] = time();
