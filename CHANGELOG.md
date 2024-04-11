@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## 0.4.0 - 2024-04-10
+
+### Added
+
+-   [#47](https://github.com/MetaProvide/nextcloud-swarm-plugin/issues/47) Upgrade plugin for NC version 28 (Hub 7)
+
 ## 0.3.0 - 2024-03-27
 
 ### Added
