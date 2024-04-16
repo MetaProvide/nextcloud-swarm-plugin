@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+### **Changelog**
+
+**0.4.1 - 2024-04-16**
+
+Added
+
+- Updated the PHP version for the make command of release.yml to 8.2
+  
 ## 0.4.0 - 2024-04-10
 
 ### Added
