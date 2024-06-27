@@ -1,4 +1,4 @@
-FROM nextcloud:25
+FROM nextcloud:28
 
 RUN pecl install xdebug; \
 	docker-php-ext-enable xdebug; \
