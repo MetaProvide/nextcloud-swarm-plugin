@@ -30,12 +30,13 @@ For setting up a Bee node please have a look at the [official documentation](htt
 
 The following steps explain how to configure a Bee node in Nextcloud.
 
--   Make sure the "External Storage" plugin is enabled
--   Install the "External Storage: Swarm" app from the Nextcloud App store
+-   Run this command to start the development enviroment `docker compose up`, wait 10 seconds and naviagate to `localhost`
+-   Once the nextcloud instance has been initalized stop the docker services, navigate to `docker-compose.yml` and active the volume for this plugin directory, by removing the `#` in front of the line `-./:/var/www/html/custom_apps/files_external_ethswarm`. Then run `docker compose up`. **NOTE** You only need to do this one time, once Nextcloud has been initalize the volume mappings will not be an issue.
+-   Navigate to Profile menu -> Settings -> Apps and make sure the "External Storage support" and "External Storage: Swarm" plugins are enabled
 -   Navigate to External Storage Administration (Profile menu -> Settings -> External Storage)
--   Add the connection settings for a new Bee node
+-   Add the connection settings for a new Bee node, **make sure** Authentiation: none, Configuration is pointing to an active Bee node, and Available for: All users
 -   Navigate to Ethswarm Storage Administration (Profile menu -> Settings -> Ethswarm Storage)
--   Configure the Bee node - by default, encryption is active
+-   Configure the Bee node - by default, encryption is active, **make sure** stamp batch is actived by using the toggle
 -   To use a Bee node, it is necessary to [Purchase a Batch of new stamps](https://docs.ethswarm.org/docs/access-the-swarm/keep-your-data-alive) from the funds in the node's wallet account
 -   Once the new batch is purchased, a unique batchId is generated. Once your batch has been purchased, it will take a few minutes for other Bee nodes in the Swarm to catch up and register your batch. Allow some time for your batch to propagate in the network before proceeding to the next step. This is indicated by the checkbox "Usable".
 -   Uploading files to the swarm costs Bzz, so it is necessary to select a Batch as "Active". Only 1 batch is allowed to be Active for a given Bee node. Then click "Save Settings".

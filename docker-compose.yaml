@@ -1,18 +1,17 @@
----
-version: "3"
-
 volumes:
-  mariadb: null
-  nextcloud: null
-  clef-1: null
+  mariadb:
+  nextcloud_data:
+  nextcloud_config:
+
 
 networks:
-  frontend: null
-  backend: null
+  frontend:
+  backend:
+
 
 services:
   mariadb:
-    image: mariadb:10.6
+    image: mariadb:latest
     # set transaction isolation: https://docs.nextcloud.com/server/stable/admin_manual/configuration_database/linux_database_configuration.html
     command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW --innodb-file-per-table=1 --skip-innodb-read-only-compressed
     restart: always
@@ -33,15 +32,15 @@ services:
     restart: always
     depends_on:
       - mariadb
-      - bee-1
     networks:
       - frontend
       - backend
     extra_hosts:
       - host.docker.internal:host-gateway
     volumes:
-      - nextcloud:/var/www/html
-      - ./:/var/www/html/custom_apps/files_external_ethswarm
+      - nextcloud_data:/var/www/html/data
+      - nextcloud_config:/var/www/html/config
+    # - ./:/var/www/html/custom_apps/files_external_ethswarm # uncomment this line after first run to enable the app
     ports:
       - "80:80"
       - "443:443"
@@ -50,8 +49,8 @@ services:
       MYSQL_USER: nextcloud
       MYSQL_PASSWORD: nextcloud
       MYSQL_HOST: mariadb:3306
-      NEXTCLOUD_ADMIN_USER: test
-      NEXTCLOUD_ADMIN_PASSWORD: test
+      NEXTCLOUD_ADMIN_USER: swarmbox
+      NEXTCLOUD_ADMIN_PASSWORD: swarmbox
 
   adminer:
     image: adminer
@@ -63,74 +62,3 @@ services:
       - 8082:8080
     links:
       - mariadb
-
-  clef-1:
-    image: ethersphere/clef:0.6.0
-    restart: always
-    environment:
-      - CLEF_CHAINID
-    volumes:
-      - clef-1:/app/data
-    command: full
-    networks:
-      - backend
-
-  bee-1:
-    image: ethersphere/bee:stable
-    restart: always
-    environment:
-      - BEE_API_ADDR
-      - BEE_BLOCK_TIME
-      - BEE_BOOTNODE
-      - BEE_BOOTNODE_MODE
-      - BEE_CLEF_SIGNER_ENABLE
-      - BEE_CLEF_SIGNER_ENDPOINT=http://clef-1:8550
-      - BEE_CONFIG
-      - BEE_CORS_ALLOWED_ORIGINS
-      - BEE_DATA_DIR
-      - BEE_CACHE_CAPACITY
-      - BEE_DB_OPEN_FILES_LIMIT
-      - BEE_DB_BLOCK_CACHE_CAPACITY
-      - BEE_DB_WRITE_BUFFER_SIZE
-      - BEE_DB_DISABLE_SEEKS_COMPACTION
-      - BEE_DEBUG_API_ADDR
-      - BEE_DEBUG_API_ENABLE
-      - BEE_GATEWAY_MODE
-      - BEE_GLOBAL_PINNING_ENABLE
-      - BEE_FULL_NODE
-      - BEE_NAT_ADDR
-      - BEE_NETWORK_ID
-      - BEE_P2P_ADDR
-      - BEE_P2P_QUIC_ENABLE
-      - BEE_P2P_WS_ENABLE
-      - BEE_PASSWORD
-      - BEE_PASSWORD_FILE
-      - BEE_PAYMENT_EARLY
-      - BEE_PAYMENT_THRESHOLD
-      - BEE_PAYMENT_TOLERANCE
-      - BEE_POSTAGE_STAMP_ADDRESS
-      - BEE_RESOLVER_OPTIONS
-      - BEE_SWAP_ENABLE
-      - BEE_SWAP_ENDPOINT
-      - BEE_SWAP_FACTORY_ADDRESS
-      - BEE_SWAP_LEGACY_FACTORY_ADDRESSES
-      - BEE_SWAP_INITIAL_DEPOSIT
-      - BEE_SWAP_DEPLOYMENT_GAS_PRICE
-      - BEE_TRACING_ENABLE
-      - BEE_TRACING_ENDPOINT
-      - BEE_TRACING_SERVICE_NAME
-      - BEE_TRANSACTION
-      - BEE_VERBOSITY
-      - BEE_WELCOME_MESSAGE
-      - BEE_MAINNET
-    ports:
-      - "${API_ADDR:-1633}${BEE_API_ADDR:-:1633}"
-      - "${P2P_ADDR:-1634}${BEE_P2P_ADDR:-:1634}"
-      - "${DEBUG_API_ADDR:-127.0.0.1:1635}${BEE_DEBUG_API_ADDR:-:1635}"
-    volumes:
-      - ./dev-environment/bee_node:/home/bee/.bee
-    command: start
-    depends_on:
-      - clef-1
-    networks:
-      - backend
