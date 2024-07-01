@@ -75,6 +75,14 @@ Since every operation in Swarm costs money, it is important to view how much mon
 -   Have the option to purchase a new batch of stamps
 -   Toggle the batch used for uploading files active/inactive
 
+#### Using Bee node hosted on same server
+
+If you are running the Bee node and Nextcloud using Docker containers on the same host, you cannot access the Bee node using `localhost` or `127.0.0.1` from within the Nextcloud container. Instead, you need to use the special DNS name `host.docker.internal` to access the host machine from within the container.
+
+This is because `localhost` and `127.0.0.1` within the container refer to the container itself, not the host machine. The `host.docker.internal` DNS name is a special entry that resolves to the IP address of the host machine, allowing you to access services running on the host from within the container.
+
+So, when configuring the Bee node connection in Nextcloud, use `host.docker.internal` instead of `localhost` or `127.0.0.1` for the IP address if your Bee node is running on the same host as the Nextcloud container.
+
 ![Setup Swarm External Storage](assets/images/swarm_Setup_Ethswarm_buyStamp1.png "Setup Swarm External Storage")
 
 <em>Advanced configuration of Swarm in Nextcloud administration</em>
