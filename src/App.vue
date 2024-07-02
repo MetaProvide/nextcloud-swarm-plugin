@@ -2,6 +2,26 @@
 	<AppContent>
 		<div class="section">
 			<h2 class="inlineblock">External Storage: Swarm</h2>
+
+			<div>
+				Access key:
+				<input v-model="accessKey" type="text" maxlength="200" />
+				<button @click="verifyAccessKey">Verify</button>
+
+				<!-- message box -->
+				 <div v-if="accessKeySubmitted" class="message">
+					 <div class="message-text">
+						<span v-if="hasAccess" class="icon-checkmark"></span>
+						 <span v-else class="icon-alert-outline-white"></span>
+						<span>{{ message }}</span>
+						<button @click="accessKeySubmitted = false">Close</button>
+					</div>
+				</div>
+			</div>
+
+
+
+
 			<a
 target="_blank" rel="noreferrer" class="icon-info" title="Open documentation"
 				href="https://github.com/MetaProvide/nextcloud-swarm-plugin/"></a>
@@ -223,6 +243,10 @@ export default {
 	data() {
 		return {
 			beeClient: null,
+			accessKey: null,
+			hasAccess: false,
+			message: null,
+			accessKeySubmitted: false,
 			show: true,
 			parsedMounts: [],
 			newBatchAmounts: [],
@@ -264,6 +288,27 @@ export default {
 		}
 	},
 	methods: {
+		async verifyAccessKey() {
+			this.accessKeySubmitted = true;
+			if (!this.accessKey) {
+				this.message = 'Please enter an access key';
+				return;
+			}
+
+			try {
+				const response = await axios.post(generateUrl("/apps/files_external_ethswarm/bee/verifyBeeNodeAccess"), {access_key: this.accessKey});
+				this.hasAccess = response.status === 200;
+
+				if (this.hasAccess) {
+					this.message = 'Access key verified successfully';
+				} else {
+					this.message = response.data.msg;
+				}
+			} catch (error) {
+				console.error('There was a problem with the request:', error);
+				this.message = error.response.data.msg;
+			}
+		},
 		getRequestOptions(authUser, authPassword) {
 			let requestOptions = null;
 			if (authUser && authPassword) {
@@ -475,6 +520,7 @@ export default {
 			await axios
 				.post(url, {
 					storageconfig: JSON.stringify(parsedMountsToSave),
+					swarm_access_key: this.swarm_access_key,
 				})
 				.then((response) => {
 					this.setSaveMessage(mountidx, "Saved!");
