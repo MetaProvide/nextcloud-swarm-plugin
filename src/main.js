@@ -39,6 +39,8 @@ export default new Vue({
 		// Importing params from backend
 		const dataset = document.querySelector("#app").dataset;
 		this.settings = JSON.parse(dataset.params);
+
+		// TODO - add swarm access key to settings
 	},
 	render(h) {
 		// Render with settings passed as props to App component

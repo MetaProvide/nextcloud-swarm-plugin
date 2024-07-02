@@ -35,6 +35,11 @@ return ['routes' => [
 		'verb' => 'POST',
 	],
 	[
+		'name' => 'Bee#verifyBeeNodeAccess',
+		'url' => '/bee/verifyBeeNodeAccess',
+		'verb' => 'POST',
+	],
+	[
 		'name' => 'Bee#topUpBatch',
 		'url' => '/bee/topUpBatch',
 		'verb' => 'POST',

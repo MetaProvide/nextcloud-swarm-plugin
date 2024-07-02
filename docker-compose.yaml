@@ -4,11 +4,9 @@ volumes:
   nextcloud_data:
   nextcloud_config:
 
-
 networks:
   frontend:
   backend:
-
 
 services:
 
@@ -30,7 +28,9 @@ services:
       MYSQL_PASSWORD: nextcloud
 
   nextcloud:
-    build: ./docker/nextcloud
+    build:
+      context: ./docker/nextcloud
+      dockerfile: Dockerfile
     restart: always
     depends_on:
       - mariadb
@@ -44,6 +44,8 @@ services:
       - nextcloud_data:/var/www/html/data
       - nextcloud_config:/var/www/html/config
       - ./:/var/www/html/custom_apps/files_external_ethswarm
+      - ./docker/nextcloud/scripts/set_swarm_access_api_key.sh:/docker-entrypoint-hooks.d/post-installation/set_swarm_access_api_key.sh
+      - ./docker/nextcloud/scripts/set_swarm_access_api_key.sh:/docker-entrypoint-hooks.d/before-starting/set_swarm_access_api_key.sh
     ports:
       - "80:80"
       - "443:443"
@@ -54,6 +56,7 @@ services:
       MYSQL_HOST: mariadb:3306
       NEXTCLOUD_ADMIN_USER: swarmbox
       NEXTCLOUD_ADMIN_PASSWORD: swarmbox
+      SWARM_ACCESS_API_TOKEN: Nz5lDX7PpPGrcdAI5SjPZHVdZJe12AuMOrKfZXaL
 
   adminer:
     image: adminer
