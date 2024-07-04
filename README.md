@@ -31,7 +31,6 @@ For setting up a Bee node please have a look at the [official documentation](htt
 The following steps explain how to configure a Bee node in Nextcloud.
 
 -   Run this command to start the development enviroment `docker compose up`, wait 10 seconds and naviagate to `localhost`
--   Once the nextcloud instance has been initalized stop the docker services, navigate to `docker-compose.yml` and active the volume for this plugin directory, by removing the `#` in front of the line `-./:/var/www/html/custom_apps/files_external_ethswarm`. Then run `docker compose up`. **NOTE** You only need to do this one time, once Nextcloud has been initalize the volume mappings will not be an issue.
 -   Navigate to Profile menu -> Settings -> Apps and make sure the "External Storage support" and "External Storage: Swarm" plugins are enabled
 -   Navigate to External Storage Administration (Profile menu -> Settings -> External Storage)
 -   Add the connection settings for a new Bee node, **make sure** Authentiation: none, Configuration is pointing to an active Bee node, and Available for: All users
