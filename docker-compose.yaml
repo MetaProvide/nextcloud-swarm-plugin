@@ -10,6 +10,12 @@ networks:
 
 
 services:
+  init:
+    image: busybox
+    volumes:
+      - .:/var/www/html/custom_apps/files_external_ethswarm
+    command: [ "sh", "-c", "chown -R 33:33 /var/www/html" ]
+
   mariadb:
     image: mariadb:latest
     # set transaction isolation: https://docs.nextcloud.com/server/stable/admin_manual/configuration_database/linux_database_configuration.html
@@ -31,6 +37,7 @@ services:
     build: ./docker/nextcloud
     restart: always
     depends_on:
+      - init
       - mariadb
     networks:
       - frontend
@@ -40,7 +47,7 @@ services:
     volumes:
       - nextcloud_data:/var/www/html/data
       - nextcloud_config:/var/www/html/config
-    # - ./:/var/www/html/custom_apps/files_external_ethswarm # uncomment this line after first run to enable the app
+      - ./:/var/www/html/custom_apps/files_external_ethswarm
     ports:
       - "80:80"
       - "443:443"
