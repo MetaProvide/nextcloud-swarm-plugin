@@ -166,9 +166,9 @@ class BeeController extends Controller {
 		curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt($ch, CURLOPT_HTTPHEADER, [
-			'accept: application/json',
-			'xc-token: Nz5lDX7PpPGrcdAI5SjPZHVdZJe12AuMOrKfZXaL',
-			'Content-Type: application/json'
+			"accept: application/json",
+			"xc-token: $api_token",
+			"Content-Type: application/json"
 		]);
 
 		// Execute the request and store the response
