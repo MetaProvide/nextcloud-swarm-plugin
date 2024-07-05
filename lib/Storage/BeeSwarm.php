@@ -27,12 +27,14 @@ use Exception;
 use OCP\Constants;
 use OCP\Files\IMimeTypeLoader;
 use OCA\Files_External_Ethswarm\Db\SwarmFileMapper;
+use OCA\Files_External\Lib\StorageConfig;
 use OCP\Files\Config\IUserMountCache;
 use OCP\IDBConnection;
 use OCP\IConfig;
 use OCP\ILogger;
 use Sabre\DAV\Exception\BadRequest;
 
+// TODO: Make sure to retrive backendOption from storageConfig
 class BeeSwarm extends \OC\Files\Storage\Common {
 	use BeeSwarmTrait;
 
@@ -66,7 +68,11 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 	/** @var \OC\Files\Cache\Cache */
 	private $cacheHandler;
 
+	/** @var \OCA\Files_External\Lib\StorageConfig */
+	private $storageConfig;
+
 	public function __construct($params) {
+		//$this->storageConfig = $storageConfig;
 		$this->parseParams($params);
 		$this->id = 'ethswarm::' . $this->ip . ':' . $this->port;
 		$this->storageId = $this->getStorageCache()->getNumericId();
@@ -373,6 +379,11 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 
 	public function writeStream(string $path, $stream, int $size = null): int {
 		if (empty($this->stampBatchId)) {
+			fclose($stream);
+			throw new \Exception("File not uploaded: There is no active Batch associated with this storage. Please check your Administration Settings.");
+		}
+
+		if (empty($this->storage->getBackendOption('has_access'))) {
 			fclose($stream);
 			throw new \Exception("File not uploaded: There is no active Batch associated with this storage. Please check your Administration Settings.");
 		}
