@@ -15,3 +15,6 @@ RUN pecl install xdebug; \
 	} > /usr/local/etc/php/conf.d/nextcloud.ini;
 
 ENV NEXTCLOUD_UPDATE=1
+
+RUN mkdir /var/www/html/custom_apps
+RUN chown www-data:www-data -R /var/www/html/custom_apps

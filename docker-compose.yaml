@@ -1,5 +1,6 @@
 volumes:
   mariadb:
+  nextcloud_app:
   nextcloud_data:
   nextcloud_config:
 
@@ -10,6 +11,7 @@ networks:
 
 
 services:
+
   mariadb:
     image: mariadb:latest
     # set transaction isolation: https://docs.nextcloud.com/server/stable/admin_manual/configuration_database/linux_database_configuration.html
@@ -38,9 +40,10 @@ services:
     extra_hosts:
       - host.docker.internal:host-gateway
     volumes:
+      - nextcloud_app:/var/www/html
       - nextcloud_data:/var/www/html/data
       - nextcloud_config:/var/www/html/config
-    # - ./:/var/www/html/custom_apps/files_external_ethswarm # uncomment this line after first run to enable the app
+      - ./:/var/www/html/custom_apps/files_external_ethswarm
     ports:
       - "80:80"
       - "443:443"
