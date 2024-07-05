@@ -1,5 +1,6 @@
 volumes:
   mariadb:
+  nextcloud_app:
   nextcloud_data:
   nextcloud_config:
 
@@ -10,11 +11,6 @@ networks:
 
 
 services:
-  init:
-    image: busybox
-    volumes:
-      - .:/var/www/html/custom_apps/files_external_ethswarm
-    command: [ "sh", "-c", "chown -R 33:33 /var/www/html" ]
 
   mariadb:
     image: mariadb:latest
@@ -37,7 +33,6 @@ services:
     build: ./docker/nextcloud
     restart: always
     depends_on:
-      - init
       - mariadb
     networks:
       - frontend
@@ -45,6 +40,7 @@ services:
     extra_hosts:
       - host.docker.internal:host-gateway
     volumes:
+      - nextcloud_app:/var/www/html
       - nextcloud_data:/var/www/html/data
       - nextcloud_config:/var/www/html/config
       - ./:/var/www/html/custom_apps/files_external_ethswarm
