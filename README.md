@@ -31,10 +31,10 @@ For setting up a Bee node please have a look at the [official documentation](htt
 The following steps explain how to configure a Bee node in Nextcloud.
 
 -   Run this command to start the development enviroment `docker compose up`, wait 10 seconds and naviagate to `localhost`
--   Navigate to Profile menu -> Settings -> Apps and make sure the "External Storage support" and "External Storage: Swarm" plugins are enabled
--   Navigate to External Storage Administration (Profile menu -> Settings -> External Storage)
+-   Navigate to Profile menu -> Apps and make sure the "External Storage support" and "External Storage: Swarm" plugins are enabled
+-   Navigate to External Storage Administration (Profile menu -> Administration Settings -> External Storage)
 -   Add the connection settings for a new Bee node, **make sure** Authentiation: none, Configuration is pointing to an active Bee node, and Available for: All users
--   Navigate to Ethswarm Storage Administration (Profile menu -> Settings -> Ethswarm Storage)
+-   Navigate to Ethswarm Storage Administration (Profile menu -> Administration Settings -> Ethswarm Storage)
 -   Configure the Bee node - by default, encryption is active, **make sure** stamp batch is actived by using the toggle
 -   To use a Bee node, it is necessary to [Purchase a Batch of new stamps](https://docs.ethswarm.org/docs/access-the-swarm/keep-your-data-alive) from the funds in the node's wallet account
 -   Once the new batch is purchased, a unique batchId is generated. Once your batch has been purchased, it will take a few minutes for other Bee nodes in the Swarm to catch up and register your batch. Allow some time for your batch to propagate in the network before proceeding to the next step. This is indicated by the checkbox "Usable".
