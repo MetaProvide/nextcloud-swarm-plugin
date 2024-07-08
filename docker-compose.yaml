@@ -1,6 +1,5 @@
 volumes:
   mariadb:
-  nextcloud_app:
   nextcloud_data:
   nextcloud_config:
 
@@ -40,9 +39,9 @@ services:
     extra_hosts:
       - host.docker.internal:host-gateway
     volumes:
-      - nextcloud_app:/var/www/html
       - nextcloud_data:/var/www/html/data
       - nextcloud_config:/var/www/html/config
+      - ./dev-environment/nextcloud_source:/var/www/html
       - ./:/var/www/html/custom_apps/files_external_ethswarm
       - ./docker/nextcloud/scripts/set_swarm_access_api_key.sh:/docker-entrypoint-hooks.d/post-installation/set_swarm_access_api_key.sh
       - ./docker/nextcloud/scripts/set_swarm_access_api_key.sh:/docker-entrypoint-hooks.d/before-starting/set_swarm_access_api_key.sh
