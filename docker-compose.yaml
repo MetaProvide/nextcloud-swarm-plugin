@@ -43,6 +43,7 @@ services:
       - nextcloud_config:/var/www/html/config
       - ./dev-environment/nextcloud_source:/var/www/html
       - ./:/var/www/html/custom_apps/files_external_ethswarm
+      - ./docker/nextcloud/hooks:/docker-entrypoint-hooks.d
     ports:
       - "80:80"
       - "443:443"
