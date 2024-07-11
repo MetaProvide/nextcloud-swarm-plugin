@@ -5,7 +5,7 @@ RUN pecl install xdebug; \
 	mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"; \
 	{ \
 	echo "xdebug.mode = debug"; \
-	echo "xdebug.start_with_request = no"; \
+	echo "xdebug.start_with_request = yes"; \
 	echo "xdebug.client_host=host.docker.internal"; \
 	echo "memory_limit=1024M"; \
 	echo "upload_max_filesize=16G"; \
