@@ -5,7 +5,7 @@ RUN pecl install xdebug; \
 	mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"; \
 	{ \
 	echo "xdebug.mode = debug"; \
-	echo "xdebug.start_with_request = yes"; \
+	echo "xdebug.start_with_request = no"; \
 	echo "xdebug.client_host=host.docker.internal"; \
 	echo "memory_limit=1024M"; \
 	echo "upload_max_filesize=16G"; \
@@ -16,5 +16,9 @@ RUN pecl install xdebug; \
 
 ENV NEXTCLOUD_UPDATE=1
 
-RUN mkdir /var/www/html/custom_apps
-RUN chown www-data:www-data -R /var/www/html/custom_apps
+ENV WWWUSER=1000
+ENV WWWGROUP=1000
+ENV APACHE_RUN_USER=www-user
+ENV APACHE_RUN_GROUP=www-group
+RUN groupadd -g $WWWGROUP $APACHE_RUN_GROUP
+RUN useradd -u $WWWUSER -g $APACHE_RUN_GROUP $APACHE_RUN_USER
