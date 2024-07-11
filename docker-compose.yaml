@@ -2,6 +2,7 @@ volumes:
   mariadb:
   nextcloud_data:
   nextcloud_config:
+  nextcloud_theme:
 
 networks:
   frontend:
