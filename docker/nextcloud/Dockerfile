@@ -16,5 +16,9 @@ RUN pecl install xdebug; \
 
 ENV NEXTCLOUD_UPDATE=1
 
-RUN mkdir /var/www/html/custom_apps
-RUN chown www-data:www-data -R /var/www/html/custom_apps
+ENV WWWUSER=1000
+ENV WWWGROUP=1000
+ENV APACHE_RUN_USER=www-user
+ENV APACHE_RUN_GROUP=www-group
+RUN groupadd -g $WWWGROUP $APACHE_RUN_GROUP
+RUN useradd -u $WWWUSER -g $APACHE_RUN_GROUP $APACHE_RUN_USER
