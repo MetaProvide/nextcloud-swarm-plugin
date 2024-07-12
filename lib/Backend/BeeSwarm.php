@@ -29,6 +29,7 @@ use OCA\Files_External\Lib\Auth\AuthMechanism;
 use OCA\Files_External_Ethswarm\Auth\HttpBasicAuth;
 use OCA\Files_External\Lib\DefinitionParameter;
 use OCA\Files_External\Lib\StorageConfig;
+use OCA\Files_External\Service\GlobalStoragesService;
 use OCP\IUser;
 use OCP\IConfig;
 use Psr\Log\LoggerInterface;
@@ -49,20 +50,21 @@ class BeeSwarm extends Backend {
 	 /** @var LoggerInterface */
 	 private $logger;
 
-	public function __construct(string $appName, IL10N $l, IConfig $config, LoggerInterface $logger) {
+	 /** @var GlobalStoragesService */
+	 private $globalStoragesService;
+
+	public function __construct(string $appName, IL10N $l, IConfig $config, LoggerInterface $logger, GlobalStoragesService $globalStoragesService) {
 		$this->l = $l;
 		$this->appName = $appName;
 		$this->config = $config;
 		$this->logger = $logger;
+		$this->globalStoragesService = $globalStoragesService;
 		$this
 			->setIdentifier('files_external_ethswarm')
 			->addIdentifierAlias('\OC\Files\External_Storage\BeeSwarm') // legacy compat
 			->setStorageClass('\OCA\Files_External_Ethswarm\Storage\BeeSwarm')
 			->setText($l->t('Swarm'))
 			->addParameters([
-				// (new DefinitionParameter('ip', $l->t('URL')))->setTooltip($l->t("Add http:// or https:// at the start of the parameter")),
-				// (new DefinitionParameter('port', $l->t('API Port')))->setTooltip($l->t("The API-endpoint port that exposes all functionality with the Swarm network. By default, it runs on port 1633")),
-				// (new DefinitionParameter('debug_api_port', $l->t('Debug API Port')))->setTooltip($l->t("The Debug API exposes functionality to inspect the state of your Bee node while it is running.  By default, it runs on port 1635")),
 				(new DefinitionParameter('access_key', $l->t('Access Key')))->setTooltip($l->t("Access Key from MetaProvide")),
 			])
 			->addAuthScheme(AuthMechanism::SCHEME_NULL)
@@ -85,7 +87,7 @@ class BeeSwarm extends Backend {
 		$ch = curl_init();
 
 		// Set the URL
-		// should ask a public api for the access key because Nocodb requires an api_token
+		// TODO: should ask a public API for the access key because Nocodb requires an api_token
 		// this api_token gives full access to the table (including deletion of every row)
 
 		// $endpont = swarmpluginaccess.metaprovide.org/api/check
@@ -123,17 +125,14 @@ class BeeSwarm extends Backend {
 		$this->config->setAppValue($this->appName, 'has_swarm_access', true);
 
 		// Set storage config to point to MetaProvide Developer Bee Node
-		// $storageConfig->setBackendOption('ip', 'http://188.34.161.148');
-		// $storageConfig->setBackendOption('port', '1633');
-		// $storageConfig->setBackendOption('debug_api_port', '1635');
 		$storageConfig->setBackendOptions([
-			'ip' => 'https://swarm-dev.metaprovide.org',
+			'ip' => 'http://188.34.161.148',
 			'port' => '1633',
 			'debug_api_port' => '1635',
 			'access_key' => $access_key
 		]);
 
-		$options = $storageConfig->getBackendOptions();
+		$this->globalStoragesService->updateStorage($storageConfig);
 
 		$auth = $storageConfig->getAuthMechanism();
 		if ($auth->getScheme() != HttpBasicAuth::SCHEME_HTTP_BASIC) {
