@@ -53,6 +53,8 @@ class Admin implements ISettings {
 	 */
 	public function getForm(): TemplateResponse {
 		// Get all valid Beeswarm storages
+		$temp = $this->globalStoragesService->getStorages();
+
 		$storageBackends = array_filter($this->globalStoragesService->getStorages(), function ($storageBackend) {
 			return $storageBackend->getBackend()->getStorageClass() == '\OCA\Files_External_Ethswarm\Storage\BeeSwarm';
 		});

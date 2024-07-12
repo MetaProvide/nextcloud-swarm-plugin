@@ -31,18 +31,29 @@ use OCA\Files_External\Lib\DefinitionParameter;
 use OCA\Files_External\Lib\StorageConfig;
 use OCP\IUser;
 use OCP\IConfig;
+use Psr\Log\LoggerInterface;
 
 class BeeSwarm extends Backend {
 	/**
 	 * ethswarm constructor.
 	 * @param IL10N $l
 	 */
+	private $l;
+
+	/** @var string */
+	protected $appName;
 
 	 /** @var IConfig */
 	 private $config;
 
-	public function __construct(IL10N $l, IConfig $config) {
+	 /** @var LoggerInterface */
+	 private $logger;
+
+	public function __construct(string $appName, IL10N $l, IConfig $config, LoggerInterface $logger) {
+		$this->l = $l;
+		$this->appName = $appName;
 		$this->config = $config;
+		$this->logger = $logger;
 		$this
 			->setIdentifier('files_external_ethswarm')
 			->addIdentifierAlias('\OC\Files\External_Storage\BeeSwarm') // legacy compat
@@ -60,13 +71,13 @@ class BeeSwarm extends Backend {
 	}
 
 	public function manipulateStorageConfig(StorageConfig &$storageConfig, IUser $user = null) {
-		$storageConfig->setBackendOption('has_access', false);
+		$this->config->setAppValue($this->appName, 'has_swarm_access', false);
 
 		$access_key = $storageConfig->getBackendOption('access_key');
 
 		// Check if access key is empty
 		if (empty($access_key)) {
-			\OC::$server->getLogger()->warning("Access Key not set");
+			$this->logger->warning("Access Key not set");
 			return;
 		}
 
@@ -74,6 +85,10 @@ class BeeSwarm extends Backend {
 		$ch = curl_init();
 
 		// Set the URL
+		// should ask a public api for the access key because Nocodb requires an api_token
+		// this api_token gives full access to the table (including deletion of every row)
+
+		// $endpont = swarmpluginaccess.metaprovide.org/api/check
 		$endpoint = "https://nocodb.metaprovide.org/api/v1/db/data/v1/ethswarm-api-key-manger/access_keys/find-one";
 		$query = 'where='. urlencode("(Key,eq," . $access_key . ")");
 		$url = $endpoint . '?' . $query;
@@ -83,7 +98,7 @@ class BeeSwarm extends Backend {
 
 		// check if api token is empty
 		if (empty($api_token)) {
-			\OC::$server->getLogger()->warning("API Token not found");
+			$this->logger->warning("API Token not found");
 			return;
 		}
 
@@ -98,26 +113,32 @@ class BeeSwarm extends Backend {
 		$response = curl_exec($ch);
 		$data = json_decode($response, true);
 
-		// check if staus code is 400
-		if (curl_getinfo($ch, CURLINFO_HTTP_CODE) === 400) {
-			\OC::$server->getLogger()->warning("Access Key not found");
-			return;
-		}
-
-		// check if still valid by checking if ExpiresAt is less than current time
-		if (strtotime($data["ExpiresAt"]) < time()) {
-			\OC::$server->getLogger()->warning("Access Key has expired");
+		// check if staus code is 401
+		if (curl_getinfo($ch, CURLINFO_HTTP_CODE) === 401) {
+			$this->logger->warning("Access Key not found or invalid");
 			return;
 		}
 
 		// Success
-		$storageConfig->setBackendOption('has_access', true);
+		$this->config->setAppValue($this->appName, 'has_swarm_access', true);
+
+		// Set storage config to point to MetaProvide Developer Bee Node
+		// $storageConfig->setBackendOption('ip', 'http://188.34.161.148');
+		// $storageConfig->setBackendOption('port', '1633');
+		// $storageConfig->setBackendOption('debug_api_port', '1635');
+		$storageConfig->setBackendOptions([
+			'ip' => 'https://swarm-dev.metaprovide.org',
+			'port' => '1633',
+			'debug_api_port' => '1635',
+			'access_key' => $access_key
+		]);
+
+		$options = $storageConfig->getBackendOptions();
 
 		$auth = $storageConfig->getAuthMechanism();
 		if ($auth->getScheme() != HttpBasicAuth::SCHEME_HTTP_BASIC) {
 			$storageConfig->setBackendOption('user', '');
 			$storageConfig->setBackendOption('password', '');
-			$storageConfig->setBackendOption('access_key', '');
 		}
 	}
 }

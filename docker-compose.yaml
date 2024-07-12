@@ -2,10 +2,7 @@ volumes:
   mariadb:
   nextcloud_data:
   nextcloud_config:
-<<<<<<< HEAD
-=======
   nextcloud_theme:
->>>>>>> feature/change-owner
 
 networks:
   frontend:

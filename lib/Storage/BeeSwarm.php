@@ -59,6 +59,9 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 	/** @var SwarmFileMapper */
 	private $filemapper;
 
+	/** @var IConfig */
+	private $config;
+
 	/** @var \OCP\IDBConnection */
 	protected $dbConnection;
 
@@ -68,11 +71,7 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 	/** @var \OC\Files\Cache\Cache */
 	private $cacheHandler;
 
-	/** @var \OCA\Files_External\Lib\StorageConfig */
-	private $storageConfig;
-
 	public function __construct($params) {
-		//$this->storageConfig = $storageConfig;
 		$this->parseParams($params);
 		$this->id = 'ethswarm::' . $this->ip . ':' . $this->port;
 		$this->storageId = $this->getStorageCache()->getNumericId();
@@ -383,9 +382,9 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 			throw new \Exception("File not uploaded: There is no active Batch associated with this storage. Please check your Administration Settings.");
 		}
 
-		if (empty($this->storage->getBackendOption('has_access'))) {
+		if (empty($this->config->getAppValue(self::APP_NAME,'has_swarm_access'))) {
 			fclose($stream);
-			throw new \Exception("File not uploaded: There is no active Batch associated with this storage. Please check your Administration Settings.");
+			throw new \Exception("File not uploaded: There is no access key to Bee Node has been acquired. Please check your Administration Settings.");
 		}
 
 		// Write to temp file
