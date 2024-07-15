@@ -1,8 +1,6 @@
 volumes:
   mariadb:
-  nextcloud_data:
-  nextcloud_config:
-  nextcloud_theme:
+  nextcloud_app:
 
 networks:
   frontend:
@@ -40,11 +38,10 @@ services:
     extra_hosts:
       - host.docker.internal:host-gateway
     volumes:
-      - nextcloud_data:/var/www/html/data
-      - nextcloud_config:/var/www/html/config
-      - nextcloud_theme:/var/www/html/themes
-      - ./dev-environment/nextcloud_source:/var/www/html
+      - nextcloud_app:/var/www/html
       - ./:/var/www/html/custom_apps/files_external_ethswarm
+      - ./dev-environment/nextcloud_source/lib:/var/www/html/lib
+      - ./dev-environment/nextcloud_source/apps:/var/www/html/apps
     ports:
       - "80:80"
       - "443:443"
