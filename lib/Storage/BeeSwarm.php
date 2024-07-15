@@ -160,8 +160,9 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 		return false;
 	}
 
-	public function mkdir($path) {
-	 	return true;
+	public function mkdir($path): bool {
+		$this->filemapper->createDirectory($path, $this->storageId);
+		return true;
 	}
 
 	public function rmdir($path) {
@@ -178,20 +179,26 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 	}
 
 	public function opendir($path) {
-	 	return false;
+	 	return true;
 	}
 
 	/**
 	 * @return bool
 	 */
 	public function is_dir($path) {
-		return $this->file_exists($path) == false;
+		$data = $this->getMetaData($path);
+		if ($data['mimetype'] === 'httpd/unix-directory') {
+			return true;
+		}
 	}
 	/**
 	 * @return bool
 	 */
 	public function is_file($path) {
-		return $this->file_exists($path) == true;
+		$data = $this->getMetaData($path);
+		if ($data['mimetype'] === 'httpd/unix-directory') {
+			return false;
+		}
 	}
 
 	public function filetype($path) {
@@ -239,6 +246,7 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 	}
 
 	public function verifyPath($path, $fileName) {
+
 	}
 
 	/**
@@ -309,14 +317,15 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 	/* Enabling this function causes a fatal exception "Call to a member function getId() on null /var/www/html/lib/private/Files/Mount/MountPoint.php - line 276: OC\Files\Cache\Wrapper\CacheWrapper->getId("")
 	public function getCache($path = '', $storage = null)
 	{
-		\OC::$server->getLogger()->warning("\\apps\\nextcloud-swarm-plugin\\lib\\Storage\\BeeSwarm.php-getCache(): path=" . $path);
+
 	}
 	*/
+	/*
+	public function getDirectoryContent($directory): \Traversable {
+		return new \EmptyIterator();
+	}*/
 
-	// public function getDirectoryContent($directory): \Traversable {
-	// }
-
-		/**
+/**
 	 * @param string $path
 	 * @return array|null
 	 */
@@ -358,7 +367,7 @@ class BeeSwarm extends \OC\Files\Storage\Common {
             $data['size'] = $swarmFile->getSize();
             $data['etag'] = uniqid();
 			$data['swarm_ref'] = $swarmFile->getSwarmReference();
-        }
+		}
 	 	return $data;
 	}
 

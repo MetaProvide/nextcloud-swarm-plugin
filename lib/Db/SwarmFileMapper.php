@@ -28,6 +28,7 @@ namespace OCA\Files_External_Ethswarm\Db;
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\QBMapper;
 use OCP\IDBConnection;
+use OCP\Files\IMimeTypeLoader;
 
 /**
  * @template-extends QBMapper<SwarmFile>
@@ -86,6 +87,16 @@ class SwarmFileMapper extends QBMapper {
 			->where($qb->expr()->eq('name', $qb->createNamedParameter($name, $qb::PARAM_STR)))
 			->andWhere($qb->expr()->eq('storage', $qb->createNamedParameter($storage, $qb::PARAM_INT)));
 		return count($this->findEntities($select));
+	}
+
+	public function createDirectory(string $path, int $storage): SwarmFile {
+		$swarm = new SwarmFile();
+		$swarm->setName($path);
+		$swarm->setMimetype(\OC::$server->get(IMimeTypeLoader::class)->getId("httpd/unix-directory"));
+		$swarm->setSize(1);
+		$swarm->setStorageMtime(time());
+		$swarm->setStorage($storage);
+		return $this->insert($swarm);
 	}
 
 	public function createFile(array $filearray): SwarmFile {
