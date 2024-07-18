@@ -9,22 +9,25 @@
 				<button @click="verifyAccessKey">Verify</button>
 
 				<!-- message box -->
-				 <div v-if="accessKeySubmitted" class="message">
-					 <div class="message-text">
+				<div v-if="accessKeySubmitted" class="message">
+					<div class="message-text">
 						<span v-if="hasAccess" class="icon-checkmark"></span>
-						 <span v-else class="icon-alert-outline-white"></span>
+						<span v-else class="icon-alert-outline-white"></span>
 						<span>{{ message }}</span>
-						<button @click="accessKeySubmitted = false">Close</button>
+						<button @click="accessKeySubmitted = false">
+							Close
+						</button>
 					</div>
 				</div>
 			</div>
 
-
-
-
 			<a
-target="_blank" rel="noreferrer" class="icon-info" title="Open documentation"
-				href="https://github.com/MetaProvide/nextcloud-swarm-plugin/"></a>
+				target="_blank"
+				rel="noreferrer"
+				class="icon-info"
+				title="Open documentation"
+				href="https://github.com/MetaProvide/nextcloud-swarm-plugin/"
+			></a>
 			<p class="settings-hint">
 				View the current status of the Swarm node(s) configured in
 				'External Storage' section of NextCloud.
@@ -34,27 +37,40 @@ target="_blank" rel="noreferrer" class="icon-info" title="Open documentation"
 				<a href="externalstorages">"External Storage"</a> Administration
 				section.
 			</div>
-			<div v-for="(mount, mountidx) in parsedMounts" :key="mount.mount_id">
+			<div
+				v-for="(mount, mountidx) in parsedMounts"
+				:key="mount.mount_id"
+			>
 				<div @click="setSaveMessage(mountidx, '')">
 					<h3>
 						Swarm Node: <b>{{ mount.mount_name }}</b>
 						<Actions>
-							<ActionButton icon="icon-caret-dark" @click="showNode(mountidx)"></ActionButton>
+							<ActionButton
+								icon="icon-caret-dark"
+								@click="showNode(mountidx)"
+							></ActionButton>
 						</Actions>
 					</h3>
 
 					<div v-if="toggleNode[mountidx]">
 						<div>
 							<CheckboxRadioSwitch
-:checked.sync="mount.isEncrypted" type="switch"
-								@update:checked="toggleEncryption(mountidx)">
+								:checked.sync="mount.isEncrypted"
+								type="switch"
+								@update:checked="toggleEncryption(mountidx)"
+							>
 								Enable encryption
 							</CheckboxRadioSwitch>
 						</div>
 
 						<div>
 							Available chequebook balance (bzz):
-							<input type="text" :value="mount.chequebalance" maxlength="200" readonly />
+							<input
+								type="text"
+								:value="mount.chequebalance"
+								maxlength="200"
+								readonly
+							/>
 						</div>
 
 						<div><u>Stamp batches:</u></div>
@@ -66,6 +82,7 @@ target="_blank" rel="noreferrer" class="icon-info" title="Open documentation"
 										<th>Batch Id</th>
 										<th>Bzz purchased</th>
 										<th>Balance</th>
+										<th>Usage</th>
 										<th>Usable</th>
 										<th>Active</th>
 										<th>Actions</th>
@@ -73,60 +90,93 @@ target="_blank" rel="noreferrer" class="icon-info" title="Open documentation"
 								</thead>
 								<tbody>
 									<tr
-v-for="(
-																																																																																															batch, batchidx
-																																																																																														) in mount.batches"
-										:key="batchidx">
+										v-for="(
+											batch, batchidx
+										) in mount.batches"
+										:key="batchidx"
+									>
 										<td>
 											<input
-type="text" name="batchid" :value="batch.batchID" maxlength="200"
-												readonly />
-										</td>
-										<td>
-											<input type="text" name="bzz" :value="batch.amount" maxlength="200" readonly />
+												type="text"
+												name="batchid"
+												:value="batch.batchID"
+												maxlength="200"
+												readonly
+											/>
 										</td>
 										<td>
 											<input
-type="text" name="balance" :value="batch.batchTTL" maxlength="200"
-												readonly />
+												type="text"
+												name="bzz"
+												:value="batch.amount"
+												maxlength="200"
+												readonly
+											/>
+										</td>
+										<td>
+											<input
+												type="text"
+												name="balance"
+												:value="batch.batchTTL"
+												maxlength="200"
+												readonly
+											/>
+										</td>
+										<td>
+											<span>
+												{{ stampsUsage[batch.batchID] }} 
+											</span>
 										</td>
 										<td>
 											<CheckboxRadioSwitch
-:checked.sync="batch.isUsable" :disabled="true"
-												type="switch" name="toggleUsableBatchName">
+												:checked.sync="batch.isUsable"
+												:disabled="true"
+												type="switch"
+												name="toggleUsableBatchName"
+											>
 											</CheckboxRadioSwitch>
 										</td>
 										<td>
 											<CheckboxRadioSwitch
-:checked.sync="batch.isActive" type="switch"
-												name="toggleActiveBatchName" @update:checked="
+												:checked.sync="batch.isActive"
+												type="switch"
+												name="toggleActiveBatchName"
+												@update:checked="
 													toggleActiveBatch(
 														mountidx,
 														batchidx,
 														batch.batchID
 													)
-												">
+												"
+											>
 											</CheckboxRadioSwitch>
 										</td>
 										<td>
 											<Actions>
-												<ActionButton :disabled="true" icon="icon-add">Top up (Bzz)
+												<ActionButton
+													:disabled="true"
+													icon="icon-add"
+													>Top up (Bzz)
 												</ActionButton>
 												<ActionInput
-type="number" :editable="true" :value="batch.topUpValue"
+													type="number"
+													:editable="true"
+													:value="batch.topUpValue"
 													@update:value="
 														(x) =>
 															handleTopUpChange(
 																x,
 																mountidx
 															)
-													" @submit="
-	topupBatch(
-		mountidx,
-		batchidx,
-		batch.batchID
-	)
-">
+													"
+													@submit="
+														topupBatch(
+															mountidx,
+															batchidx,
+															batch.batchID
+														)
+													"
+												>
 												</ActionInput>
 												<ActionSeparator title="" />
 											</Actions>
@@ -135,18 +185,22 @@ type="number" :editable="true" :value="batch.topUpValue"
 									<tr>
 										<td colspan="6">
 											<input
-type="submit" :value="
-												saveSettingsValue[mountidx]
-											" :disabled="
-	saveSettingsBtn[mountidx]
-" @click="
-	saveSettings(
-		mountidx,
-		$event
-	)
-" />&nbsp;&nbsp;&nbsp;{{
-	saveSettingsLabel[mountidx]
-}}
+												type="submit"
+												:value="
+													saveSettingsValue[mountidx]
+												"
+												:disabled="
+													saveSettingsBtn[mountidx]
+												"
+												@click="
+													saveSettings(
+														mountidx,
+														$event
+													)
+												"
+											/>&nbsp;&nbsp;&nbsp;{{
+												saveSettingsLabel[mountidx]
+											}}
 										</td>
 									</tr>
 								</tbody>
@@ -171,32 +225,44 @@ type="submit" :value="
 										<tr>
 											<td>
 												<input
-v-model="
-													newBatchAmounts[
-													mountidx
-													]
-												" type="number" value="" maxlength="10" />
+													v-model="
+														newBatchAmounts[
+															mountidx
+														]
+													"
+													type="number"
+													value=""
+													maxlength="10"
+												/>
 											</td>
 											<td>
 												<input
-v-model="
-													newBatchDepths[mountidx]
-												" type="number" value="" maxlength="17" />
+													v-model="
+														newBatchDepths[mountidx]
+													"
+													type="number"
+													value=""
+													maxlength="17"
+												/>
 											</td>
 											<td>
 												<input
-type="submit" :disabled="
-													newBatchBtnDisabled[
-													mountidx
-													]
-												" value="Buy" @click="
-	buyPostage(
-		mountidx,
-		$event
-	)
-" />&nbsp;&nbsp;&nbsp;{{
-	newBatchLabel[mountidx]
-}}
+													type="submit"
+													:disabled="
+														newBatchBtnDisabled[
+															mountidx
+														]
+													"
+													value="Buy"
+													@click="
+														buyPostage(
+															mountidx,
+															$event
+														)
+													"
+												/>&nbsp;&nbsp;&nbsp;{{
+													newBatchLabel[mountidx]
+												}}
 											</td>
 										</tr>
 									</tbody>
@@ -249,6 +315,7 @@ export default {
 			accessKeySubmitted: false,
 			show: true,
 			parsedMounts: [],
+			stampsUsage: [],
 			newBatchAmounts: [],
 			newBatchDepths: [],
 			newBatchLabel: [],
@@ -268,7 +335,9 @@ export default {
 			isEncrypted: mount.encrypt === 1,
 			batches: mount.batches.map((b) => ({ ...b, topUpValue: 0 })),
 		}));
-
+		this.settings.stampsUsage.forEach((stamp) => {
+			this.stampsUsage[stamp.batchID] = stamp.usage;
+		});
 		this.newBatchAmounts = Array(this.parsedMounts.length).fill("");
 		this.newBatchDepths = Array(this.parsedMounts.length).fill("");
 		this.newBatchLabel = Array(this.parsedMounts.length).fill("");
@@ -283,7 +352,7 @@ export default {
 		if (!this.debugConsole) {
 			const methods = ["log", "debug", "warn", "info"];
 			for (let i = 0; i < methods.length; i++) {
-				console[methods[i]] = function () { };
+				console[methods[i]] = function () {};
 			}
 		}
 	},
@@ -291,21 +360,26 @@ export default {
 		async verifyAccessKey() {
 			this.accessKeySubmitted = true;
 			if (!this.accessKey) {
-				this.message = 'Please enter an access key';
+				this.message = "Please enter an access key";
 				return;
 			}
 
 			try {
-				const response = await axios.post(generateUrl("/apps/files_external_ethswarm/bee/verifyBeeNodeAccess"), {access_key: this.accessKey});
+				const response = await axios.post(
+					generateUrl(
+						"/apps/files_external_ethswarm/bee/verifyBeeNodeAccess"
+					),
+					{ access_key: this.accessKey }
+				);
 				this.hasAccess = response.status === 200;
 
 				if (this.hasAccess) {
-					this.message = 'Access key verified successfully';
+					this.message = "Access key verified successfully";
 				} else {
 					this.message = response.data.msg;
 				}
 			} catch (error) {
-				console.error('There was a problem with the request:', error);
+				console.error("There was a problem with the request:", error);
 				this.message = error.response.data.msg;
 			}
 		},
@@ -343,10 +417,10 @@ export default {
 					batch.isActive = !batch.isActive;
 					console.log(
 						"Set batch.isActive 1 = " +
-						batch.isActive +
-						" (" +
-						bIdx +
-						")"
+							batch.isActive +
+							" (" +
+							bIdx +
+							")"
 					);
 				}
 				bIdx++;
@@ -368,32 +442,36 @@ export default {
 		 */
 		isInputValid(amount, depth) {
 			if (amount <= 0) {
-				throw t('files_external_ethswarm', 'Please enter an amount');
+				throw t("files_external_ethswarm", "Please enter an amount");
 			} else if (depth !== undefined && (depth < 17 || depth > 255)) {
-				throw t('files_external_ethswarm', 'Please enter a valid depth between 17 and 255');
+				throw t(
+					"files_external_ethswarm",
+					"Please enter a valid depth between 17 and 255"
+				);
 			}
 			return true;
 		},
 		async topupBatch(mountIdx, batchIdx, activeBatchId) {
-			const url = generateUrl("/apps/files_external_ethswarm/bee/topUpBatch");
+			const url = generateUrl(
+				"/apps/files_external_ethswarm/bee/topUpBatch"
+			);
 			const postageBatch = this.parsedMounts[mountIdx];
 			postageBatch.activeBatchId = activeBatchId;
 			postageBatch.topUpValue = Number(this.topUpValue[mountIdx]);
 			console.log(
 				"json=" +
-				JSON.stringify(this.parsedMounts) +
-				";postageBatch=" +
-				JSON.stringify(postageBatch) +
-				"batch,amount=" +
-				activeBatchId +
-				"," +
-				postageBatch.topUpValue
+					JSON.stringify(this.parsedMounts) +
+					";postageBatch=" +
+					JSON.stringify(postageBatch) +
+					"batch,amount=" +
+					activeBatchId +
+					"," +
+					postageBatch.topUpValue
 			);
 
 			try {
 				this.isInputValid(postageBatch.topUpValue);
-			}
-			catch (error) {
+			} catch (error) {
 				console.log(error);
 				return false;
 			}
@@ -407,11 +485,11 @@ export default {
 				.catch((error) => {
 					console.log(
 						"response err=" +
-						error.response +
-						";mesg=" +
-						error.response.data.msg +
-						"error.msg=" +
-						error.message
+							error.response +
+							";mesg=" +
+							error.response.data.msg +
+							"error.msg=" +
+							error.message
 					);
 					console.log(error);
 				});
@@ -425,17 +503,13 @@ export default {
 			postageBatch.depth = Number(this.newBatchDepths[mountidx]);
 
 			console.log(
-				"amount,depth=" +
-				postageBatch.amount +
-				"," +
-				postageBatch.depth
+				"amount,depth=" + postageBatch.amount + "," + postageBatch.depth
 			);
 
 			let newBatchlabel = [...this.newBatchLabel];
 			try {
 				this.isInputValid(postageBatch.amount, postageBatch.depth);
-			}
-			catch (errorMessage) {
+			} catch (errorMessage) {
 				newBatchlabel[mountidx] = errorMessage;
 				this.newBatchLabel = newBatchlabel;
 				return false;
@@ -445,19 +519,21 @@ export default {
 
 			this.newBatchBtnDisabled[mountidx] = true;
 
-
 			newBatchlabel = [...this.newBatchLabel];
-			const url = generateUrl("/apps/files_external_ethswarm/bee/createPostageBatch");
+			const url = generateUrl(
+				"/apps/files_external_ethswarm/bee/createPostageBatch"
+			);
 
 			console.log(
 				"json=" +
-				JSON.stringify(this.parsedMounts) +
-				";len=" +
-				this.parsedMounts.length +
-				";url=" +
-				url +
-				";newparse=" +
-				JSON.stringify(postageBatch));
+					JSON.stringify(this.parsedMounts) +
+					";len=" +
+					this.parsedMounts.length +
+					";url=" +
+					url +
+					";newparse=" +
+					JSON.stringify(postageBatch)
+			);
 
 			await axios
 				.post(url, {
@@ -465,7 +541,8 @@ export default {
 				})
 				.then((response) => {
 					const newBatchId = response.data.batchID;
-					newBatchlabel[mountidx] = "Success: Created new batch " + newBatchId;
+					newBatchlabel[mountidx] =
+						"Success: Created new batch " + newBatchId;
 
 					this.parsedMounts[mountidx].batches.push({
 						batchID: newBatchId,
@@ -481,14 +558,14 @@ export default {
 				.catch((error) => {
 					console.log(
 						"response err=" +
-						error.response +
-						";mesg=" +
-						error.response.data.msg +
-						"error.msg=" +
-						error.message
+							error.response +
+							";mesg=" +
+							error.response.data.msg +
+							"error.msg=" +
+							error.message
 					);
 					console.log(error);
-					newBatchlabel[mountidx] = error.response.data.msg;;
+					newBatchlabel[mountidx] = error.response.data.msg;
 					this.newBatchLabel = newBatchlabel;
 					this.newBatchBtnDisabled[mountidx] = false;
 				});
@@ -509,13 +586,13 @@ export default {
 			}));
 			console.log(
 				"json=" +
-				JSON.stringify(this.parsedMounts) +
-				";len=" +
-				this.parsedMounts.length +
-				";url=" +
-				url +
-				";newparse=" +
-				JSON.stringify(parsedMountsToSave)
+					JSON.stringify(this.parsedMounts) +
+					";len=" +
+					this.parsedMounts.length +
+					";url=" +
+					url +
+					";newparse=" +
+					JSON.stringify(parsedMountsToSave)
 			);
 			await axios
 				.post(url, {
@@ -528,18 +605,18 @@ export default {
 				.catch((error) => {
 					console.log(
 						"response err=" +
-						error.response +
-						";mesg=" +
-						error.response.data.message +
-						"error.msg=" +
-						error.message
+							error.response +
+							";mesg=" +
+							error.response.data.message +
+							"error.msg=" +
+							error.message
 					);
 					this.setSaveMessage(
 						mountidx,
 						"Failed to save: " +
-						(error.response
-							? error.response.data.message
-							: error)
+							(error.response
+								? error.response.data.message
+								: error)
 					);
 				});
 

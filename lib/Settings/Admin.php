@@ -109,10 +109,11 @@ class Admin implements ISettings {
 
 			unset($batcharray);
 		}
-
+		$stampsUsage = $this->stampUsage();
 		$parameters = [
 			'visibilityType' => BackendService::VISIBILITY_ADMIN,
 			'mounts' => json_encode($newMounts),
+			'stampsUsage' => $stampsUsage,
 		];
 
 		Util::addScript($this->appName, 'nextcloud-swarm-plugin-main');
@@ -234,5 +235,41 @@ class Admin implements ISettings {
 			curl_setopt($curl, CURLOPT_HTTPHEADER, [$header]);
 		}
 		return $curl;
+	}
+	public function fetchStamps() {
+		$url = 'http://188.34.161.148:1633/stamps';
+		$curl = curl_init($url);
+		curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+		$response = curl_exec($curl);
+		curl_close($curl);
+		return $response;
+	}
+	public function stampUsage() {
+		$json = $this->fetchStamps();
+	// Decode the JSON string into a PHP associative array
+		$data = json_decode($json, true);
+
+		// Initialize an array to hold the usage results
+		$usageResults = [];
+
+		// Loop through each stamp and calculate the usage
+		foreach ($data['stamps'] as $stamp) {
+			$depth = $stamp['depth'];
+			$bucketDepth = $stamp['bucketDepth'];
+			$utilization = $stamp['utilization'];
+
+			// Calculate the usage
+			$usage = $utilization / pow(2, $depth - $bucketDepth);
+
+			// Format the usage as a percentage text
+			$usageText = ceil($usage * 100) . '%';
+
+			// Add the result to the usageResults array
+			$usageResults[] = [
+				'batchID' => $stamp['batchID'],
+				'usage' => $usageText
+			];
+		}
+		return $usageResults;
 	}
 }
