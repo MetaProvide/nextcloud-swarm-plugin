@@ -22,3 +22,5 @@ ENV APACHE_RUN_USER=www-user
 ENV APACHE_RUN_GROUP=www-group
 RUN groupadd -g $WWWGROUP $APACHE_RUN_GROUP
 RUN useradd -u $WWWUSER -g $APACHE_RUN_GROUP $APACHE_RUN_USER
+RUN mkdir -p /var/www/html/custom_apps
+RUN chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP /var/www/html/custom_apps
