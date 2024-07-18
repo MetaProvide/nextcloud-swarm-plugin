@@ -297,7 +297,16 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 		return true;
 	}
 
-	public function file_get_contents($path) {
+	/**
+	 * @param $path
+	 * @return string|false
+	 * @throws DoesNotExistException
+	 */
+	public function file_get_contents($path): string|false
+	{
+		$swarmFile = $this->filemapper->find($path, $this->storageId);
+		$reference = $swarmFile->getSwarmReference();
+		return stream_get_contents($this->get_stream($path, $reference));
 	}
 
 	public function file_put_contents($path, $data) {

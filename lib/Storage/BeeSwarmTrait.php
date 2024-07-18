@@ -180,7 +180,14 @@ trait BeeSwarmTrait {
 		return $output;
 	}
 
-	private function get_stream(string $path, string $reference) {
+	/**
+	 * @param string $path
+	 * @param string $reference
+	 * @return resource
+	 * @throws \Exception
+	 */
+	private function get_stream(string $path, string $reference)
+	{
 		$url_endpoint = $this->api_url . '/bzz/';
 		$url_params = $reference;
 		$url_endpoint .= $url_params;
