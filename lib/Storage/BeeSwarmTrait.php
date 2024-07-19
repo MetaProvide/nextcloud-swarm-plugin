@@ -122,9 +122,11 @@ trait BeeSwarmTrait {
 		curl_setopt($curl, CURLOPT_VERBOSE, true);
 
 		curl_setopt($curl, CURLOPT_HTTPHEADER, [
+			'content-type: ' . $mimetype,
 			'swarm-postage-batch-id: ' . $this->stampBatchId,
-			'Content-Type: ' . $mimetype,
-			($this->isEncrypted ? 'Swarm-Encrypt: true' : ''),
+			'swarm-pin: true',
+			'swarm-redundancy-level: 2',
+			($this->isEncrypted ? 'swarm-encrypt: true' : ''),
 			($this->isBasicAuth ? $this->addBasicAuthHeaders($this->username, $this->password) : '')
 		]);
 
