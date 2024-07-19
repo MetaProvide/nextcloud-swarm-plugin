@@ -1,7 +1,6 @@
 volumes:
   mariadb:
-  nextcloud_data:
-  nextcloud_config:
+  nextcloud_app:
 
 networks:
   frontend:
@@ -21,10 +20,10 @@ services:
     ports:
       - "3306:3306"
     environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: nextcloud
-      MYSQL_USER: nextcloud
-      MYSQL_PASSWORD: nextcloud
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
 
   nextcloud:
     build:
@@ -39,21 +38,25 @@ services:
     extra_hosts:
       - host.docker.internal:host-gateway
     volumes:
-      - nextcloud_data:/var/www/html/data
-      - nextcloud_config:/var/www/html/config
-      - ./dev-environment/nextcloud_source:/var/www/html
+      - nextcloud_app:/var/www/html
       - ./:/var/www/html/custom_apps/files_external_ethswarm
+      - ./dev-environment/nextcloud_source/lib:/var/www/html/lib
+      - ./dev-environment/nextcloud_source/apps:/var/www/html/apps
     ports:
       - "80:80"
       - "443:443"
     environment:
-      MYSQL_DATABASE: nextcloud
-      MYSQL_USER: nextcloud
-      MYSQL_PASSWORD: nextcloud
+      WWWUSER: ${WWWUSER}
+      WWWGROUP: ${WWWGROUP}
+      APACHE_RUN_USER: ${APACHE_RUN_USER}
+      APACHE_RUN_GROUP: ${APACHE_RUN_GROUP}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
       MYSQL_HOST: mariadb:3306
-      NEXTCLOUD_ADMIN_USER: swarmbox
-      NEXTCLOUD_ADMIN_PASSWORD: swarmbox
-      SWARM_ACCESS_API_TOKEN: Nz5lDX7PpPGrcdAI5SjPZHVdZJe12AuMOrKfZXaL
+      NEXTCLOUD_ADMIN_USER: ${NC_ADMIN_USER}
+      NEXTCLOUD_ADMIN_PASSWORD: ${NC_ADMIN_PASSWORD}
+      SWARM_ACCESS_API_TOKEN: ${SWARM_ACCESS_API_TOKEN}
 
   adminer:
     image: adminer
