@@ -122,9 +122,11 @@ trait BeeSwarmTrait {
 		curl_setopt($curl, CURLOPT_VERBOSE, true);
 
 		curl_setopt($curl, CURLOPT_HTTPHEADER, [
+			'content-type: ' . $mimetype,
 			'swarm-postage-batch-id: ' . $this->stampBatchId,
-			'Content-Type: ' . $mimetype,
-			($this->isEncrypted ? 'Swarm-Encrypt: true' : ''),
+			'swarm-pin: true',
+			'swarm-redundancy-level: 2',
+			($this->isEncrypted ? 'swarm-encrypt: true' : ''),
 			($this->isBasicAuth ? $this->addBasicAuthHeaders($this->username, $this->password) : '')
 		]);
 
@@ -180,7 +182,14 @@ trait BeeSwarmTrait {
 		return $output;
 	}
 
-	private function get_stream(string $path, string $reference) {
+	/**
+	 * @param string $path
+	 * @param string $reference
+	 * @return resource
+	 * @throws \Exception
+	 */
+	private function get_stream(string $path, string $reference)
+	{
 		$url_endpoint = $this->api_url . '/bzz/';
 		$url_params = $reference;
 		$url_endpoint .= $url_params;

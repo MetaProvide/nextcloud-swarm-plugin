@@ -39,9 +39,9 @@ services:
       - host.docker.internal:host-gateway
     volumes:
       - nextcloud_app:/var/www/html
+      - ./:/var/www/html/custom_apps/files_external_ethswarm
       - ./dev-environment/nextcloud_source/lib:/var/www/html/lib
       - ./dev-environment/nextcloud_source/apps:/var/www/html/apps
-      - ./:/var/www/html/custom_apps/files_external_ethswarm
       - ./docker/nextcloud/hooks:/docker-entrypoint-hooks.d
     ports:
       - "80:80"
