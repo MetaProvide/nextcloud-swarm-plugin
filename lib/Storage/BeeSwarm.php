@@ -366,10 +366,14 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 		else {
 			// Get record from table
 			$swarmFile = $this->filemapper->find($path, $this->storageId);
-			$data['name'] = basename($path); //TODO: Test
-			$data['permissions'] = (Constants::PERMISSION_ALL - Constants::PERMISSION_DELETE - Constants::PERMISSION_UPDATE);
 			// Set mimetype as a string, get by using its ID (int)
 			$mimetypeId = $swarmFile->getMimetype();
+			if ($mimetypeId == $this->mimeTypeHandler->getId('httpd/unix-directory'))
+				$data['permissions'] = (Constants::PERMISSION_ALL - Constants::PERMISSION_DELETE);
+			else
+				$data['permissions'] = (Constants::PERMISSION_ALL - Constants::PERMISSION_DELETE - Constants::PERMISSION_UPDATE);
+
+			$data['name'] = basename($path); //TODO: Test
             $data['mimetype'] = $this->mimeTypeHandler->getMimetypeById($mimetypeId);
             $data['mtime'] = time();
             $data['storage_mtime'] = $swarmFile->getStorageMtime();
