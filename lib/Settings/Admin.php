@@ -109,7 +109,7 @@ class Admin implements ISettings {
 
 			unset($batcharray);
 		}
-		$stampsUsage = $this->stampUsage();
+		$stampsUsage = $this->getStampsUsage($urlOptions);
 		$parameters = [
 			'visibilityType' => BackendService::VISIBILITY_ADMIN,
 			'mounts' => json_encode($newMounts),
@@ -236,24 +236,17 @@ class Admin implements ISettings {
 		}
 		return $curl;
 	}
-	public function fetchStamps() {
-		$url = 'http://188.34.161.148:1633/stamps';
-		$curl = curl_init($url);
-		curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-		$response = curl_exec($curl);
-		curl_close($curl);
-		return $response;
-	}
-	public function stampUsage() {
-		$json = $this->fetchStamps();
-	// Decode the JSON string into a PHP associative array
-		$data = json_decode($json, true);
 
-		// Initialize an array to hold the usage results
+	/**
+	 * Returns the usage of the stamps
+	 * @return \array
+	 */
+	public function getStampsUsage($urlOptions) : array{
+		$stamp_data = $this->getBatches($urlOptions);
 		$usageResults = [];
 
 		// Loop through each stamp and calculate the usage
-		foreach ($data['stamps'] as $stamp) {
+		foreach ($stamp_data['stamps'] as $stamp) {
 			$depth = $stamp['depth'];
 			$bucketDepth = $stamp['bucketDepth'];
 			$utilization = $stamp['utilization'];
