@@ -124,7 +124,7 @@
 										</td>
 										<td>
 											<span>
-												{{ stampsUsage[batch.batchID] }} 
+												{{ stampsRemainingCapacity[batch.batchID]}} remaining out of {{ stampsCapacity[batch.batchID] }} {{ stampsPercentageUsage[batch.batchID] }} 
 											</span>
 										</td>
 										<td>
@@ -315,6 +315,9 @@ export default {
 			accessKeySubmitted: false,
 			show: true,
 			parsedMounts: [],
+			stampsCapacity: [],
+			stampsRemainingCapacity: [],
+			stampsPercentageUsage: [],
 			stampsUsage: [],
 			newBatchAmounts: [],
 			newBatchDepths: [],
@@ -336,8 +339,12 @@ export default {
 			batches: mount.batches.map((b) => ({ ...b, topUpValue: 0 })),
 		}));
 		this.settings.stampsUsage.forEach((stamp) => {
-			this.stampsUsage[stamp.batchID] = stamp.usage;
+			const batchID = stamp.batchID;
+			this.stampsCapacity[batchID] = stamp.capacity;
+			this.stampsRemainingCapacity[batchID] = stamp.remainingCapacity;
+			this.stampsPercentageUsage[batchID] = stamp.usage;
 		});
+
 		this.newBatchAmounts = Array(this.parsedMounts.length).fill("");
 		this.newBatchDepths = Array(this.parsedMounts.length).fill("");
 		this.newBatchLabel = Array(this.parsedMounts.length).fill("");

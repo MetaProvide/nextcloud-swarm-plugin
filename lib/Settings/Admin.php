@@ -237,6 +237,15 @@ class Admin implements ISettings {
 		return $curl;
 	}
 
+	public function getStampMaximumCapacityBytes(int $depth): int {
+		return pow(2, $depth) * 4096;
+	}
+	
+	private function formatBytes($bytes) {
+		$units = ['B', 'KB', 'MB', 'GB', 'TB'];
+		$factor = floor((strlen($bytes) - 1) / 3);
+		return sprintf("%.2f", $bytes / pow(1024, $factor)) . $units[$factor];
+	}
 	/**
 	 * Returns the usage of the stamps
 	 * @return \array
@@ -254,13 +263,23 @@ class Admin implements ISettings {
 			// Calculate the usage
 			$usage = $utilization / pow(2, $depth - $bucketDepth);
 
-			// Format the usage as a percentage text
-			$usageText = ceil($usage * 100) . '%';
+			$usageNormal = ceil($usage * 100);
+  			$usageText = $usageNormal . '%';
+
+			// Calculate the capacity and remaining capacity in bytes
+			$capacity = $this->getStampMaximumCapacityBytes($depth);
+			$remainingCapacity = $capacity * (1 - $usage);
+
+			// Convert capacity and remaining capacity to human-readable format
+			$capacityFormatted = $this->formatBytes($capacity);
+			$remainingCapacityFormatted = $this->formatBytes($remainingCapacity);
 
 			// Add the result to the usageResults array
 			$usageResults[] = [
 				'batchID' => $stamp['batchID'],
-				'usage' => $usageText
+				'usage' => $usageText,
+				'capacity' => $capacityFormatted,
+				'remainingCapacity' => $remainingCapacityFormatted,
 			];
 		}
 		return $usageResults;
