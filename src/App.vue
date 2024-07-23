@@ -124,7 +124,23 @@
 										</td>
 										<td>
 											<span>
-												{{ stampsRemainingCapacity[batch.batchID]}} remaining out of {{ stampsCapacity[batch.batchID] }} {{ stampsPercentageUsage[batch.batchID] }} 
+												{{
+													stampsPercentageUsage[
+														batch.batchID
+													]
+												}}
+												-
+												{{
+													stampsRemainingCapacity[
+														batch.batchID
+													]
+												}}
+												remaining out of
+												{{
+													stampsCapacity[
+														batch.batchID
+													]
+												}}
 											</span>
 										</td>
 										<td>
