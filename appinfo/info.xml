@@ -91,7 +91,7 @@ Once setup and configured, the Bee node is ready to use.
     <repository type="git">https://github.com/MetaProvide/nextcloud-swarm-plugin.git</repository>
 	<screenshot>https://raw.githubusercontent.com/MetaProvide/nextcloud-swarm-plugin/main/assets/images/swarm_Files.png</screenshot>
     <dependencies>
-        <nextcloud min-version="27.0" max-version="29.0"/>
+        <nextcloud min-version="27" max-version="29"/>
     </dependencies>
 	<settings>
 		<admin>OCA\Files_External_Ethswarm\Settings\Admin</admin>
