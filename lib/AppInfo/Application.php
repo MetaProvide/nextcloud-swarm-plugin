@@ -65,6 +65,9 @@ class Application extends App implements IBootstrap, IBackendProvider, IAuthMech
 			$backendService->registerAuthMechanismProvider($this);
 		});
 
+		// Load custom JS
+		Util::addScript(SELF::APP_ID, 'admin-settings');
+
 		/** @var IEventDispatcher $dispatcher */
 		$dispatcher = $context->getAppContainer()->get(IEventDispatcher::class);
 		$dispatcher->addListener('OCA\Files::loadAdditionalScripts', function () {
@@ -73,6 +76,7 @@ class Application extends App implements IBootstrap, IBackendProvider, IAuthMech
 		});
 
 		$this->getAuthMechanisms();
+
 	}
 
 	public function registerEventsScripts(IEventDispatcher $dispatcher) {
