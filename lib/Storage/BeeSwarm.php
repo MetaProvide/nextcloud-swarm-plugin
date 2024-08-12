@@ -452,7 +452,7 @@ class BeeSwarm extends \OC\Files\Storage\Common
 		$mimetype = mime_content_type($tmpFile);
 
 		try {
-			$result = $this->uploadStream($path, $stream, $tmpFile, $mimetype, $tmpFilesize);
+			$result = $this->uploadStream($path, $tmpFile, $mimetype, $tmpFilesize);
 			$reference = (isset($result["reference"]) ? $result['reference'] : null);
 
 			if (!isset($reference)) {
