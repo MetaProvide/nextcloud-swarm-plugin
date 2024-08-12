@@ -24,6 +24,7 @@
 namespace OCA\Files_External_Ethswarm\Storage;
 
 use Exception;
+use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\Constants;
 use OCP\Files\IMimeTypeLoader;
 use OCA\Files_External_Ethswarm\Db\SwarmFileMapper;
@@ -360,7 +361,7 @@ class BeeSwarm extends \OC\Files\Storage\Common
 	{
 		$swarmFile = $this->filemapper->find($path, $this->storageId);
 		$reference = $swarmFile->getSwarmReference();
-		return file_get_contents($this->downloadStream($reference));
+		return stream_get_contents($this->downloadStream($reference));
 	}
 
 	public function file_put_contents($path, $data)

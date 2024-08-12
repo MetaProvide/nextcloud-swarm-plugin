@@ -20,6 +20,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
+
 namespace OCA\Files_External_Ethswarm\Storage;
 
 use OCA\Files_External_Ethswarm\Utils\Curl;
@@ -91,10 +92,10 @@ trait BeeSwarmTrait
 
 	/**
 	 * @param string $reference
-	 * @return string|false
+	 * @return resource
 	 * @throws \Safe\Exceptions\CurlException
 	 */
-	private function downloadStream(string $reference): string|false
+	private function downloadStream(string $reference)
 	{
 		$endpoint = $this->api_base_url . DIRECTORY_SEPARATOR . 'bzz' . DIRECTORY_SEPARATOR . $reference;
 
@@ -107,8 +108,13 @@ trait BeeSwarmTrait
 			'content-type: application/octet-stream',
 		], $this->access_key);
 		$response = $curl->exec();
+		$headerSize = $curl->getInfo(CURLINFO_HEADER_SIZE);
+		$body = substr($response, $headerSize);
 
-		return substr($response, $curl->getInfo(CURLINFO_HEADER_SIZE));
+		$stream = fopen('php://memory', 'r+');
+		fwrite($stream, $body);
+		rewind($stream);
+		return $stream;
 	}
 
 	/**
