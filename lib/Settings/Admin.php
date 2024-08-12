@@ -126,6 +126,7 @@ class Admin implements ISettings {
 	 * @return string the section ID, e.g. 'sharing'
 	 */
 	public function getSection(): string {
+		return ""; // disable the settings page
 		return $this->appName;
 	}
 
