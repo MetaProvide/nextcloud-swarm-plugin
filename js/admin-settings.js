@@ -5,7 +5,8 @@ document.addEventListener('DOMContentLoaded', () => {
 			const link = '<a href="https://metaprovide.org/hejbit/start" target="_blank" style="text-decoration: underline">metaprovide.org/hejbit/start</a>';
 			const el = document.createElement('p');
 			el.style.marginBottom = '10px';
-			el.innerHTML = `To get <strong>Swarm</strong> external storage access key, please visit ${link}`;
+			el.style.fontWeight = 'bold';
+			el.innerHTML = `To get Swarm external storage access key, please visit ${link}`;
 			targetElement.insertAdjacentElement('afterend', el);
 		} else {
 			console.log('settings-hint not found');
