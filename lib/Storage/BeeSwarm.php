@@ -35,7 +35,8 @@ use OCP\ILogger;
 use Sabre\DAV\Exception\BadRequest;
 
 // TODO: Make sure to retrive backendOption from storageConfig
-class BeeSwarm extends \OC\Files\Storage\Common {
+class BeeSwarm extends \OC\Files\Storage\Common
+{
 	use BeeSwarmTrait;
 
 	public const APP_NAME = 'files_external_ethswarm';
@@ -71,9 +72,10 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 	/** @var \OC\Files\Cache\Cache */
 	private $cacheHandler;
 
-	public function __construct($params) {
+	public function __construct($params)
+	{
 		$this->parseParams($params);
-		$this->id = 'ethswarm::' . $this->ip . ':' . $this->port;
+		$this->id = 'ethswarm::' . $this->api_base_url;
 		$this->storageId = $this->getStorageCache()->getNumericId();
 
 		// Load handlers
@@ -90,7 +92,7 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 			$mountId = $storageMount->getMountId();
 
 			$this->config = \OC::$server->get(IConfig::class);
-			$configSettings = $this->config->getAppValue(SELF::APP_NAME,"storageconfig","");	//default
+			$configSettings = $this->config->getAppValue(self::APP_NAME, "storageconfig", "");    //default
 			$mounts = json_decode($configSettings, true);
 			if (is_array($mounts)) {
 				$mountIds = array_column($mounts, 'mount_id');
@@ -104,23 +106,37 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 		}
 	}
 
-	public static function checkDependencies() {
+	public static function checkDependencies()
+	{
 		return true;
 	}
 
-	public function getId() {
+	/**
+	 * @return string
+	 */
+	public function getId(): string
+	{
 		return $this->id;
 	}
 
-	public function test() {
+	/**
+	 * @return bool
+	 * @throws Exception
+	 */
+	public function test(): bool
+	{
 		if ((!str_starts_with(strtolower($this->api_url), "http://")) && (!str_starts_with(strtolower($this->api_url), "https://"))) {
 			throw new Exception("The URL must start with http:// or https://");
 		}
-
-		return $this->getConnection();
+		return $this->checkConnection();
 	}
 
-	public function file_exists($path) {
+	/**
+	 * @param $path
+	 * @return bool
+	 */
+	public function file_exists($path): bool
+	{
 		if ($path === '' || $path === '/' || $path === '.') {
 			// Return true always the creation of the root folder
 			return true;
@@ -132,12 +148,14 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 		return true;
 	}
 
-	public function filemtime($path) {
+	public function filemtime($path)
+	{
 		$mtime = 0;
 		return $mtime;
 	}
 
-	public function stat($path) {
+	public function stat($path)
+	{
 		$data = $this->getMetaData($path);
 		if ($data['mimetype'] === 'httpd/unix-directory') {
 			return false;
@@ -154,91 +172,107 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 	 * @param string $path
 	 * @return string
 	 */
-	public function getETag($path) {
+	public function getETag($path)
+	{
 		return null;
 	}
 
 	/**
 	 * @return bool
 	 */
-	public function needsPartFile() {
+	public function needsPartFile()
+	{
 		return false;
 	}
 
-	public function mkdir($path): bool {
+	public function mkdir($path): bool
+	{
 		$this->filemapper->createDirectory($path, $this->storageId);
 		return true;
 	}
 
-	public function rmdir($path) {
+	public function rmdir($path)
+	{
+
 	}
 
-	public function rename($path1, $path2) {
+	public function rename($path1, $path2)
+	{
 		$rows = $this->filemapper->getPathTree($path1, $this->storageId);
 		foreach ($rows as $row) {
-			$oldpath =  $row->getName();
+			$oldpath = $row->getName();
 			$newpath = substr_replace($oldpath, $path2, 0, strlen($path1));
 			$updateSwarmTable = $this->filemapper->updatePath($oldpath, $newpath, $this->storageId);
 		}
 		return true;
 	}
 
-	public function opendir($path) {
-	 	return true;
-	}
-
-	/**
-	 * @return bool
-	 */
-	public function is_dir($path) {
-		$data = $this->getMetaData($path);
-		if ($data['mimetype'] === 'httpd/unix-directory') {
-			return true;
-		}
-	}
-	/**
-	 * @return bool
-	 */
-	public function is_file($path) {
-		$data = $this->getMetaData($path);
-		if ($data['mimetype'] === 'httpd/unix-directory') {
-			return false;
-		}
-	}
-
-	public function filetype($path) {
-		if ($this->is_file($path))
-		{
-			return 'file';
-		}
-		return 'dir';
-	}
-
-	public function getPermissions($path) {
-		return (Constants::PERMISSION_ALL - Constants::PERMISSION_DELETE - Constants::PERMISSION_UPDATE);
-	}
-
-	public function free_space($path) {
-		return \OCP\Files\FileInfo::SPACE_UNLIMITED;
-	}
-
-	/**
-	 * @return bool
-	 */
-	public function hasUpdated($path, $time) {
+	public function opendir($path)
+	{
 		return true;
 	}
 
 	/**
 	 * @return bool
 	 */
-	public function isLocal() {
+	public function is_dir($path)
+	{
+		$data = $this->getMetaData($path);
+		if ($data['mimetype'] === 'httpd/unix-directory') {
+			return true;
+		}
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function is_file($path)
+	{
+		$data = $this->getMetaData($path);
+		if ($data['mimetype'] === 'httpd/unix-directory') {
+			return false;
+		}
+	}
+
+	public function filetype($path)
+	{
+		if ($this->is_file($path)) {
+			return 'file';
+		}
+		return 'dir';
+	}
+
+	public function getPermissions($path)
+	{
+		return (Constants::PERMISSION_ALL - Constants::PERMISSION_DELETE - Constants::PERMISSION_UPDATE);
+	}
+
+	public function free_space($path)
+	{
+		return \OCP\Files\FileInfo::SPACE_UNLIMITED;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function hasUpdated($path, $time)
+	{
+		return true;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function isLocal()
+	{
 		// the common implementation returns a temporary file by
 		// default, which is not local
 		return false;
 	}
 
-	public function setMountOptions(array $options) {
+	public function setMountOptions(array $options)
+	{
+
 	}
 
 	/**
@@ -246,36 +280,42 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 	 * @param mixed $default
 	 * @return mixed
 	 */
-	public function getMountOption($name, $default = null) {
+	public function getMountOption($name, $default = null)
+	{
 		return isset($this->mountOptions[$name]) ? $this->mountOptions[$name] : $default;
 	}
 
-	public function verifyPath($path, $fileName) {
+	public function verifyPath($path, $fileName)
+	{
 
 	}
 
 	/**
 	 * @return bool
 	 */
-	public function isCreatable($path) {
+	public function isCreatable($path)
+	{
 		return true;
 	}
 
 	/**
 	 * @return bool
 	 */
-	public function isUpdatable($path) {
+	public function isUpdatable($path)
+	{
 		return true;
 	}
 
 	/**
 	 * @return bool
 	 */
-	public function unlink($path) {
+	public function unlink($path)
+	{
 		return true;
 	}
 
-	public function fopen($path, $mode) {
+	public function fopen($path, $mode)
+	{
 		if ($path === '' || $path === '/' || $path === '.') {
 			return false;
 		}
@@ -286,19 +326,19 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 			case 'r':
 			case 'rb':
 				// Get file from swarm
-				return $this->get_stream($path, $reference);
-			case 'w':	// Open for writing only; place the file pointer at the beginning of the file
-			case 'w+':	// Open for reading and writing
+				return $this->downloadStream($reference);
+			case 'w':    // Open for writing only; place the file pointer at the beginning of the file
+			case 'w+':    // Open for reading and writing
 			case 'wb':
 			case 'wb+':
 			case 'a':
 			case 'ab':
-			case 'r+':	// Open for reading and writing. place the file pointer at the beginning of the file
-			case 'a+':	// Open for reading and writing. place the file pointer at the end of the file.
-			case 'x':	// Create and open for writing only. place the file pointer at the beginning of the file
-			case 'x+':	// Create and open for reading and writing.
-			case 'c':	// Open the file for writing only
-			case 'c+': 	// Open the file for reading and writing;
+			case 'r+':    // Open for reading and writing. place the file pointer at the beginning of the file
+			case 'a+':    // Open for reading and writing. place the file pointer at the end of the file.
+			case 'x':    // Create and open for writing only. place the file pointer at the beginning of the file
+			case 'x+':    // Create and open for reading and writing.
+			case 'c':    // Open the file for writing only
+			case 'c+':    // Open the file for reading and writing;
 		}
 		return false;
 	}
@@ -306,7 +346,8 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 	/**
 	 * @return bool
 	 */
-	public function touch($path, $mtime = null) {
+	public function touch($path, $mtime = null)
+	{
 		return true;
 	}
 
@@ -319,13 +360,17 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 	{
 		$swarmFile = $this->filemapper->find($path, $this->storageId);
 		$reference = $swarmFile->getSwarmReference();
-		return stream_get_contents($this->get_stream($path, $reference));
+		return file_get_contents($this->downloadStream($reference));
 	}
 
-	public function file_put_contents($path, $data) {
+	public function file_put_contents($path, $data)
+	{
+
 	}
 
-	public function getDirectDownload($path) {
+	public function getDirectDownload($path)
+	{
+
 	}
 
 	/* Enabling this function causes a fatal exception "Call to a member function getId() on null /var/www/html/lib/private/Files/Mount/MountPoint.php - line 276: OC\Files\Cache\Wrapper\CacheWrapper->getId("")
@@ -339,11 +384,12 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 		return new \EmptyIterator();
 	}*/
 
-/**
+	/**
 	 * @param string $path
 	 * @return array|null
 	 */
-	public function getMetaData($path) {
+	public function getMetaData($path)
+	{
 		$data = [];
 		if ($path === '' || $path === '/' || $path === '.') {
 			// This creates a root folder for the storage mount.
@@ -367,8 +413,7 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 			$data['storage_mtime'] = time();
 			$data['size'] = 1; //unknown
 			$data['etag'] = uniqid();
-		}
-		else {
+		} else {
 			// Get record from table
 			$swarmFile = $this->filemapper->find($path, $this->storageId);
 			// Set mimetype as a string, get by using its ID (int)
@@ -379,17 +424,18 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 				$data['permissions'] = (Constants::PERMISSION_ALL - Constants::PERMISSION_DELETE - Constants::PERMISSION_UPDATE);
 
 			$data['name'] = basename($path); //TODO: Test
-            $data['mimetype'] = $this->mimeTypeHandler->getMimetypeById($mimetypeId);
-            $data['mtime'] = time();
-            $data['storage_mtime'] = $swarmFile->getStorageMtime();
-            $data['size'] = $swarmFile->getSize();
-            $data['etag'] = uniqid();
+			$data['mimetype'] = $this->mimeTypeHandler->getMimetypeById($mimetypeId);
+			$data['mtime'] = time();
+			$data['storage_mtime'] = $swarmFile->getStorageMtime();
+			$data['size'] = $swarmFile->getSize();
+			$data['etag'] = uniqid();
 			$data['swarm_ref'] = $swarmFile->getSwarmReference();
 		}
-	 	return $data;
+		return $data;
 	}
 
-	protected function toTempFile($source) {
+	protected function toTempFile($source)
+	{
 		$extension = '';
 		$tmpFile = \OC::$server->getTempManager()->getTemporaryFile($extension);
 		$target = fopen($tmpFile, 'w');
@@ -398,24 +444,15 @@ class BeeSwarm extends \OC\Files\Storage\Common {
 		return $tmpFile;
 	}
 
-	public function writeStream(string $path, $stream, int $size = null): int {
-		if (empty($this->stampBatchId)) {
-			fclose($stream);
-			throw new \Exception("File not uploaded: There is no active Batch associated with this storage. Please check your Administration Settings.");
-		}
-
-		if (empty($this->config->getAppValue(self::APP_NAME,'has_swarm_access'))) {
-			fclose($stream);
-			throw new \Exception("File not uploaded: There is no access key to Bee Node has been acquired. Please check your Administration Settings.");
-		}
-
+	public function writeStream(string $path, $stream, int $size = null): int
+	{
 		// Write to temp file
 		$tmpFile = $this->toTempFile($stream);
 		$tmpFilesize = (file_exists($tmpFile) ? filesize($tmpFile) : -1);
 		$mimetype = mime_content_type($tmpFile);
 
 		try {
-			$result = $this->upload_stream($path, $stream, $tmpFile, $mimetype, $tmpFilesize);
+			$result = $this->uploadStream($path, $stream, $tmpFile, $mimetype, $tmpFilesize);
 			$reference = (isset($result["reference"]) ? $result['reference'] : null);
 
 			if (!isset($reference)) {

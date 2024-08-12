@@ -39,9 +39,6 @@ trait BeeSwarmTrait
 	/** @var string */
 	protected string $access_key;
 
-	/** @var bool */
-	protected bool $isLicense = true;
-
 	/** @var string */
 	protected string $id;
 
@@ -52,18 +49,14 @@ trait BeeSwarmTrait
 	 */
 	protected function parseParams($params): void
 	{
-		if (isset($params['host']) && isset($params['port'])) {
+		if (isset($params['host']) && isset($params['port']) && $params['access_key']) {
 			$this->api_url = $params['host'];
 			$this->port = $params['port'];
-			$this->api_base_url = $this->api_url . ':' . $this->port;
+			$this->access_key = $params['access_key'];
 		} else {
 			throw new \Exception('Creating ' . self::class . ' storage failed, required parameters not set for bee swarm');
 		}
-
-		if ($params['access_key']) {
-			$this->access_key = $params['access_key'];
-			$this->isLicense = true;
-		}
+		$this->api_base_url = $this->api_url . ':' . $this->port;
 	}
 
 	/**
