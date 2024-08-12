@@ -110,7 +110,7 @@ Once setup and configured, the Bee node is ready to use.
 
 -   Right-click on a swarm file to copy the swarm reference (or hash) to the clipboard. Alternatively click the 3 dots of the Actions menu and select the menu option "Copy swarm reference". The swarm reference is the unique address of the file on the swarm.
 
-![Copy swarm reference to clipboard](assets/images/swarm_Files_CopySwarmRef "Copy swarm reference to clipboard")
+![Copy swarm reference to clipboard](assets/images/swarm_Files_CopySwarmRef.png)
 
 <em>Copy swarm reference to clipboard</em>
 

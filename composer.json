@@ -6,7 +6,9 @@
 			"OCA\\Files_External_Ethswarm\\": "lib/"
 		}
 	},
-	"require": {},
+	"require": {
+		"ext-curl": "*"
+	},
 	"require-dev": {
 		"nextcloud/coding-standard": "^0.5.0",
 		"christophwurst/nextcloud": "^22"

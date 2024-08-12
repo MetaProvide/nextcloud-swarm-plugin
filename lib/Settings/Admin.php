@@ -53,6 +53,8 @@ class Admin implements ISettings {
 	 */
 	public function getForm(): TemplateResponse {
 		// Get all valid Beeswarm storages
+		$temp = $this->globalStoragesService->getStorages();
+
 		$storageBackends = array_filter($this->globalStoragesService->getStorages(), function ($storageBackend) {
 			return $storageBackend->getBackend()->getStorageClass() == '\OCA\Files_External_Ethswarm\Storage\BeeSwarm';
 		});
@@ -124,6 +126,7 @@ class Admin implements ISettings {
 	 * @return string the section ID, e.g. 'sharing'
 	 */
 	public function getSection(): string {
+		return ""; // disable the settings page
 		return $this->appName;
 	}
 
@@ -228,11 +231,6 @@ class Admin implements ISettings {
 		curl_setopt($curl, CURLOPT_URL, $url_endpoint);
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
 
-		if (!empty($urlOptions['user']) && !empty($urlOptions['password'])) {
-			$base64EncodedAuth = base64_encode($urlOptions['user'] . ':' . $urlOptions['password']);
-			$header = 'Authorization: Basic ' . $base64EncodedAuth;
-			curl_setopt($curl, CURLOPT_HTTPHEADER, [$header]);
-		}
 		return $curl;
 	}
 }

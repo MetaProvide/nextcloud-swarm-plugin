@@ -23,41 +23,82 @@
 
 namespace OCA\Files_External_Ethswarm\Backend;
 
+
 use OCP\IL10N;
 use OCA\Files_External\Lib\Backend\Backend;
-use OCA\Files_External\Lib\Auth\AuthMechanism;
-use OCA\Files_External_Ethswarm\Auth\HttpBasicAuth;
 use OCA\Files_External\Lib\DefinitionParameter;
 use OCA\Files_External\Lib\StorageConfig;
+use OCA\Files_External\Service\GlobalStoragesService;
+use OCA\Files_External_Ethswarm\Auth\License;
 use OCP\IUser;
+use OCP\IConfig;
+use Psr\Log\LoggerInterface;
 
-class BeeSwarm extends Backend {
+class BeeSwarm extends Backend
+{
+	/** @var IL10N */
+	private IL10N $l;
+
+	/** @var string */
+	protected string $appName;
+
+	/** @var IConfig */
+	private IConfig $config;
+
+	/** @var LoggerInterface */
+	private LoggerInterface $logger;
+
+	/** @var GlobalStoragesService */
+	private GlobalStoragesService $globalStoragesService;
+
 	/**
-	 * ethswarm constructor.
+	 * @param string $appName
 	 * @param IL10N $l
+	 * @param IConfig $config
+	 * @param LoggerInterface $logger
+	 * @param GlobalStoragesService $globalStoragesService
 	 */
-	public function __construct(IL10N $l) {
+	public function __construct(string $appName, IL10N $l, IConfig $config, LoggerInterface $logger, GlobalStoragesService $globalStoragesService)
+	{
+		$this->l = $l;
+		$this->appName = $appName;
+		$this->config = $config;
+		$this->logger = $logger;
+		$this->globalStoragesService = $globalStoragesService;
 		$this
 			->setIdentifier('files_external_ethswarm')
 			->addIdentifierAlias('\OC\Files\External_Storage\BeeSwarm') // legacy compat
 			->setStorageClass('\OCA\Files_External_Ethswarm\Storage\BeeSwarm')
 			->setText($l->t('Swarm'))
 			->addParameters([
-				(new DefinitionParameter('ip', $l->t('URL')))->setTooltip($l->t("Add http:// or https:// at the start of the parameter")),
-				(new DefinitionParameter('port', $l->t('API Port')))->setTooltip($l->t("The API-endpoint port that exposes all functionality with the Swarm network. By default, it runs on port 1633")),
-				(new DefinitionParameter('debug_api_port', $l->t('Debug API Port')))->setTooltip($l->t("The Debug API exposes functionality to inspect the state of your Bee node while it is running.  By default, it runs on port 1635")),
-			])
-			->addAuthScheme(AuthMechanism::SCHEME_NULL)
-			->addAuthScheme(HttpBasicAuth::SCHEME_HTTP_BASIC);
-		//->addCustomJs("../../../$appWebPath/js/beeswarm");
+				(new DefinitionParameter('HOST_URL', $l->t('Host')))->setTooltip($l->t("Swarm Provider URL")),
+				(new DefinitionParameter('HOST_PORT', $l->t('Port')))->setTooltip($l->t("Port Number")),
+			])->addAuthScheme(License::SCHEME_ACCESS_KEY);
 	}
 
-	public function manipulateStorageConfig(StorageConfig &$storage, IUser $user = null) {
-		$auth = $storage->getAuthMechanism();
-
-		if ($auth->getScheme() != HttpBasicAuth::SCHEME_HTTP_BASIC) {
-			$storage->setBackendOption('user', '');
-			$storage->setBackendOption('password', '');
+	/**
+	 * @param StorageConfig $storageConfig
+	 * @param IUser|null $user
+	 * @return void
+	 * @throws \OCA\Files_External\NotFoundException
+	 */
+	public function manipulateStorageConfig(StorageConfig &$storageConfig, IUser $user = null): void
+	{
+		// Check if access key is empty
+		$accessKey = $storageConfig->getBackendOption(License::SCHEME_ACCESS_KEY);
+		if (!$accessKey) {
+			$this->logger->warning("Access Key not set");
+			return;
 		}
+
+		// Set storage config to MetaProvide Swarm Gateway
+		$storageConfig->setBackendOptions([
+			'host' => $storageConfig->getBackendOption('HOST_URL'),
+			'port' => $storageConfig->getBackendOption('HOST_PORT'),
+			'access_key' => $accessKey
+		]);
+
+		// Update storage config
+		$this->globalStoragesService->updateStorage($storageConfig);
 	}
 }

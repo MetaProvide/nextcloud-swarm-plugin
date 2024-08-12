@@ -42,6 +42,7 @@ services:
       - ./:/var/www/html/custom_apps/files_external_ethswarm
       - ./dev-environment/nextcloud_source/lib:/var/www/html/lib
       - ./dev-environment/nextcloud_source/apps:/var/www/html/apps
+      - ./docker/nextcloud/hooks:/docker-entrypoint-hooks.d
     ports:
       - "80:80"
       - "443:443"
@@ -56,7 +57,6 @@ services:
       MYSQL_HOST: mariadb:3306
       NEXTCLOUD_ADMIN_USER: ${NC_ADMIN_USER}
       NEXTCLOUD_ADMIN_PASSWORD: ${NC_ADMIN_PASSWORD}
-      SWARM_ACCESS_API_TOKEN: ${SWARM_ACCESS_API_TOKEN}
 
   adminer:
     image: adminer

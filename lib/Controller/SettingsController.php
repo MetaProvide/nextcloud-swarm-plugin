@@ -73,11 +73,5 @@ class SettingsController extends Controller {
 		} else {
 			$this->config->setAppValue($this->appName, "storageconfig", "");
 		}
-
-		if($this->request->getParam("swarm_access_key")!== "") {
-			$this->config->setAppValue($this->appName, "swarm_access_key", $this->request->getParam("swarm_access_key"));
-		} else {
-			$this->config->setAppValue($this->appName, "swarm_access_key", "");
-		}
 	}
 }
