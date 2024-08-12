@@ -22,195 +22,100 @@
  */
 namespace OCA\Files_External_Ethswarm\Storage;
 
-trait BeeSwarmTrait {
+use OCA\Files_External_Ethswarm\Utils\Curl;
+
+trait BeeSwarmTrait
+{
 
 	/** @var string */
-	protected $ip;
+	protected string $api_url;
 
 	/** @var string */
-	protected $port;
+	protected string $port;
 
 	/** @var string */
-	protected $api_url;
+	protected string $api_base_url;
 
 	/** @var string */
-	protected $debug_api_url;
+	protected string $access_key;
 
 	/** @var bool */
-	protected $isBasicAuth;
+	protected bool $isLicense = true;
 
 	/** @var string */
-	protected $username;
+	protected string $id;
 
-	/** @var string */
-	protected $password;
-
-	/** @var string */
-	protected $id;
-
-	private static string $CONNECTIONSTATUS = "Ethereum Swarm Bee";
-
-	protected function parseParams($params) {
-		if (isset($params['ip']) && isset($params['port'])) {
-			$this->ip = $params['ip'];
+	/**
+	 * @param $params
+	 * @return void
+	 * @throws \Exception
+	 */
+	protected function parseParams($params): void
+	{
+		if (isset($params['host']) && isset($params['port'])) {
+			$this->api_url = $params['host'];
 			$this->port = $params['port'];
-			$this->api_url = $this->ip . ':' . $this->port;
-			$this->debug_api_url = $this->ip . ':' . $params['debug_api_port'];
+			$this->api_base_url = $this->api_url . ':' . $this->port;
 		} else {
 			throw new \Exception('Creating ' . self::class . ' storage failed, required parameters not set for bee swarm');
 		}
 
-		if (!empty($params['user']) && !empty($params['password'])) {
-			$this->isBasicAuth = true;
-			$this->username = $params['user'];
-			$this->password = $params['password'];
+		if ($params['access_key']) {
+			$this->access_key = $params['access_key'];
+			$this->isLicense = true;
 		}
-	}
-
-	/**
-	 * initializes a curl handler
-	 * @return \CurlHandle
-	 */
-	private function setCurl($url) {
-		$ch = curl_init();
-
-		curl_setopt($ch, CURLOPT_URL, $url);
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-		return $ch;
-	}
-
-	/**
-	 * tests whether a curl operation ran successfully. If not, an exception
-	 * is thrown
-	 *
-	 * @param \CurlHandle $ch
-	 * @param mixed $result
-	 * @throws \Exception
-	 */
-	private function checkCurlResult($ch, $result) {
-		if ($result === false) {
-			$error = curl_error($ch);
-			curl_close($ch);
-			throw new \Exception($error);
-		}
-	}
-
-	protected function addBasicAuthHeaders(string $user, string $password): string {
-		$base64EncodedAuth = base64_encode($user . ':' . $password);
-		$header = 'Authorization: Basic ' . $base64EncodedAuth;
-		return $header;
-	}
-
-	private function upload_stream(string $path, $stream, string $tmpfile, string $mimetype, int $file_size = null) {
-		$url_endpoint = $this->api_url . '/bzz';
-		$url_params = "?name=" . urlencode(basename($path));
-
-		$url_endpoint .= $url_params;
-		$curl = $this->setCurl($url_endpoint);
-
-		$fh = fopen($tmpfile, 'r');
-		if ($fh === false || !is_resource($fh)) {
-			throw new \Exception("Failed to open temporary file $tmpfile");
-		}
-
-		curl_setopt($curl, CURLOPT_PUT, true);
-		curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "POST");
-		curl_setopt($curl, CURLOPT_POST, true);
-		curl_setopt($curl, CURLOPT_INFILE, $fh);
-		curl_setopt($curl, CURLOPT_INFILESIZE, $file_size);
-		curl_setopt($curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
-		curl_setopt($curl, CURLOPT_VERBOSE, true);
-
-		curl_setopt($curl, CURLOPT_HTTPHEADER, [
-			'content-type: ' . $mimetype,
-			'swarm-postage-batch-id: ' . $this->stampBatchId,
-			'swarm-pin: true',
-			'swarm-redundancy-level: 2',
-			($this->isEncrypted ? 'swarm-encrypt: true' : ''),
-			($this->isBasicAuth ? $this->addBasicAuthHeaders($this->username, $this->password) : '')
-		]);
-
-		$output = curl_exec($curl);
-		$this->checkCurlResult($curl, $output);
-		$response_data = json_decode($output, true);
-		curl_close($curl);
-		return $response_data;
-	}
-
-	private function upload_file(string $uploadpath, string $tmppath, int $file_size = null) {
-		$url_endpoint = $this->api_url . '/bzz';
-		$url_endpoint .= "?name=logo_meta.png"; // . basename($uploadpath);
-		$curl = $this->setCurl($url_endpoint);
-
-		curl_setopt($curl, CURLOPT_HTTPHEADER, [
-			'swarm-postage-batch-id: ' . $this->stampBatchId,
-			'Content-Type: application/octet-stream',	// this is necessary, otherwise produces server error 500: "could not store directory". File can then be Open or Save in browser.
-			($this->isEncrypted ? 'Swarm-Encrypt: true' : '')
-		]);
-		curl_setopt($curl, CURLOPT_POST, true);
-
-		// Create a CURLFile object
-		$cfile = curl_file_create($tmppath); //,'image/jpeg','mytest');
-		// Assign POST data
-		$post_data = ['file=' => $cfile];
-
-		curl_setopt($curl, CURLOPT_POSTFIELDS, $post_data);
-
-		$output = curl_exec($curl);
-
-		$this->checkCurlResult($curl, $output);
-		$response_data = json_decode($output, true);
-		curl_close($curl);
-		return $response_data;
-	}
-
-	private function get_stream_by_curl(string $path, string $reference) {
-		$url_endpoint = $this->api_url . '/bzz/';
-		$url_params = $reference;
-		$url_endpoint .= $url_params;
-
-		$curl = $this->setCurl($url_endpoint);
-
-		curl_setopt($curl, CURLOPT_HTTPHEADER, [
-			'Content-Type: application/octet-stream',
-		]);
-
-		curl_setopt($curl, CURLOPT_HEADER, true);
-		$output = curl_exec($curl);
-		$this->checkCurlResult($curl, $output);
-		curl_close($curl);
-		return $output;
 	}
 
 	/**
 	 * @param string $path
-	 * @param string $reference
-	 * @return resource
-	 * @throws \Exception
+	 * @param string $tmpfile
+	 * @param string $mimetype
+	 * @param int|null $file_size
+	 * @return array|string
+	 * @throws \Safe\Exceptions\CurlException
 	 */
-	private function get_stream(string $path, string $reference)
+	private function uploadStream(string $path, string $tmpfile, string $mimetype, int $file_size = null)
 	{
-		$url_endpoint = $this->api_url . '/bzz/';
-		$url_params = $reference;
-		$url_endpoint .= $url_params;
+		$endpoint = $this->api_base_url . DIRECTORY_SEPARATOR . 'bzz';
+		$params = "?name=" . urlencode(basename($path));
 
-		$context = null;
-		if ($this->isBasicAuth) {
-			$hdr = $this->addBasicAuthHeaders($this->username, $this->password);
-			$opts = [
-				'http' => [
-					'method' => "GET",
-					'header' => $hdr
-				]
-			];
-			$context = stream_context_create($opts);
-		}
-		$output = fopen($url_endpoint, 'r', false, $context);
+		$curl = new Curl($endpoint . $params, [
+			CURLOPT_PUT => true,
+			CURLOPT_CUSTOMREQUEST => "POST",
+			CURLOPT_POST => true,
+			CURLOPT_INFILE => fopen($tmpfile, 'r'),
+			CURLOPT_INFILESIZE => $file_size,
+			CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+			CURLOPT_VERBOSE => true
+		], [
+			'content-type: ' . $mimetype,
+			'swarm-pin: true',
+			'swarm-redundancy-level: 2',
+		], $this->access_key);
 
-		if (!$output) {
-			throw new \Exception("Unable to get file $path from swarm");
-		}
-		return $output;
+		return $curl->exec(true);
+	}
+
+	/**
+	 * @param string $reference
+	 * @return string|false
+	 * @throws \Safe\Exceptions\CurlException
+	 */
+	private function downloadStream(string $reference): string|false
+	{
+		$endpoint = $this->api_base_url . DIRECTORY_SEPARATOR . 'bzz' . DIRECTORY_SEPARATOR . $reference;
+
+		$curl = new Curl($endpoint, [
+			CURLOPT_FOLLOWLOCATION => true,
+			CURLOPT_RETURNTRANSFER => true,
+			CURLOPT_MAXREDIRS => 10,
+			CURLOPT_HEADER => true,
+		], [
+			'content-type: application/octet-stream',
+		], $this->access_key);
+		$response = $curl->exec();
+
+		return substr($response, $curl->getInfo(CURLINFO_HEADER_SIZE));
 	}
 
 	/**
@@ -219,22 +124,16 @@ trait BeeSwarmTrait {
 	 * @return bool
 	 * @throws \Exception if connection could not be made
 	 */
-	private function getConnection() {
-		$url_endpoint = $this->api_url;
+	private function checkConnection(): bool
+	{
+		$endpoint = $this->api_base_url . DIRECTORY_SEPARATOR . 'readiness';
 
-		$curl = $this->setCurl($url_endpoint);
+		$curl = new Curl($endpoint);
+		$curl->setAuthorization($this->access_key);
 
-		curl_setopt($curl, CURLOPT_HEADER, false);
-		curl_setopt($curl, CURLOPT_HTTPHEADER, [
-			($this->isBasicAuth ? $this->addBasicAuthHeaders($this->username, $this->password) : '')
-		]);
-		$output = curl_exec($curl);
-		$this->checkCurlResult($curl, $output);
-		curl_close($curl);
+		$output = $curl->exec();
+		$httpCode = $curl->getInfo(CURLINFO_HTTP_CODE);
 
-		if (trim($output) === self::$CONNECTIONSTATUS) {
-			return true;
-		}
-		return false;
+		return $httpCode === 200 and $output === 'OK';
 	}
 }
