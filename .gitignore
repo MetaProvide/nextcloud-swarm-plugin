@@ -1,7 +1,16 @@
+# Projetc
 .env
 /build
-/node_modules
-/vendor
-/.php_cs.cache
 /dev-environment
 js/nextcloud-swarm-plugin*.*
+/.php_cs.cache
+
+# Package Manages
+/node_modules
+/vendor
+
+# IDE
+.idea
+
+# OS
+.DS_Store
