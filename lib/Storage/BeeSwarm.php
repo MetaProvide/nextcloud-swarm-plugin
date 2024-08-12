@@ -125,7 +125,7 @@ class BeeSwarm extends \OC\Files\Storage\Common
 	 */
 	public function test(): bool
 	{
-		if ((!str_starts_with(strtolower($this->api_url), "http://")) && (!str_starts_with(strtolower($this->api_url), "https://"))) {
+		if (!preg_match('/^https?:\/\//i', $this->api_url)) {
 			throw new Exception("The URL must start with http:// or https://");
 		}
 		return $this->checkConnection();
