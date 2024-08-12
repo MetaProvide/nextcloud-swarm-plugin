@@ -23,37 +23,43 @@
 
 namespace OCA\Files_External_Ethswarm\Backend;
 
+
 use OCP\IL10N;
 use OCA\Files_External\Lib\Backend\Backend;
-use OCA\Files_External\Lib\Auth\AuthMechanism;
-use OCA\Files_External_Ethswarm\Auth\HttpBasicAuth;
 use OCA\Files_External\Lib\DefinitionParameter;
 use OCA\Files_External\Lib\StorageConfig;
 use OCA\Files_External\Service\GlobalStoragesService;
+use OCA\Files_External_Ethswarm\Auth\License;
 use OCP\IUser;
 use OCP\IConfig;
 use Psr\Log\LoggerInterface;
 
-class BeeSwarm extends Backend {
-	/**
-	 * ethswarm constructor.
-	 * @param IL10N $l
-	 */
-	private $l;
+class BeeSwarm extends Backend
+{
+	/** @var IL10N */
+	private IL10N $l;
 
 	/** @var string */
-	protected $appName;
+	protected string $appName;
 
-	 /** @var IConfig */
-	 private $config;
+	/** @var IConfig */
+	private IConfig $config;
 
-	 /** @var LoggerInterface */
-	 private $logger;
+	/** @var LoggerInterface */
+	private LoggerInterface $logger;
 
-	 /** @var GlobalStoragesService */
-	 private $globalStoragesService;
+	/** @var GlobalStoragesService */
+	private GlobalStoragesService $globalStoragesService;
 
-	public function __construct(string $appName, IL10N $l, IConfig $config, LoggerInterface $logger, GlobalStoragesService $globalStoragesService) {
+	/**
+	 * @param string $appName
+	 * @param IL10N $l
+	 * @param IConfig $config
+	 * @param LoggerInterface $logger
+	 * @param GlobalStoragesService $globalStoragesService
+	 */
+	public function __construct(string $appName, IL10N $l, IConfig $config, LoggerInterface $logger, GlobalStoragesService $globalStoragesService)
+	{
 		$this->l = $l;
 		$this->appName = $appName;
 		$this->config = $config;
@@ -65,79 +71,34 @@ class BeeSwarm extends Backend {
 			->setStorageClass('\OCA\Files_External_Ethswarm\Storage\BeeSwarm')
 			->setText($l->t('Swarm'))
 			->addParameters([
-				(new DefinitionParameter('access_key', $l->t('Access Key')))->setTooltip($l->t("Access Key from MetaProvide")),
-			])
-			->addAuthScheme(AuthMechanism::SCHEME_NULL)
-			->addAuthScheme(HttpBasicAuth::SCHEME_HTTP_BASIC);
-		//->addCustomJs("../../../$appWebPath/js/beeswarm");
+				(new DefinitionParameter('HOST_URL', $l->t('Host')))->setTooltip($l->t("Swarm Provider URL")),
+				(new DefinitionParameter('HOST_PORT', $l->t('Port')))->setTooltip($l->t("Port Number")),
+			])->addAuthScheme(License::SCHEME_ACCESS_KEY);
 	}
 
-	public function manipulateStorageConfig(StorageConfig &$storageConfig, IUser $user = null) {
-		$this->config->setAppValue($this->appName, 'has_swarm_access', false);
-
-		$access_key = $storageConfig->getBackendOption('access_key');
-
+	/**
+	 * @param StorageConfig $storageConfig
+	 * @param IUser|null $user
+	 * @return void
+	 * @throws \OCA\Files_External\NotFoundException
+	 */
+	public function manipulateStorageConfig(StorageConfig &$storageConfig, IUser $user = null): void
+	{
 		// Check if access key is empty
-		if (empty($access_key)) {
+		$accessKey = $storageConfig->getBackendOption(License::SCHEME_ACCESS_KEY);
+		if (!$accessKey) {
 			$this->logger->warning("Access Key not set");
 			return;
 		}
 
-		// Verify access key
-		$ch = curl_init();
-
-		// Set the URL
-		// TODO: should ask a public API for the access key because Nocodb requires an api_token
-		// this api_token gives full access to the table (including deletion of every row)
-
-		// $endpont = swarmpluginaccess.metaprovide.org/api/check
-		$endpoint = "https://nocodb.metaprovide.org/api/v1/db/data/v1/ethswarm-api-key-manger/access_keys/find-one";
-		$query = 'where='. urlencode("(Key,eq," . $access_key . ")");
-		$url = $endpoint . '?' . $query;
-
-		// Set the necessary cURL options
-		$api_token = $this->config->getSystemValue('swarm_access_api_token');
-
-		// check if api token is empty
-		if (empty($api_token)) {
-			$this->logger->warning("API Token not found");
-			return;
-		}
-
-		curl_setopt($ch, CURLOPT_URL, $url);
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-		curl_setopt($ch, CURLOPT_HTTPHEADER, [
-			"accept: application/json",
-			"xc-token: $api_token"
-		]);
-
-		// Execute the request and store the response
-		$response = curl_exec($ch);
-		$data = json_decode($response, true);
-
-		// check if staus code is 401
-		if (curl_getinfo($ch, CURLINFO_HTTP_CODE) === 401) {
-			$this->logger->warning("Access Key not found or invalid");
-			return;
-		}
-
-		// Success
-		$this->config->setAppValue($this->appName, 'has_swarm_access', true);
-
-		// Set storage config to point to MetaProvide Developer Bee Node
+		// Set storage config to MetaProvide Swarm Gateway
 		$storageConfig->setBackendOptions([
-			'ip' => 'http://188.34.161.148',
-			'port' => '1633',
-			'debug_api_port' => '1635',
-			'access_key' => $access_key
+			'host' => $storageConfig->getBackendOption('HOST_URL'),
+			'port' => $storageConfig->getBackendOption('HOST_PORT'),
+			'access_key' => $accessKey
 		]);
 
+		// Update storage config
 		$this->globalStoragesService->updateStorage($storageConfig);
-
-		$auth = $storageConfig->getAuthMechanism();
-		if ($auth->getScheme() != HttpBasicAuth::SCHEME_HTTP_BASIC) {
-			$storageConfig->setBackendOption('user', '');
-			$storageConfig->setBackendOption('password', '');
-		}
 	}
 }

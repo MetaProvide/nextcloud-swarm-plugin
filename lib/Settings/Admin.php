@@ -230,11 +230,6 @@ class Admin implements ISettings {
 		curl_setopt($curl, CURLOPT_URL, $url_endpoint);
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
 
-		if (!empty($urlOptions['user']) && !empty($urlOptions['password'])) {
-			$base64EncodedAuth = base64_encode($urlOptions['user'] . ':' . $urlOptions['password']);
-			$header = 'Authorization: Basic ' . $base64EncodedAuth;
-			curl_setopt($curl, CURLOPT_HTTPHEADER, [$header]);
-		}
 		return $curl;
 	}
 }

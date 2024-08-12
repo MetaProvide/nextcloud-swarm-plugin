@@ -29,18 +29,16 @@ use OCP\IL10N;
 /**
  * Basic Http Authentication
  */
-class HttpBasicAuth extends AuthMechanism {
-	public const SCHEME_HTTP_BASIC = 'http_basic_auth';
+class License extends AuthMechanism {
+	public const SCHEME_ACCESS_KEY = 'access_key';
 
 	public function __construct(IL10N $l) {
 		$this
-			->setIdentifier('http::basicauth')
-			->setScheme(self::SCHEME_HTTP_BASIC)
-			->setText($l->t('HTTP Basic Auth'))
+			->setIdentifier('access:key')
+			->setScheme(self::SCHEME_ACCESS_KEY)
+			->setText($l->t('License'))
 			->addParameters([
-				new DefinitionParameter('user', $l->t('Username')),
-				(new DefinitionParameter('password', $l->t('Password')))
-					->setType(DefinitionParameter::VALUE_PASSWORD),
+				(new DefinitionParameter(self::SCHEME_ACCESS_KEY, $l->t('Access Key')))->setTooltip($l->t("Access Key from MetaProvide")),
 			]);
 	}
 }
