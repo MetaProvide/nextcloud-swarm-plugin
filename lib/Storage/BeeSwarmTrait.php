@@ -32,12 +32,6 @@ trait BeeSwarmTrait
 	protected string $api_url;
 
 	/** @var string */
-	protected string $port;
-
-	/** @var string */
-	protected string $api_base_url;
-
-	/** @var string */
 	protected string $access_key;
 
 	/** @var string */
@@ -50,14 +44,12 @@ trait BeeSwarmTrait
 	 */
 	protected function parseParams($params): void
 	{
-		if (isset($params['host']) && isset($params['port']) && $params['access_key']) {
+		if (isset($params['host']) && $params['access_key']) {
 			$this->api_url = $params['host'];
-			$this->port = $params['port'];
 			$this->access_key = $params['access_key'];
 		} else {
 			throw new \Exception('Creating ' . self::class . ' storage failed, required parameters not set for bee swarm');
 		}
-		$this->api_base_url = $this->api_url . ':' . $this->port;
 	}
 
 	/**
@@ -70,7 +62,7 @@ trait BeeSwarmTrait
 	 */
 	private function uploadStream(string $path, string $tmpfile, string $mimetype, int $file_size = null)
 	{
-		$endpoint = $this->api_base_url . DIRECTORY_SEPARATOR . 'bzz';
+		$endpoint = $this->api_url . DIRECTORY_SEPARATOR . 'bzz';
 		$params = "?name=" . urlencode(basename($path));
 
 		$curl = new Curl($endpoint . $params, [
@@ -97,7 +89,7 @@ trait BeeSwarmTrait
 	 */
 	private function downloadStream(string $reference)
 	{
-		$endpoint = $this->api_base_url . DIRECTORY_SEPARATOR . 'bzz' . DIRECTORY_SEPARATOR . $reference;
+		$endpoint = $this->api_url . DIRECTORY_SEPARATOR . 'bzz' . DIRECTORY_SEPARATOR . $reference;
 
 		$curl = new Curl($endpoint, [
 			CURLOPT_FOLLOWLOCATION => true,
@@ -125,7 +117,7 @@ trait BeeSwarmTrait
 	 */
 	private function checkConnection(): bool
 	{
-		$endpoint = $this->api_base_url . DIRECTORY_SEPARATOR . 'readiness';
+		$endpoint = $this->api_url . DIRECTORY_SEPARATOR . 'readiness';
 
 		$curl = new Curl($endpoint);
 		$curl->setAuthorization($this->access_key);
