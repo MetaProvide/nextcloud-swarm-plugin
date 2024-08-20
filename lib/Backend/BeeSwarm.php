@@ -71,7 +71,7 @@ class BeeSwarm extends Backend
 			->setStorageClass('\OCA\Files_External_Ethswarm\Storage\BeeSwarm')
 			->setText($l->t('Swarm'))
 			->addParameters([
-				(new DefinitionParameter('HOST_URL', $l->t('Host')))
+				(new DefinitionParameter('HOST_URL', $l->t('Server URL')))
 					->setTooltip($l->t("License Server URL")),
 			])->addAuthScheme(License::SCHEME_ACCESS_KEY);
 	}
