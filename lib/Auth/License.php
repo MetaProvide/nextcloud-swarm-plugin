@@ -38,7 +38,9 @@ class License extends AuthMechanism {
 			->setScheme(self::SCHEME_ACCESS_KEY)
 			->setText($l->t('License'))
 			->addParameters([
-				(new DefinitionParameter(self::SCHEME_ACCESS_KEY, $l->t('Access Key')))->setTooltip($l->t("Access Key from MetaProvide")),
+				(new DefinitionParameter(self::SCHEME_ACCESS_KEY, $l->t('Access Key')))
+					->setTooltip($l->t("License Access Key"))
+					->setType(DefinitionParameter::VALUE_PASSWORD),
 			]);
 	}
 }

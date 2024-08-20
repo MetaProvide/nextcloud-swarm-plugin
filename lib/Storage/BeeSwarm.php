@@ -126,9 +126,6 @@ class BeeSwarm extends \OC\Files\Storage\Common
 	 */
 	public function test(): bool
 	{
-		if (!preg_match('/^https?:\/\//i', $this->api_url)) {
-			throw new Exception("The URL must start with http:// or https://");
-		}
 		return $this->checkConnection();
 	}
 

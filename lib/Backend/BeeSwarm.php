@@ -24,14 +24,14 @@
 namespace OCA\Files_External_Ethswarm\Backend;
 
 
-use OCP\IL10N;
 use OCA\Files_External\Lib\Backend\Backend;
 use OCA\Files_External\Lib\DefinitionParameter;
 use OCA\Files_External\Lib\StorageConfig;
 use OCA\Files_External\Service\GlobalStoragesService;
 use OCA\Files_External_Ethswarm\Auth\License;
-use OCP\IUser;
 use OCP\IConfig;
+use OCP\IL10N;
+use OCP\IUser;
 use Psr\Log\LoggerInterface;
 
 class BeeSwarm extends Backend
@@ -71,8 +71,8 @@ class BeeSwarm extends Backend
 			->setStorageClass('\OCA\Files_External_Ethswarm\Storage\BeeSwarm')
 			->setText($l->t('Swarm'))
 			->addParameters([
-				(new DefinitionParameter('HOST_URL', $l->t('Host')))->setTooltip($l->t("Swarm Provider URL")),
-				(new DefinitionParameter('HOST_PORT', $l->t('Port')))->setTooltip($l->t("Port Number")),
+				(new DefinitionParameter('HOST_URL', $l->t('Host')))
+					->setTooltip($l->t("License Server URL")),
 			])->addAuthScheme(License::SCHEME_ACCESS_KEY);
 	}
 
@@ -80,25 +80,42 @@ class BeeSwarm extends Backend
 	 * @param StorageConfig $storageConfig
 	 * @param IUser|null $user
 	 * @return void
-	 * @throws \OCA\Files_External\NotFoundException
+	 * @throws \Exception
 	 */
 	public function manipulateStorageConfig(StorageConfig &$storageConfig, IUser $user = null): void
 	{
-		// Check if access key is empty
-		$accessKey = $storageConfig->getBackendOption(License::SCHEME_ACCESS_KEY);
-		if (!$accessKey) {
-			$this->logger->warning("Access Key not set");
-			return;
-		}
+		// validations
+		$storageParams = $this->validateStorageConfig($storageConfig);
 
-		// Set storage config to MetaProvide Swarm Gateway
-		$storageConfig->setBackendOptions([
-			'host' => $storageConfig->getBackendOption('HOST_URL'),
-			'port' => $storageConfig->getBackendOption('HOST_PORT'),
-			'access_key' => $accessKey
-		]);
+		// Set storage config
+		$storageConfig->setBackendOptions($storageParams);
 
 		// Update storage config
 		$this->globalStoragesService->updateStorage($storageConfig);
+	}
+
+	/**
+	 * @param StorageConfig $storageConfig
+	 * @return array
+	 * @throws \Exception
+	 */
+	private function validateStorageConfig(StorageConfig $storageConfig): array
+	{
+		$host = $storageConfig->getBackendOption('HOST_URL');
+		$access_key = $storageConfig->getBackendOption(License::SCHEME_ACCESS_KEY);
+
+		if (!$access_key) {
+			$this->logger->warning("access key not set");
+			throw new \Exception('Creating ' . self::class . ' storage failed, required parameters not set for bee swarm');
+		}
+		if (!preg_match('/^https?:\/\//i', $host)) {
+			$host = 'https://' . $host;
+		}
+		if (!filter_var($host, FILTER_VALIDATE_URL)) {
+			$this->logger->warning("invalid url");
+			throw new \Exception('Creating ' . self::class . ' storage failed, required parameters not set for bee swarm');
+		}
+
+		return ['host' => $host, 'access_key' => $access_key];
 	}
 }
