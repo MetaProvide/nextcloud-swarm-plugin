@@ -20,6 +20,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
+
 namespace OCA\Files_External_Ethswarm\Auth;
 
 use OCA\Files_External\Lib\Auth\AuthMechanism;
@@ -29,10 +30,16 @@ use OCP\IL10N;
 /**
  * Basic Http Authentication
  */
-class License extends AuthMechanism {
+class License extends AuthMechanism
+{
+	/** @const string */
 	public const SCHEME_ACCESS_KEY = 'access_key';
 
-	public function __construct(IL10N $l) {
+	/**
+	 * @param IL10N $l
+	 */
+	public function __construct(IL10N $l)
+	{
 		$this
 			->setIdentifier('access:key')
 			->setScheme(self::SCHEME_ACCESS_KEY)
