@@ -23,6 +23,8 @@
 
 namespace OCA\Files_External_Ethswarm\Storage;
 
+use OCA\Files_External_Ethswarm\Auth\License;
+use OCA\Files_External_Ethswarm\Backend\BeeSwarm;
 use OCA\Files_External_Ethswarm\Utils\Curl;
 
 trait BeeSwarmTrait
@@ -34,9 +36,6 @@ trait BeeSwarmTrait
 	/** @var string */
 	protected string $access_key;
 
-	/** @var string */
-	protected string $id;
-
 	/**
 	 * @param $params
 	 * @return void
@@ -44,11 +43,25 @@ trait BeeSwarmTrait
 	 */
 	protected function parseParams($params): void
 	{
-		if (isset($params['host']) && $params['access_key']) {
-			$this->api_url = $params['host'];
-			$this->access_key = $params['access_key'];
-		} else {
-			throw new \Exception('Creating ' . self::class . ' storage failed, required parameters not set for bee swarm');
+		$this->validateParams($params);
+
+		$this->api_url = $params[BeeSwarm::OPTION_HOST_URL];
+		$this->access_key = $params[License::SCHEME_ACCESS_KEY];
+	}
+
+	/**
+	 * @param array $params
+	 * @return void
+	 * @throws \Exception
+	 */
+	private function validateParams(array &$params): void
+	{
+		if (!$params[BeeSwarm::OPTION_HOST_URL] || !$params[License::SCHEME_ACCESS_KEY]) {
+			throw new \Exception('Creating ' . self::class . ' storage failed, required parameters not set');
+		}
+
+		if (!filter_var($params[BeeSwarm::OPTION_HOST_URL], FILTER_VALIDATE_URL)) {
+			throw new \Exception('Creating ' . self::class . ' storage failed, invalid url');
 		}
 	}
 

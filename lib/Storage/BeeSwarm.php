@@ -24,59 +24,55 @@
 namespace OCA\Files_External_Ethswarm\Storage;
 
 use Exception;
+use OC\Files\Cache\Cache;
+use OC\Files\Storage\Common;
+use OCA\Files_External_Ethswarm\Db\SwarmFileMapper;
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\Constants;
-use OCP\Files\IMimeTypeLoader;
-use OCA\Files_External_Ethswarm\Db\SwarmFileMapper;
-use OCA\Files_External\Lib\StorageConfig;
 use OCP\Files\Config\IUserMountCache;
-use OCP\IDBConnection;
+use OCP\Files\IMimeTypeLoader;
 use OCP\IConfig;
-use OCP\ILogger;
+use OCP\IDBConnection;
 use Sabre\DAV\Exception\BadRequest;
 
-// TODO: Make sure to retrive backendOption from storageConfig
-class BeeSwarm extends \OC\Files\Storage\Common
+class BeeSwarm extends Common
 {
 	use BeeSwarmTrait;
 
 	public const APP_NAME = 'files_external_ethswarm';
 
 	/** @var int */
-	protected $storageId;
+	protected int $storageId;
 
-	/**
-	 * @var bool
-	 */
-	private $isEncrypted;
+	/** @var bool */
+	private bool $isEncrypted;
 
 	/** @var string */
-	protected $stampBatchId;
-
-	/**
-	 * @var ILogger
-	 */
-	protected $logger;
+	protected string $stampBatchId;
 
 	/** @var SwarmFileMapper */
-	private $filemapper;
+	private SwarmFileMapper $filemapper;
 
 	/** @var IConfig */
-	private $config;
+	private IConfig $config;
 
 	/** @var \OCP\IDBConnection */
-	protected $dbConnection;
+	protected IDBConnection $dbConnection;
 
 	/** @var \OCP\Files\IMimeTypeLoader */
-	private $mimeTypeHandler;
+	private IMimeTypeLoader $mimeTypeHandler;
 
 	/** @var \OC\Files\Cache\Cache */
-	private $cacheHandler;
+	private Cache $cacheHandler;
+
+	/** @var string */
+	protected string $id;
+
 
 	public function __construct($params)
 	{
 		$this->parseParams($params);
-		$this->id = 'ethswarm::' . $this->api_base_url;
+		$this->id = 'ethswarm::' . $this->api_url;
 		$this->storageId = $this->getStorageCache()->getNumericId();
 
 		// Load handlers

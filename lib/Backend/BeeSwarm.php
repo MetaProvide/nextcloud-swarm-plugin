@@ -51,6 +51,9 @@ class BeeSwarm extends Backend
 	/** @var GlobalStoragesService */
 	private GlobalStoragesService $globalStoragesService;
 
+	/** @const string */
+	public const OPTION_HOST_URL = 'host_url';
+
 	/**
 	 * @param string $appName
 	 * @param IL10N $l
@@ -71,51 +74,48 @@ class BeeSwarm extends Backend
 			->setStorageClass('\OCA\Files_External_Ethswarm\Storage\BeeSwarm')
 			->setText($l->t('Swarm'))
 			->addParameters([
-				(new DefinitionParameter('HOST_URL', $l->t('Server URL')))
+				(new DefinitionParameter(self::OPTION_HOST_URL, $l->t('Server URL')))
 					->setTooltip($l->t("License Server URL")),
 			])->addAuthScheme(License::SCHEME_ACCESS_KEY);
 	}
 
 	/**
-	 * @param StorageConfig $storageConfig
-	 * @param IUser|null $user
-	 * @return void
-	 * @throws \Exception
+	 * {@inheritdoc}
 	 */
-	public function manipulateStorageConfig(StorageConfig &$storageConfig, IUser $user = null): void
+	public function manipulateStorageConfig(StorageConfig &$storage, IUser $user = null): void
 	{
-		// validations
-		$storageParams = $this->validateStorageConfig($storageConfig);
-
-		// Set storage config
-		$storageConfig->setBackendOptions($storageParams);
-
-		// Update storage config
-		$this->globalStoragesService->updateStorage($storageConfig);
-	}
-
-	/**
-	 * @param StorageConfig $storageConfig
-	 * @return array
-	 * @throws \Exception
-	 */
-	private function validateStorageConfig(StorageConfig $storageConfig): array
-	{
-		$host = $storageConfig->getBackendOption('HOST_URL');
-		$access_key = $storageConfig->getBackendOption(License::SCHEME_ACCESS_KEY);
-
-		if (!$access_key) {
-			$this->logger->warning("access key not set");
-			throw new \Exception('Creating ' . self::class . ' storage failed, required parameters not set for bee swarm');
-		}
+		// add https:// if not present
+		$host = $storage->getBackendOption(self::OPTION_HOST_URL);
 		if (!preg_match('/^https?:\/\//i', $host)) {
 			$host = 'https://' . $host;
 		}
-		if (!filter_var($host, FILTER_VALIDATE_URL)) {
-			$this->logger->warning("invalid url");
-			throw new \Exception('Creating ' . self::class . ' storage failed, required parameters not set for bee swarm');
+
+		// override manipulated configs
+		$storage->setBackendOptions([
+			...$storage->getBackendOptions(),
+			self::OPTION_HOST_URL => $host,
+		]);
+	}
+
+	/**
+	 * {@inheritdoc}
+	 */
+	public function validateStorageDefinition(StorageConfig $storage): bool
+	{
+		$this->manipulateStorageConfig($storage);
+
+		$result = true;
+
+		if (!$storage->getBackendOption(License::SCHEME_ACCESS_KEY)) {
+			$this->logger->warning("access key not set");
+			$result = false;
 		}
 
-		return ['host' => $host, 'access_key' => $access_key];
+		if (!filter_var($storage->getBackendOption(self::OPTION_HOST_URL), FILTER_VALIDATE_URL)) {
+			$this->logger->warning("invalid url");
+			$result = false;
+		}
+
+		return $result;
 	}
 }
