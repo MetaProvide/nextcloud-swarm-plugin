@@ -59,7 +59,9 @@ trait BeeSwarmTrait
 		if (!$params[BeeSwarm::OPTION_HOST_URL] || !$params[License::SCHEME_ACCESS_KEY]) {
 			throw new \Exception('Creating ' . self::class . ' storage failed, required parameters not set');
 		}
-
+		if (!preg_match('/^https?:\/\//i', $params[BeeSwarm::OPTION_HOST_URL])) {
+			$params[BeeSwarm::OPTION_HOST_URL] = 'https://' . $params[BeeSwarm::OPTION_HOST_URL];
+		}
 		if (!filter_var($params[BeeSwarm::OPTION_HOST_URL], FILTER_VALIDATE_URL)) {
 			throw new \Exception('Creating ' . self::class . ' storage failed, invalid url');
 		}
