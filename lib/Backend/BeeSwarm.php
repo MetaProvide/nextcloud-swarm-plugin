@@ -82,36 +82,22 @@ class BeeSwarm extends Backend
 	/**
 	 * {@inheritdoc}
 	 */
-	public function manipulateStorageConfig(StorageConfig &$storage, IUser $user = null): void
-	{
-		// add https:// if not present
-		$host = $storage->getBackendOption(self::OPTION_HOST_URL);
-		if (!preg_match('/^https?:\/\//i', $host)) {
-			$host = 'https://' . $host;
-		}
-
-		// override manipulated configs
-		$storage->setBackendOptions([
-			...$storage->getBackendOptions(),
-			self::OPTION_HOST_URL => $host,
-		]);
-	}
-
-	/**
-	 * {@inheritdoc}
-	 */
 	public function validateStorageDefinition(StorageConfig $storage): bool
 	{
-		$this->manipulateStorageConfig($storage);
-
 		$result = true;
 
+		// access key
 		if (!$storage->getBackendOption(License::SCHEME_ACCESS_KEY)) {
 			$this->logger->warning("access key not set");
 			$result = false;
 		}
 
-		if (!filter_var($storage->getBackendOption(self::OPTION_HOST_URL), FILTER_VALIDATE_URL)) {
+		// server url
+		$host = $storage->getBackendOption(self::OPTION_HOST_URL);
+		if (!preg_match('/^https?:\/\//i', $host)) {
+			$host = 'https://' . $host;
+		}
+		if (!filter_var($host, FILTER_VALIDATE_URL)) {
 			$this->logger->warning("invalid url");
 			$result = false;
 		}
