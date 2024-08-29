@@ -8,19 +8,19 @@ This plugin integrates [Swarm](https://www.ethswarm.org/) (a decentralized, bloc
 
 ## Table of Contents
 
-- [Dependencies](#dependencies) .
-- [Setup and Installation](#setup-and-installation) .
-- [Usage](#usage) . 
-  - [Settings](#settings) .
-  - [Usage](#usage) .
-- [Get Hejbit License](#get-hejbit-license) .
+- [Dependencies](#dependencies)
+- [Setup and Installation](#setup-and-installation)
+- [Usage](#usage)
+  - [Settings](#settings)
+  - [Usage](#usage)
+- [Get Hejbit License](#get-hejbit-license) 
 - [License](#license)
 
 ## Dependencies
 
 Before using the plugin, ensure you have the following:
 
-- An active Nextcloud instance
+- An active Nextcloud instance (version 27,28 or 29)
 - A valid license and URL to activate the service 
   - [Request Your Free Nextcloud Swarm Plugin Trial License](https://metaprovide.org/hejbit/start)
 
