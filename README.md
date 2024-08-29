@@ -1,118 +1,80 @@
-# Nextcloud Swarm Plugin
+# **Hejbit - Nextcloud Swarm Plugin**
 
-_Decentralized Sovereign cloud-storage comes to Nextcloud!_
+*Bring decentralized, sovereign cloud storage to Nextcloud with the Hejbit Swarm plugin!*
 
-This plugin brings [Swarm](https://www.ethswarm.org/) to [Nextcloud](https://nextcloud.com) - decentralized file-storage, connected to the blockchain.
+This plugin integrates [Swarm](https://www.ethswarm.org/) (a decentralized, blockchain-connected file storage system) directly into your [Nextcloud ](https://nextcloud.com/)instance.
 
-![View file and action menu](assets/images/swarm_Files.png "View file and action menu")
-
-<em>File view when using the plugin in Nextcloud</em>
+![File view when using the plugin in Nextcloud](https://github.com/user-attachments/assets/24f89fd9-f8eb-47e3-97ac-e1da41e48072)
 
 ## Table of Contents
 
--   [Dependencies](#dependencies)
--   [Setup and Installation](#setup-and-installation)
--   [Usage](#usage)
-    -   [Settings](#settings)
-    -   [Using Swarm](#using-swarm)
--   [License](#license)
+- [Dependencies](#dependencies)
+- [Setup and Installation](#setup-and-installation)
+- [Usage](#usage)
+  - [Settings](#settings)
+  - [Usage](#usage)
+- [Get Hejbit License](#get-hejbit-license) 
+- [License](#license)
 
 ## Dependencies
 
-To use the plugin you need the following
+Before using the plugin, ensure you have the following:
 
--   A Nextcloud instance
--   A Bee node
+- An active Nextcloud instance (version 27,28 or 29)
+- A valid license and URL to activate the service 
+  - [Request Your Free Nextcloud Swarm Plugin Trial License](https://metaprovide.org/hejbit/start)
 
 ## Setup and Installation
 
-For setting up a Bee node please have a look at the [official documentation](https://docs.ethswarm.org/docs/installation/quick-start)
+Follow these steps to configure Hejbit Swarm in Nextcloud:
 
-The following steps explain how to configure a Bee node in Nextcloud.
-
--	Create a `.env` file in the project root by copying the `.env.example` file and adjusting its values accordingly.
--	Run this command to start the development environment `docker compose up`, wait 10 seconds and navigate to `localhost`
--   Navigate to Profile menu -> Apps and make sure the "External Storage support" and "External Storage: Swarm" plugins are enabled
--   Navigate to External Storage Administration (Profile menu -> Administration Settings -> External Storage)
--   Add the connection settings for a new Bee node, **make sure** Authentication: none, Configuration is pointing to an active Bee node, and Available for: All users
--   Navigate to Ethswarm Storage Administration (Profile menu -> Administration Settings -> Ethswarm Storage)
--   Configure the Bee node - by default, encryption is active, **make sure** stamp batch is activated by using the toggle
--   To use a Bee node, it is necessary to [Purchase a Batch of new stamps](https://docs.ethswarm.org/docs/access-the-swarm/keep-your-data-alive) from the funds in the node's wallet account
--   Once the new batch is purchased, a unique batchId is generated. Once your batch has been purchased, it will take a few minutes for other Bee nodes in the Swarm to catch up and register your batch. Allow some time for your batch to propagate in the network before proceeding to the next step. This is indicated by the checkbox "Usable".
--   Uploading files to the swarm costs Bzz, so it is necessary to select a Batch as "Active". Only 1 batch is allowed to be Active for a given Bee node. Then click "Save Settings".
+1. Ensure the "External Storage" plugin is enabled.
+2. Install the "External Storage: Hejbit Swarm" app from the Nextcloud App Store.
+3. Navigate to External Storage Administration: Profile menu -> Settings -> External Storage.
+4. Create a new external storage with a folder name of your choice and select 'hejbit-swarm' as the storage type. Then, enter the license key and URL configuration.
 
 ## Usage
 
-File handling operations involving the Bee node are integrated in the External Storage ("Files") section of Nextcloud.
+Once installed, Hejbit Swarm integrates directly with Nextcloud’s "Files" section, allowing seamless file operations:
 
-![View file and action menu](assets/images/swarm_Files_Intro.png "View file and action menu")
+- **Upload:** Transfer files to decentralized storage.
+- **Download:** Retrieve and view files from decentralized storage.
+- **Copy/Move:** Shift files between any external storage and decentralized storage
 
-<em>View, download, and file view actions in Nextcloud</em>
-
-Using the plugin, the main file operations that are available in Nextcloud are:
-
--   Upload file(s) to a Bee node
--   Download and view files
--   Copy/Move files from any External Storage to a Bee node
--   Copy files from a Bee node to any External Storage
--   View and copy the unique swarm reference to the clipboard for any file stored on a Bee node
+![View, download, and file view actions in Nextcloud](https://github.com/user-attachments/assets/3bee08e4-7a9e-4b44-a904-821359cc3e7b)
 
 ### Settings
 
-Available to users with administrative credentials, the external storage accepts configuration options from two places, the normal External Storage settings, which allows a user to configure the basic connection properties of a Bee node:
+Users with administrative credentials can configure the plugin through the standard External Storage settings. Here, you can input your license key and URL for Hejbit Swarm.
 
-![Setup Swarm External Storage](assets/images/swarm_Setup_ExtStorage.png "Setup Swarm External Storage")
+![Basic Hejbit Swarm setup in External Storage in Nextcloud administration](https://github.com/user-attachments/assets/47e0cdda-5c1a-4464-a752-cf1eb5eeb19d)
 
-<em>Basic Swarm setup in External Storage in Nextcloud administration</em>
+### Usage
 
-Since every operation in Swarm costs money, it is important to view how much money is available to the Bee node directly and also provide a convenient way of handling the payment system in Swarm - all managed directly in Nextcloud. This is in a specific section with more advanced configuration for the Bee node, where the following settings can be viewed and edited:
+Once setup and configured, the Decentralized Storage is ready to use.
 
--   Configure which Bee node to manage
--   View current status of the Bee node
--   Option to toggle encryption on and off
--   How much BZZ is available to the node
--   Any purchased stamp batches and the remaining balances
--   Have the option to purchase a new batch of stamps
--   Toggle the batch used for uploading files active/inactive
+- Access the Decentralized Storage folder under "All Files" or via the "Files" menu under "External Storage."
+- Upload files as you would in Nextcloud.
 
-#### Using Bee node hosted on same server
+![Upload file to swarm in Nextcloud](https://github.com/user-attachments/assets/aadd664e-26ca-470a-a27b-af8d94351e52)
 
-If you are running the Bee node and Nextcloud using Docker containers on the same host, you cannot access the Bee node using `localhost` or `127.0.0.1` from within the Nextcloud container. Instead, you need to use the special DNS name `host.docker.internal` to access the host machine from within the container.
+- Once uploaded, it can be viewed internally or downloaded. It can also be copied to another storage.
 
-This is because `localhost` and `127.0.0.1` within the container refer to the container itself, not the host machine. The `host.docker.internal` DNS name is a special entry that resolves to the IP address of the host machine, allowing you to access services running on the host from within the container.
+![View, download, and file view actions in Nextcloud](https://github.com/user-attachments/assets/596b72ed-d97f-48ba-bcb9-0ee5ff581a3c)
 
-So, when configuring the Bee node connection in Nextcloud, use `host.docker.internal` instead of `localhost` or `127.0.0.1` for the IP address if your Bee node is running on the same host as the Nextcloud container.
+- Files from another Nextcloud storage can also be copied/moved to the decentralized storage.. Choose the decentralized storage folder as the target Folder
 
-![Setup Swarm External Storage](assets/images/swarm_Setup_Ethswarm_buyStamp1.png "Setup Swarm External Storage")
+![Copying or moving files to decentralized storage folder](https://github.com/user-attachments/assets/ceed3585-f7e6-4f16-b371-d61402e9f1e9)
 
-<em>Advanced configuration of Swarm in Nextcloud administration</em>
+- Right-click on a Swarm file to copy the Swarm reference (hash) to your clipboard. Alternatively, click the three dots in the Actions menu and select 'Copy Swarm Reference.' The Swarm reference is the unique address of the file on the Swarm network.
 
-### Using Swarm
+![Copy swarm reference to clipboard](https://github.com/user-attachments/assets/cc73282b-e32e-411f-a94b-a2ac3313f60b)
 
-Once setup and configured, the Bee node is ready to use.
+### Get Hejbit License
 
--   Navigate to "Files" option on the menu -> "External Storage" and then the name of the Bee node.
--   Click to Upload file(s):
+Experience the future of data storage with 5GB of free, decentralized storage on the Ethereum Swarm network. Our plugin seamlessly integrates with your existing Nextcloud interface, providing true data sovereignty without the complexity.
 
-![Upload file](assets/images/swarm_Files_UploadFile.png "Upload file")
-
-<em>Upload file to swarm in Nextcloud</em>
-
--   Once uploaded, it can be viewed internally or downloaded. It can also be copied to another storage.
-
-![View file and action menu](assets/images/swarm_Files_ViewFile.png "View file and action menu")
-
-<em>View, download, and file view actions in Nextcloud</em>
-
--   Files from another Nextcloud storage can also be copied/moved to the Bee node. Choose the Bee node as the target Folder
-
-![Copy file](assets/images/swarm_CopyMove.png "Copy file")
-
--   Right-click on a swarm file to copy the swarm reference (or hash) to the clipboard. Alternatively click the 3 dots of the Actions menu and select the menu option "Copy swarm reference". The swarm reference is the unique address of the file on the swarm.
-
-![Copy swarm reference to clipboard](assets/images/swarm_Files_CopySwarmRef.png)
-
-<em>Copy swarm reference to clipboard</em>
+[Get your free licence here!](https://metaprovide.org/hejbit/start) .
 
 ## License
 
