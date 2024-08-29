@@ -13,18 +13,18 @@ This plugin integrates [Swarm](https://www.ethswarm.org/) (a decentralized, bloc
 
 ## **Table of Contents**
 
-- [Dependencies](https://apps.nextcloud.com/apps/files_external_ethswarm#dependencies) .
-- [Setup and Installation](https://apps.nextcloud.com/apps/files_external_ethswarm#setup-and-installation) .
-- [Usage](https://apps.nextcloud.com/apps/files_external_ethswarm#usage) . 
-  - [Settings](https://apps.nextcloud.com/apps/files_external_ethswarm#settings) .
-  - [Using Swarm](https://apps.nextcloud.com/apps/files_external_ethswarm#using-swarm) .
-- Hejbit [License](https://apps.nextcloud.com/apps/files_external_ethswarm#license) .
+- [Dependencies](https://apps.nextcloud.com/apps/files_external_ethswarm#dependencies)
+- [Setup and Installation](https://apps.nextcloud.com/apps/files_external_ethswarm#setup-and-installation)
+- [Usage](https://apps.nextcloud.com/apps/files_external_ethswarm#usage)
+  - [Settings](https://apps.nextcloud.com/apps/files_external_ethswarm#settings)
+  - [Using Swarm](https://apps.nextcloud.com/apps/files_external_ethswarm#using-swarm)
+- Hejbit [License](https://apps.nextcloud.com/apps/files_external_ethswarm#license)
 
 ## **Dependencies**
 
 Before using the plugin, ensure you have the following:
 
-- An active Nextcloud instance
+- An active Nextcloud instance (version 27,28 or 29)
 - A valid license and URL to activate the service 
   - [Request Your Free Nextcloud Swarm Plugin Trial License](#)
 
