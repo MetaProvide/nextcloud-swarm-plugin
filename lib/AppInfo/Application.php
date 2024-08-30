@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace OCA\Files_External_Ethswarm\AppInfo;
 
+use OCA\Files\Event\LoadAdditionalScriptsEvent;
 use OCA\Files_External_Ethswarm\Backend\BeeSwarm;
 use OCA\Files_External_Ethswarm\Auth\License;
 use OCA\Files_External\Lib\Config\IBackendProvider;
@@ -73,6 +74,9 @@ class Application extends App implements IBootstrap, IBackendProvider, IAuthMech
 		$dispatcher->addListener('OCA\Files::loadAdditionalScripts', function () {
 			Util::addScript(SELF::APP_ID, 'fileactions');
 			Util::addScript(SELF::APP_ID, 'menuobserver');
+		});
+		$dispatcher->addListener(LoadAdditionalScriptsEvent::class, function () {
+			Util::addScript(SELF::APP_ID, 'nextcloud-swarm-plugin-fileactions');
 		});
 
 		$this->getAuthMechanisms();
