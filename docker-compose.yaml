@@ -7,10 +7,10 @@ services:
     networks:
       - nextcloud
     environment:
-      MYSQL_ROOT_PASSWORD: r00tp@ss
-      MYSQL_USER: nextcloud_rw
-      MYSQL_PASSWORD: N3xtCl0ud!
-      MYSQL_DATABASE: nextcloud
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
     restart: unless-stopped
 
   nextcloud:    
@@ -23,10 +23,10 @@ services:
     ports:
       - "8080:80"
     environment:
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
       MYSQL_HOST: mariadb
-      MYSQL_USER: nextcloud_rw
-      MYSQL_PASSWORD: N3xtCl0ud!
-      MYSQL_DATABASE: nextcloud
     restart: unless-stopped
 
   onlyoffice:
@@ -38,8 +38,16 @@ services:
       - "8081:80"
     environment:
       JWT_ENABLED: "true"
-      JWT_SECRET: "3uL9G3dIJzBcQXErnJX6lHJRfGBd6rMG"
+      JWT_SECRET: ${JWT_SECRET}
     restart: unless-stopped
+
+  adminer:
+    image: adminer
+    restart: always
+    networks:
+      - nextcloud
+    ports:
+      - 8082:8080
 
 networks:
   nextcloud:
