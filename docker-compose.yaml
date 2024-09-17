@@ -13,8 +13,10 @@ services:
       MYSQL_DATABASE: nextcloud
     restart: unless-stopped
 
-  nextcloud:
-    image: nextcloud:latest
+  nextcloud:    
+    build:
+      context: ./docker/nextcloud
+      dockerfile: Dockerfile
     container_name: nextcloud
     networks:
       - nextcloud
