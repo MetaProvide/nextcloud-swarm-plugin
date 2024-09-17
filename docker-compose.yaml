@@ -5,7 +5,9 @@ services:
     image: mariadb:latest
     container_name: mariadb
     networks:
-      - nextcloud
+      - nextcloud    
+    volumes:
+      - mariadb:/var/lib/mysql
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
       MYSQL_DATABASE: ${DB_NAME}
@@ -22,6 +24,9 @@ services:
       - nextcloud
     ports:
       - "8080:80"
+    volumes:
+      - nextcloud_app:/var/www/html
+      - ./:/var/www/html/custom_apps/files_external_ethswarm
     environment:
       MYSQL_DATABASE: ${DB_NAME}
       MYSQL_USER: ${DB_USER}
@@ -52,3 +57,7 @@ services:
 networks:
   nextcloud:
     driver: bridge
+
+volumes:
+  mariadb:
+  nextcloud_app:
