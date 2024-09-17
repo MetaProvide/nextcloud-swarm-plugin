@@ -127,8 +127,7 @@ class SwarmFileMapper extends QBMapper {
 			->from($this->getTableName())
 			->where($qb->expr()->like('name', $qb->createNamedParameter($this->db->escapeLikeParameter($path1) . '%', $qb::PARAM_STR)))
 			->andWhere($qb->expr()->eq('storage', $qb->createNamedParameter($storage, $qb::PARAM_INT)));
-		array_merge($dir, $this->findEntities($select));
-		return $dir;
+		return array_merge($dir, $this->findEntities($select));
 	}
 
 	public function updatePath(string $path1, string $path2, int $storage): int {
