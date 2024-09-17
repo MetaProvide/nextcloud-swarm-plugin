@@ -1,70 +1,44 @@
-volumes:
-  mariadb:
-  nextcloud_app:
-
-networks:
-  frontend:
-  backend:
+version: '3.8'
 
 services:
-
   mariadb:
     image: mariadb:latest
-    # set transaction isolation: https://docs.nextcloud.com/server/stable/admin_manual/configuration_database/linux_database_configuration.html
-    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW --innodb-file-per-table=1 --skip-innodb-read-only-compressed
-    restart: always
+    container_name: mariadb
     networks:
-      - backend
-    volumes:
-      - mariadb:/var/lib/mysql
-    ports:
-      - "3306:3306"
+      - nextcloud
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${DB_NAME}
-      MYSQL_USER: ${DB_USER}
-      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: r00tp@ss
+      MYSQL_USER: nextcloud_rw
+      MYSQL_PASSWORD: N3xtCl0ud!
+      MYSQL_DATABASE: nextcloud
+    restart: unless-stopped
 
   nextcloud:
-    build:
-      context: ./docker/nextcloud
-      dockerfile: Dockerfile
-    restart: always
-    depends_on:
-      - mariadb
+    image: nextcloud:latest
+    container_name: nextcloud
     networks:
-      - frontend
-      - backend
-    extra_hosts:
-      - host.docker.internal:host-gateway
-    volumes:
-      - nextcloud_app:/var/www/html
-      - ./:/var/www/html/custom_apps/files_external_ethswarm
-      - ./dev-environment/nextcloud_source/lib:/var/www/html/lib
-      - ./dev-environment/nextcloud_source/apps:/var/www/html/apps
-      - ./docker/nextcloud/hooks:/docker-entrypoint-hooks.d
+      - nextcloud
     ports:
-      - "80:80"
-      - "443:443"
+      - "8080:80"
     environment:
-      WWWUSER: ${WWWUSER}
-      WWWGROUP: ${WWWGROUP}
-      APACHE_RUN_USER: ${APACHE_RUN_USER}
-      APACHE_RUN_GROUP: ${APACHE_RUN_GROUP}
-      MYSQL_DATABASE: ${DB_NAME}
-      MYSQL_USER: ${DB_USER}
-      MYSQL_PASSWORD: ${DB_PASSWORD}
-      MYSQL_HOST: mariadb:3306
-      NEXTCLOUD_ADMIN_USER: ${NC_ADMIN_USER}
-      NEXTCLOUD_ADMIN_PASSWORD: ${NC_ADMIN_PASSWORD}
+      MYSQL_HOST: mariadb
+      MYSQL_USER: nextcloud_rw
+      MYSQL_PASSWORD: N3xtCl0ud!
+      MYSQL_DATABASE: nextcloud
+    restart: unless-stopped
 
-  adminer:
-    image: adminer
-    restart: always
+  onlyoffice:
+    image: onlyoffice/documentserver
+    container_name: onlyoffice
     networks:
-      - frontend
-      - backend
+      - nextcloud
     ports:
-      - 8082:8080
-    links:
-      - mariadb
+      - "8081:80"
+    environment:
+      JWT_ENABLED: "true"
+      JWT_SECRET: "3uL9G3dIJzBcQXErnJX6lHJRfGBd6rMG"
+    restart: unless-stopped
+
+networks:
+  nextcloud:
+    driver: bridge
