@@ -111,15 +111,18 @@ class SwarmFileMapper extends QBMapper {
 		return $this->insert($swarm);
 	}
 
-	public function getPathTree(string $path1, int $storage): array {
+	public function getPathTree(string $path1, int $storage, bool $incSelf = true): array {
 		// Get files from directory tree based on path parameter
 		$dir = array();
-		try {
-			array_push($dir, $this->find($path1, $storage));
-		} catch (DoesNotExistException $e) {
+		if ($incSelf) {
+			try {
+				array_push($dir, $this->find($path1, $storage));
+			} catch (DoesNotExistException $e) {
+			}
 		}
 
-		$path1 .= '/';
+		if ($path1 !== '')
+			$path1 .= '/';
 
 		$qb = $this->db->getQueryBuilder();
 		$select = $qb
@@ -127,8 +130,7 @@ class SwarmFileMapper extends QBMapper {
 			->from($this->getTableName())
 			->where($qb->expr()->like('name', $qb->createNamedParameter($this->db->escapeLikeParameter($path1) . '%', $qb::PARAM_STR)))
 			->andWhere($qb->expr()->eq('storage', $qb->createNamedParameter($storage, $qb::PARAM_INT)));
-		array_merge($dir, $this->findEntities($select));
-		return $dir;
+		return array_merge($dir, $this->findEntities($select));
 	}
 
 	public function updatePath(string $path1, string $path2, int $storage): int {
