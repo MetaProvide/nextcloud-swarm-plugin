@@ -1,70 +1,110 @@
-volumes:
-  mariadb:
-  nextcloud_app:
-
-networks:
-  frontend:
-  backend:
-
 services:
 
-  mariadb:
-    image: mariadb:latest
-    # set transaction isolation: https://docs.nextcloud.com/server/stable/admin_manual/configuration_database/linux_database_configuration.html
-    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW --innodb-file-per-table=1 --skip-innodb-read-only-compressed
-    restart: always
-    networks:
-      - backend
-    volumes:
-      - mariadb:/var/lib/mysql
-    ports:
-      - "3306:3306"
+  web:
+    build: ./docker/web
+    restart: unless-stopped
+    volumes_from:
+      - nextcloud
+    depends_on:
+      - nextcloud
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${DB_NAME}
-      MYSQL_USER: ${DB_USER}
-      MYSQL_PASSWORD: ${DB_PASSWORD}
+      VIRTUAL_HOST: ${APP_URL:-localhost}
+      LETSENCRYPT_HOST: ${APP_URL:-localhost}
+    networks:
+      - frontend
 
   nextcloud:
     build:
       context: ./docker/nextcloud
-      dockerfile: Dockerfile
-    restart: always
+      dockerfile: ${NC_VERSION:-28}.Dockerfile
+    restart: unless-stopped
     depends_on:
       - mariadb
+      - redis
+    env_file:
+      - .env
     networks:
       - frontend
       - backend
     extra_hosts:
       - host.docker.internal:host-gateway
     volumes:
-      - nextcloud_app:/var/www/html
+      - ./dev-environment/nextcloud_source:/var/www/html
       - ./:/var/www/html/custom_apps/files_external_ethswarm
-      - ./dev-environment/nextcloud_source/lib:/var/www/html/lib
-      - ./dev-environment/nextcloud_source/apps:/var/www/html/apps
-      - ./docker/nextcloud/hooks:/docker-entrypoint-hooks.d
-    ports:
-      - "80:80"
-      - "443:443"
     environment:
-      WWWUSER: ${WWWUSER}
-      WWWGROUP: ${WWWGROUP}
-      APACHE_RUN_USER: ${APACHE_RUN_USER}
-      APACHE_RUN_GROUP: ${APACHE_RUN_GROUP}
       MYSQL_DATABASE: ${DB_NAME}
       MYSQL_USER: ${DB_USER}
       MYSQL_PASSWORD: ${DB_PASSWORD}
       MYSQL_HOST: mariadb:3306
+      REDIS_HOST: redis
       NEXTCLOUD_ADMIN_USER: ${NC_ADMIN_USER}
       NEXTCLOUD_ADMIN_PASSWORD: ${NC_ADMIN_PASSWORD}
 
+  redis:
+    image: redis:alpine
+    restart: unless-stopped
+    networks:
+      - backend
+
+  mariadb:
+    image: mariadb:latest
+    # set transaction isolation: https://docs.nextcloud.com/server/stable/admin_manual/configuration_database/linux_database_configuration.html
+    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW --innodb-file-per-table=1 --skip-innodb-read-only-compressed
+    restart: unless-stopped
+    networks:
+      - backend
+    volumes:
+      - db-data:/var/lib/mysql
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+
+  proxy:
+    build: ./docker/proxy
+    restart: unless-stopped
+    ports:
+      - '80:80'
+      - '443:443'
+    labels:
+      com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy: "true"
+    volumes:
+      - certs:/etc/nginx/certs:ro
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+    networks:
+      - frontend
+
+  ssl:
+    image: paulczar/omgwtfssl
+    platform: linux/amd64
+    restart: no
+    volumes:
+      - certs:/certs
+    environment:
+      SSL_SUBJECT: ${APP_URL:-localhost}
+      CA_SUBJECT: support@${APP_URL:-localhost}
+      SSL_KEY: /certs/${APP_URL:-localhost}.key
+      SSL_CSR: /certs/${APP_URL:-localhost}.csr
+      SSL_CERT: /certs/${APP_URL:-localhost}.crt
+
   adminer:
-    image: adminer
-    restart: always
+    image: adminer:latest
+    restart: unless-stopped
     networks:
       - frontend
       - backend
     ports:
-      - 8082:8080
+      - '8080:8080'
     links:
       - mariadb
+
+volumes:
+  db-data:
+  certs:
+
+networks:
+  frontend:
+  backend:

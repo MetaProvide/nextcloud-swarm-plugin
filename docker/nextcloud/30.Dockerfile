@@ -1,4 +1,4 @@
-FROM nextcloud:28.0.7
+FROM nextcloud:30-fpm-alpine
 
 RUN pecl install xdebug; \
 	docker-php-ext-enable xdebug; \
@@ -16,11 +16,7 @@ RUN pecl install xdebug; \
 
 ENV NEXTCLOUD_UPDATE=1
 
-ENV WWWUSER=1000
-ENV WWWGROUP=1000
-ENV APACHE_RUN_USER=www-user
-ENV APACHE_RUN_GROUP=www-group
-RUN groupadd -g $WWWGROUP $APACHE_RUN_GROUP
-RUN useradd -u $WWWUSER -g $APACHE_RUN_GROUP $APACHE_RUN_USER
-RUN mkdir -p /var/www/html/custom_apps
-RUN chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP /var/www/html/custom_apps
+COPY --chown=www-data ./hooks /docker-entrypoint-hooks.d
+
+RUN mkdir -p /var/www/html/custom_apps && \
+    chown -R www-data:www-data /var/www/html/custom_apps
