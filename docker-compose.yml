@@ -25,6 +25,9 @@ services:
       - redis
     env_file:
       - .env
+    environment:
+      MYSQL_HOST: mariadb:3306
+      REDIS_HOST: redis
     networks:
       - frontend
       - backend
@@ -33,14 +36,6 @@ services:
     volumes:
       - ./dev-environment/nextcloud_source:/var/www/html
       - ./:/var/www/html/custom_apps/files_external_ethswarm
-    environment:
-      MYSQL_DATABASE: ${DB_NAME}
-      MYSQL_USER: ${DB_USER}
-      MYSQL_PASSWORD: ${DB_PASSWORD}
-      MYSQL_HOST: mariadb:3306
-      REDIS_HOST: redis
-      NEXTCLOUD_ADMIN_USER: ${NC_ADMIN_USER}
-      NEXTCLOUD_ADMIN_PASSWORD: ${NC_ADMIN_PASSWORD}
 
   redis:
     image: redis:alpine
@@ -60,11 +55,8 @@ services:
       - db-data:/var/lib/mysql
     ports:
       - "3307:3306"
-    environment:
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${DB_NAME}
-      MYSQL_USER: ${DB_USER}
-      MYSQL_PASSWORD: ${DB_PASSWORD}
+    env_file:
+      - .env
 
   proxy:
     build: ./docker/proxy
