@@ -17,7 +17,7 @@ if not exist ".env" (
     copy .env.example .env
 
     echo Updating environment variables in .env file
-    powershell -Command "(Get-Content .env) -replace 'REDIS_PASSWORD=', 'REDIS_PASSWORD=secret' | Set-Content .env"
+    powershell -Command "(Get-Content .env) -replace 'REDIS_HOST_PASSWORD=', 'REDIS_HOST_PASSWORD=secret' | Set-Content .env"
     powershell -Command "(Get-Content .env) -replace 'MYSQL_PASSWORD=', 'MYSQL_PASSWORD=secret' | Set-Content .env"
     powershell -Command "(Get-Content .env) -replace 'MYSQL_ROOT_PASSWORD=', 'MYSQL_ROOT_PASSWORD=rootpassword' | Set-Content .env"
     powershell -Command "(Get-Content .env) -replace 'NEXTCLOUD_ADMIN_PASSWORD=', 'NEXTCLOUD_ADMIN_PASSWORD=swarmbox' | Set-Content .env"

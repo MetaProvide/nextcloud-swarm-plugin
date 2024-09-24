@@ -15,7 +15,7 @@ if [ ! -f .env ]; then
 	echo "creating .env file"
 	cp .env.example .env
 	echo "setting up .env file"
-	perl -pi -e 's/REDIS_PASSWORD=/REDIS_PASSWORD=secret/g' .env
+	perl -pi -e 's/REDIS_HOST_PASSWORD=/REDIS_HOST_PASSWORD=secret/g' .env
     perl -pi -e 's/MYSQL_PASSWORD=/MYSQL_PASSWORD=secret/g' .env
     perl -pi -e 's/MYSQL_ROOT_PASSWORD=/MYSQL_ROOT_PASSWORD=rootpassword/g' .env
     perl -pi -e 's/NEXTCLOUD_ADMIN_PASSWORD=/NEXTCLOUD_ADMIN_PASSWORD=swarmbox/g' .env

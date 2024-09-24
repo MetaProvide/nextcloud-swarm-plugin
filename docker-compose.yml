@@ -34,7 +34,12 @@ services:
     extra_hosts:
       - host.docker.internal:host-gateway
     volumes:
-      - ./dev-environment/nextcloud_source:/var/www/html
+      - nc-app:/var/www/html # replace with ./dev-environment/nextcloud_source:/var/www/html for development (will have permissions issues)
+      - ./dev-environment/nextcloud_source/lib:/var/www/html/lib
+      - ./dev-environment/nextcloud_source/core:/var/www/html/core
+      - ./dev-environment/nextcloud_source/apps:/var/www/html/apps
+      - ./dev-environment/nextcloud_source/config:/var/www/html/config
+      - ./dev-environment/nextcloud_source/data:/var/www/html/data
       - ./:/var/www/html/custom_apps/files_external_ethswarm
 
   redis:
@@ -42,22 +47,23 @@ services:
     restart: unless-stopped
     networks:
       - backend
-    command: redis-server --requirepass ${REDIS_PASSWORD:-password}
+    command: redis-server --requirepass ${REDIS_HOST_PASSWORD:-secret}
 
   mariadb:
     image: mariadb:latest
     # set transaction isolation: https://docs.nextcloud.com/server/stable/admin_manual/configuration_database/linux_database_configuration.html
     command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW --innodb-file-per-table=1 --skip-innodb-read-only-compressed
     restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-nextcloud}
+      MYSQL_USER: ${MYSQL_USER:-nextcloud}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-secret}
+    volumes:
+      - nc-db:/var/lib/mysql
     networks:
       - backend
       - dev
-    volumes:
-      - db-data:/var/lib/mysql
-    ports:
-      - "3307:3306"
-    env_file:
-      - .env
 
   proxy:
     build: ./docker/proxy
@@ -99,7 +105,8 @@ services:
       - mariadb
 
 volumes:
-  db-data:
+  nc-app:
+  nc-db:
   certs:
 
 networks:
