@@ -42,6 +42,7 @@ services:
     restart: unless-stopped
     networks:
       - backend
+    command: redis-server --requirepass ${REDIS_PASSWORD:-password}
 
   mariadb:
     image: mariadb:latest
