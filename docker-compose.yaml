@@ -12,11 +12,13 @@ services:
       LETSENCRYPT_HOST: ${APP_URL:-localhost}
     networks:
       - frontend
+      - proxy
 
   nextcloud:
     build:
       context: ./docker/nextcloud
       dockerfile: ${NC_VERSION:-28}.Dockerfile
+      target: ${ENV:-production}
     restart: unless-stopped
     depends_on:
       - mariadb
@@ -53,6 +55,7 @@ services:
     restart: unless-stopped
     networks:
       - backend
+      - dev
     volumes:
       - db-data:/var/lib/mysql
     ports:
@@ -75,7 +78,7 @@ services:
       - certs:/etc/nginx/certs:ro
       - /var/run/docker.sock:/tmp/docker.sock:ro
     networks:
-      - frontend
+      - proxy
 
   ssl:
     image: paulczar/omgwtfssl
@@ -89,13 +92,14 @@ services:
       SSL_KEY: /certs/${APP_URL:-localhost}.key
       SSL_CSR: /certs/${APP_URL:-localhost}.csr
       SSL_CERT: /certs/${APP_URL:-localhost}.crt
+    networks:
+      - proxy
 
   adminer:
     image: adminer:latest
     restart: unless-stopped
     networks:
-      - frontend
-      - backend
+      - dev
     ports:
       - '8080:8080'
     links:
@@ -108,3 +112,5 @@ volumes:
 networks:
   frontend:
   backend:
+  proxy:
+  dev:
