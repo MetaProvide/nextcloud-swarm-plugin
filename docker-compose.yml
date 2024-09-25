@@ -1,0 +1,116 @@
+services:
+
+  web:
+    build: ./docker/web
+    restart: unless-stopped
+    volumes_from:
+      - nextcloud
+    depends_on:
+      - nextcloud
+    environment:
+      VIRTUAL_HOST: ${APP_URL:-localhost}
+      LETSENCRYPT_HOST: ${APP_URL:-localhost}
+    networks:
+      - frontend
+      - proxy
+
+  nextcloud:
+    build:
+      context: ./docker/nextcloud
+      dockerfile: ${NC_VERSION:-28}.Dockerfile
+      target: ${ENV:-production}
+    restart: unless-stopped
+    depends_on:
+      - mariadb
+      - redis
+    env_file:
+      - .env
+    environment:
+      MYSQL_HOST: mariadb:3306
+      REDIS_HOST: redis
+    networks:
+      - frontend
+      - backend
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    volumes:
+      - nc-app:/var/www/html # replace with ./dev-environment/nextcloud_source:/var/www/html for development (will have permissions issues)
+      - ./dev-environment/nextcloud_source/lib:/var/www/html/lib
+      - ./dev-environment/nextcloud_source/core:/var/www/html/core
+      - ./dev-environment/nextcloud_source/apps:/var/www/html/apps
+      - ./dev-environment/nextcloud_source/config:/var/www/html/config
+      - ./dev-environment/nextcloud_source/data:/var/www/html/data
+      - ./:/var/www/html/custom_apps/files_external_ethswarm
+
+  redis:
+    image: redis:alpine
+    restart: unless-stopped
+    networks:
+      - backend
+    command: redis-server --requirepass ${REDIS_HOST_PASSWORD:-secret}
+
+  mariadb:
+    image: mariadb:latest
+    # set transaction isolation: https://docs.nextcloud.com/server/stable/admin_manual/configuration_database/linux_database_configuration.html
+    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW --innodb-file-per-table=1 --skip-innodb-read-only-compressed
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-nextcloud}
+      MYSQL_USER: ${MYSQL_USER:-nextcloud}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-secret}
+    volumes:
+      - nc-db:/var/lib/mysql
+    networks:
+      - backend
+      - dev
+
+  proxy:
+    build: ./docker/proxy
+    restart: unless-stopped
+    ports:
+      - '80:80'
+      - '443:443'
+    labels:
+      com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy: "true"
+    volumes:
+      - certs:/etc/nginx/certs:ro
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+    networks:
+      - proxy
+
+  ssl:
+    image: paulczar/omgwtfssl
+    platform: linux/amd64
+    restart: no
+    volumes:
+      - certs:/certs
+    environment:
+      SSL_SUBJECT: ${APP_URL:-localhost}
+      CA_SUBJECT: support@${APP_URL:-localhost}
+      SSL_KEY: /certs/${APP_URL:-localhost}.key
+      SSL_CSR: /certs/${APP_URL:-localhost}.csr
+      SSL_CERT: /certs/${APP_URL:-localhost}.crt
+    networks:
+      - proxy
+
+  adminer:
+    image: adminer:latest
+    restart: unless-stopped
+    networks:
+      - dev
+    ports:
+      - '8080:8080'
+    links:
+      - mariadb
+
+volumes:
+  nc-app:
+  nc-db:
+  certs:
+
+networks:
+  frontend:
+  backend:
+  proxy:
+  dev:
