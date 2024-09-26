@@ -427,7 +427,9 @@ class BeeSwarm extends Common
 
 	public function getDirectoryContent($path): \Traversable
 	{
-		$rows = $this->filemapper->getPathTree($path, $this->storageId, false);
+		$rows = $this->filemapper->getPathTree($path, $this->storageId,
+		                                       incSelf: false,
+		                                       recursive: false);
 		$content = array_map(fn($val) => $this->getMetaData($val->getName()), $rows);
 
 		return new \ArrayIterator($content);
