@@ -7,9 +7,9 @@ services:
       - nextcloud
     depends_on:
       - nextcloud
-    environment:
-      VIRTUAL_HOST: ${APP_URL:-localhost}
-      LETSENCRYPT_HOST: ${APP_URL:-localhost}
+    labels:
+      caddy: ${APP_URL:-localhost}
+      caddy.reverse_proxy: '{{upstreams 80}}'
     networks:
       - frontend
       - proxy
@@ -34,13 +34,21 @@ services:
     extra_hosts:
       - host.docker.internal:host-gateway
     volumes:
-      - nc-app:/var/www/html # replace with ./dev-environment/nextcloud_source:/var/www/html for development (will have permissions issues)
-      - ./dev-environment/nextcloud_source/lib:/var/www/html/lib
-      - ./dev-environment/nextcloud_source/core:/var/www/html/core
-      - ./dev-environment/nextcloud_source/apps:/var/www/html/apps
-      - ./dev-environment/nextcloud_source/config:/var/www/html/config
-      - ./dev-environment/nextcloud_source/data:/var/www/html/data
+      - nc-app:/var/www/html
       - ./:/var/www/html/custom_apps/files_external_ethswarm
+
+  rsync:
+    image: ogivuk/rsync
+    restart: unless-stopped
+    cpu_shares: 512
+    mem_limit: 256m
+    volumes:
+      - rsync:/rsync
+      - nc-app:/app:ro
+      - ./dev-environment/nextcloud_source:/source
+    command: rsync -avP -e /app/data/ /app/ /source/
+    networks:
+      - dev
 
   redis:
     image: redis:alpine
@@ -66,31 +74,17 @@ services:
       - dev
 
   proxy:
-    build: ./docker/proxy
+    image: lucaslorentz/caddy-docker-proxy:alpine
     restart: unless-stopped
     ports:
       - '80:80'
       - '443:443'
-    labels:
-      com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy: "true"
     volumes:
-      - certs:/etc/nginx/certs:ro
-      - /var/run/docker.sock:/tmp/docker.sock:ro
-    networks:
-      - proxy
-
-  ssl:
-    image: paulczar/omgwtfssl
-    platform: linux/amd64
-    restart: no
-    volumes:
-      - certs:/certs
+      - caddy_data:/data
+      - caddy_config:/config
+      - /var/run/docker.sock:/var/run/docker.sock
     environment:
-      SSL_SUBJECT: ${APP_URL:-localhost}
-      CA_SUBJECT: support@${APP_URL:-localhost}
-      SSL_KEY: /certs/${APP_URL:-localhost}.key
-      SSL_CSR: /certs/${APP_URL:-localhost}.csr
-      SSL_CERT: /certs/${APP_URL:-localhost}.crt
+      - CADDY_INGRESS_NETWORKS=proxy
     networks:
       - proxy
 
@@ -101,13 +95,16 @@ services:
       - dev
     ports:
       - '8080:8080'
-    links:
+    depends_on:
       - mariadb
+    environment:
+      ADMINER_DEFAULT_SERVER: mariadb
 
 volumes:
   nc-app:
   nc-db:
   certs:
+  rsync:
 
 networks:
   frontend:
