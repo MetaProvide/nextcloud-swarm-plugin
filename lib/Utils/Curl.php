@@ -86,7 +86,7 @@ class Curl
 	{
 		$headers = $this->headers + $headers;
 		if ($this->authorization) {
-			$headers[] = 'Authorization: ' . $this->authorization;
+			$headers[] = 'Authorization: Bearer ' . $this->authorization;
 		}
 		curl_setopt($this->handler, CURLOPT_HTTPHEADER, $headers);
 	}
