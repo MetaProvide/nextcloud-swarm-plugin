@@ -23,17 +23,23 @@
 
 namespace OCA\Files_External_Ethswarm\Storage;
 
+use ArrayIterator;
 use Exception;
+use OC;
 use OC\Files\Cache\Cache;
 use OC\Files\Storage\Common;
+use OC_Helper;
 use OCA\Files_External_Ethswarm\Db\SwarmFileMapper;
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\Constants;
 use OCP\Files\Config\IUserMountCache;
+use OCP\Files\FileInfo;
 use OCP\Files\IMimeTypeLoader;
 use OCP\IConfig;
 use OCP\IDBConnection;
+use OCP\ITempManager;
 use Sabre\DAV\Exception\BadRequest;
+use Traversable;
 
 class BeeSwarm extends Common
 {
@@ -45,50 +51,59 @@ class BeeSwarm extends Common
 	protected int $storageId;
 
 	/** @var bool */
-	private bool $isEncrypted;
+	private bool $isEncrypted; // TODO: remove
 
 	/** @var string */
-	protected string $stampBatchId;
+	protected string $stampBatchId; // TODO: remove
 
 	/** @var SwarmFileMapper */
-	private SwarmFileMapper $filemapper;
+	private SwarmFileMapper $fileMapper;
 
 	/** @var IConfig */
 	private IConfig $config;
 
-	/** @var \OCP\IDBConnection */
+	/** @var IDBConnection */
 	protected IDBConnection $dbConnection;
 
-	/** @var \OCP\Files\IMimeTypeLoader */
+	/** @var ITempManager */
+	protected ITempManager $tempManager;
+
+	/** @var IMimeTypeLoader */
 	private IMimeTypeLoader $mimeTypeHandler;
 
-	/** @var \OC\Files\Cache\Cache */
+	/** @var Cache */
 	private Cache $cacheHandler;
 
 	/** @var string */
 	protected string $id;
 
 
+	/**
+	 * @throws Exception
+	 */
 	public function __construct($params)
 	{
+		parent::__construct($params);
+
 		$this->parseParams($params);
 		$this->id = 'ethswarm::' . $this->api_url;
 		$this->storageId = $this->getStorageCache()->getNumericId();
 
 		// Load handlers
-		$dbConnection = \OC::$server->get(IDBConnection::class);
-		$this->filemapper = new SwarmFileMapper($dbConnection);
-		$this->mimeTypeHandler = \OC::$server->get(IMimeTypeLoader::class);
+		$this->tempManager = OC::$server->get(ITempManager::class);
+		$this->dbConnection = OC::$server->get(IDBConnection::class);
+		$this->fileMapper = new SwarmFileMapper($this->dbConnection);
+		$this->mimeTypeHandler = OC::$server->get(IMimeTypeLoader::class);
 
-		$mountHandler = \OC::$server->get(IUserMountCache::class);
+		$mountHandler = OC::$server->get(IUserMountCache::class);
 		$storageMounts = $mountHandler->getMountsForStorageId($this->storageId);
-		$isConfigured = false;
+
 		if (is_array($storageMounts) && isset($storageMounts[0])) {
 			// Parse array for config of requested storage
 			$storageMount = $storageMounts[0];
 			$mountId = $storageMount->getMountId();
 
-			$this->config = \OC::$server->get(IConfig::class);
+			$this->config = OC::$server->get(IConfig::class);
 			$configSettings = $this->config->getAppValue(self::APP_NAME, "storageconfig", "");    //default
 			$mounts = json_decode($configSettings, true);
 			if (is_array($mounts)) {
@@ -103,13 +118,8 @@ class BeeSwarm extends Common
 		}
 	}
 
-	public static function checkDependencies()
-	{
-		return true;
-	}
-
 	/**
-	 * @return string
+	 * @inheritDoc
 	 */
 	public function getId(): string
 	{
@@ -117,7 +127,7 @@ class BeeSwarm extends Common
 	}
 
 	/**
-	 * @return bool
+	 * @inheritDoc
 	 * @throws Exception
 	 */
 	public function test(): bool
@@ -126,8 +136,7 @@ class BeeSwarm extends Common
 	}
 
 	/**
-	 * @param $path
-	 * @return bool
+	 * @inheritDoc
 	 */
 	public function file_exists($path): bool
 	{
@@ -135,20 +144,26 @@ class BeeSwarm extends Common
 			// Return true always the creation of the root folder
 			return true;
 		}
-		$exists = $this->filemapper->findExists($path, $this->storageId);
+		$exists = $this->fileMapper->findExists($path, $this->storageId);
 		if ($exists == 0) {
 			return false;
 		}
 		return true;
 	}
 
-	public function filemtime($path)
+	/**
+	 * @inheritDoc
+	 */
+	public function filemtime($path): int
 	{
-		$mtime = 0;
-		return $mtime;
+		return 0;
 	}
 
-	public function stat($path)
+	/**
+	 * @inheritDoc
+	 * @throws DoesNotExistException
+	 */
+	public function stat($path): bool|array
 	{
 		$data = $this->getMetaData($path);
 		if ($data['mimetype'] === 'httpd/unix-directory') {
@@ -161,167 +176,186 @@ class BeeSwarm extends Common
 	}
 
 	/**
-	 * get the ETag for a file or folder
-	 *
-	 * @param string $path
-	 * @return string
+	 * @inheritDoc
 	 */
-	public function getETag($path)
+	public function getETag($path): ?string
 	{
 		return null;
 	}
 
 	/**
-	 * @return bool
+	 * @inheritDoc
 	 */
-	public function needsPartFile()
+	public function needsPartFile(): bool
 	{
 		return false;
 	}
 
+	/**
+	 * @inheritDoc
+	 */
 	public function mkdir($path): bool
 	{
-		$this->filemapper->createDirectory($path, $this->storageId);
+		$this->fileMapper->createDirectory($path, $this->storageId);
 		return true;
 	}
 
-	public function rmdir($path)
+	/**
+	 * @inheritDoc
+	 */
+	public function rmdir($path): void
 	{
-
+		// TODO: Implement rmdir() method.
 	}
 
-	public function rename($path1, $path2)
+	/**
+	 * @inheritDoc
+	 */
+	public function rename($source, $target): bool
 	{
-		$rows = $this->filemapper->getPathTree($path1, $this->storageId);
+		$rows = $this->fileMapper->getPathTree($source, $this->storageId);
 		foreach ($rows as $row) {
-			$oldpath = $row->getName();
-			$newpath = substr_replace($oldpath, $path2, 0, strlen($path1));
-			$updateSwarmTable = $this->filemapper->updatePath($oldpath, $newpath, $this->storageId);
+			$oldPath = $row->getName();
+			$newPath = substr_replace($oldPath, $target, 0, strlen($source));
+			$this->fileMapper->updatePath($oldPath, $newPath, $this->storageId);
 		}
 		return true;
 	}
 
-	public function opendir($path)
+	/**
+	 * @inheritDoc
+	 */
+	public function opendir($path): bool
 	{
 		return true;
 	}
 
 	/**
-	 * @return bool
+	 * * @inheritDoc
+	 * @throws DoesNotExistException
 	 */
-	public function is_dir($path)
+	public function is_dir($path): bool
 	{
-		$data = $this->getMetaData($path);
-		if ($data['mimetype'] === 'httpd/unix-directory') {
-			return true;
-		}
+		return $this->getMetaData($path)['mimetype'] === 'httpd/unix-directory';
 	}
 
 	/**
-	 * @return bool
+	 * @inheritDoc
+	 * @throws DoesNotExistException
 	 */
-	public function is_file($path)
+	public function is_file($path): bool
 	{
-		$data = $this->getMetaData($path);
-		if ($data['mimetype'] === 'httpd/unix-directory') {
-			return false;
-		}
-		return true;
+		return $this->getMetaData($path)['mimetype'] !== 'httpd/unix-directory';
 	}
 
-	public function filetype($path)
+	/**
+	 * @inheritDoc
+	 * @throws DoesNotExistException
+	 */
+	public function filetype($path): string
 	{
-		if ($this->is_file($path)) {
-			return 'file';
-		}
-		return 'dir';
+		return $this->is_file($path) ? 'file' : 'dir';
 	}
 
-	public function getPermissions($path)
+	/**
+	 * @inheritDoc
+	 */
+	public function getPermissions($path = null): int
 	{
 		return (Constants::PERMISSION_ALL - Constants::PERMISSION_DELETE - Constants::PERMISSION_UPDATE);
 	}
 
-	public function free_space($path)
+	/**
+	 * @inheritDoc
+	 */
+	public function free_space($path): float|false|int
 	{
-		return \OCP\Files\FileInfo::SPACE_UNLIMITED;
+		return FileInfo::SPACE_UNLIMITED;
 	}
 
 	/**
-	 * @return bool
+	 * @inheritDoc
 	 */
-	public function hasUpdated($path, $time)
+	public function hasUpdated($path, $time): bool
 	{
 		return true;
 	}
 
 	/**
-	 * @return bool
+	 * @inheritDoc
 	 */
-	public function isLocal()
+	public function isLocal(): bool
 	{
 		// the common implementation returns a temporary file by
 		// default, which is not local
 		return false;
 	}
 
-	public function setMountOptions(array $options)
+	/**
+	 * @inheritDoc
+	 */
+	public function setMountOptions(array $options): void
 	{
-
+		// TODO: Implement setMountOptions() method.
 	}
 
 	/**
-	 * @param string $name
-	 * @param mixed $default
-	 * @return mixed
+	 * @inheritDoc
 	 */
-	public function getMountOption($name, $default = null)
+	public function getMountOption($name, $default = null): ?string
 	{
-		return isset($this->mountOptions[$name]) ? $this->mountOptions[$name] : $default;
+		return $this->mountOptions[$name] ?? $default;
 	}
 
+	/**
+	 * @inheritDoc
+	 */
 	public function verifyPath($path, $fileName)
 	{
 
 	}
 
 	/**
-	 * @return bool
+	 * @inheritDoc
 	 */
-	public function isCreatable($path)
+	public function isCreatable($path): bool
 	{
 		return true;
 	}
 
 	/**
-	 * @return bool
+	 * @inheritDoc
 	 */
-	public function isUpdatable($path)
+	public function isUpdatable($path): bool
 	{
 		return true;
 	}
 
 	/**
-	 * @return bool
+	 * @inheritDoc
 	 */
-	public function unlink($path)
+	public function unlink($path): bool
 	{
 		return true;
 	}
 
+	/**
+	 * @inheritDoc
+	 * @throws Exception
+	 */
 	public function fopen($path, $mode)
 	{
 		if ($path === '' || $path === '/' || $path === '.') {
 			return false;
 		}
-		$swarmFile = $this->filemapper->find($path, $this->storageId);
+		$swarmFile = $this->fileMapper->find($path, $this->storageId);
 		$reference = $swarmFile->getSwarmReference();
 
 		switch ($mode) {
 			case 'r':
 			case 'rb':
 				// Get file from swarm
-				return $this->downloadStream($reference);
+				return $this->downloadSwarm($reference);
 			case 'w':    // Open for writing only; place the file pointer at the beginning of the file
 			case 'w+':    // Open for reading and writing
 			case 'wb':
@@ -339,33 +373,40 @@ class BeeSwarm extends Common
 	}
 
 	/**
-	 * @return bool
+	 * @inheritDoc
 	 */
-	public function touch($path, $mtime = null)
+	public function touch($path, $mtime = null): bool
 	{
 		return true;
 	}
 
 	/**
-	 * @param $path
-	 * @return string|false
-	 * @throws DoesNotExistException
+	 * @inheritDoc
+	 * @throws Exception
 	 */
 	public function file_get_contents($path): string|false
 	{
-		$swarmFile = $this->filemapper->find($path, $this->storageId);
+		$swarmFile = $this->fileMapper->find($path, $this->storageId);
 		$reference = $swarmFile->getSwarmReference();
-		return stream_get_contents($this->downloadStream($reference));
+		return stream_get_contents($this->downloadSwarm($reference));
 	}
 
-	public function file_put_contents($path, $data)
+	/**
+	 * @inheritDoc
+	 */
+	public function file_put_contents($path, $data): int|float|false
 	{
-
+		// TODO: Implement file_put_contents() method.
+		return parent::file_put_contents($path, $data);
 	}
 
-	public function getDirectDownload($path)
+	/**
+	 * @inheritDoc
+	 */
+	public function getDirectDownload($path): array|bool
 	{
-
+		// TODO: Implement getDirectDownload() method.
+		return parent::getDirectDownload($path);
 	}
 
 	/* Enabling this function causes a fatal exception "Call to a member function getId() on null /var/www/html/lib/private/Files/Mount/MountPoint.php - line 276: OC\Files\Cache\Wrapper\CacheWrapper->getId("")
@@ -376,10 +417,10 @@ class BeeSwarm extends Common
 	*/
 
 	/**
-	 * @param string $path
-	 * @return array|null
+	 * @inheritDoc
+	 * @throws DoesNotExistException
 	 */
-	public function getMetaData($path)
+	public function getMetaData($path): ?array
 	{
 		$data = [];
 		if ($path === '' || $path === '/' || $path === '.') {
@@ -391,9 +432,9 @@ class BeeSwarm extends Common
 			$data['storage_mtime'] = time();
 			$data['size'] = 0; //unknown
 			$data['etag'] = null;
-		}
+		} // TODO: check overwrite issue
 		// If not in swarm table, assume it's a folder
-		$exists = $this->filemapper->findExists($path, $this->storageId) !== 0;
+		$exists = $this->fileMapper->findExists($path, $this->storageId) !== 0;
 		if (!$exists) {
 			// Create a folder item
 			$data['name'] = $path;
@@ -406,16 +447,16 @@ class BeeSwarm extends Common
 			$data['etag'] = uniqid();
 		} else {
 			// Get record from table
-			$swarmFile = $this->filemapper->find($path, $this->storageId);
+			$swarmFile = $this->fileMapper->find($path, $this->storageId);
 			// Set mimetype as a string, get by using its ID (int)
-			$mimetypeId = $swarmFile->getMimetype();
-			if ($mimetypeId == $this->mimeTypeHandler->getId('httpd/unix-directory'))
+			$mimeTypeId = $swarmFile->getMimetype();
+			if ($mimeTypeId == $this->mimeTypeHandler->getId('httpd/unix-directory'))
 				$data['permissions'] = (Constants::PERMISSION_ALL - Constants::PERMISSION_DELETE);
 			else
 				$data['permissions'] = (Constants::PERMISSION_ALL - Constants::PERMISSION_DELETE - Constants::PERMISSION_UPDATE);
 
 			$data['name'] = basename($path); //TODO: Test
-			$data['mimetype'] = $this->mimeTypeHandler->getMimetypeById($mimetypeId);
+			$data['mimetype'] = $this->mimeTypeHandler->getMimetypeById($mimeTypeId);
 			$data['mtime'] = time();
 			$data['storage_mtime'] = $swarmFile->getStorageMtime();
 			$data['size'] = $swarmFile->getSize();
@@ -425,59 +466,67 @@ class BeeSwarm extends Common
 		return $data;
 	}
 
-	public function getDirectoryContent($path): \Traversable
+	/**
+	 * @inheritDoc
+	 * @throws DoesNotExistException
+	 */
+	public function getDirectoryContent($directory): Traversable
 	{
-		$rows = $this->filemapper->getPathTree($path, $this->storageId, false);
+		$rows = $this->fileMapper->getPathTree($directory, $this->storageId, false);
 		$content = array_map(fn($val) => $this->getMetaData($val->getName()), $rows);
 
-		return new \ArrayIterator($content);
+		return new ArrayIterator($content);
 	}
 
-	protected function toTempFile($source)
+	/**
+	 * @param resource $stream
+	 * @return string
+	 */
+	protected function createTempFile($stream): string
 	{
 		$extension = '';
-		$tmpFile = \OC::$server->getTempManager()->getTemporaryFile($extension);
+		$tmpFile = $this->tempManager->getTemporaryFile($extension);
 		$target = fopen($tmpFile, 'w');
-		\OC_Helper::streamCopy($source, $target);
+		OC_Helper::streamCopy($stream, $target);
 		fclose($target);
 		return $tmpFile;
 	}
 
+	/**
+	 * @inheritDoc
+	 * @throws Exception
+	 */
 	public function writeStream(string $path, $stream, int $size = null): int
 	{
-		// Write to temp file
-		$tmpFile = $this->toTempFile($stream);
-		$tmpFilesize = (file_exists($tmpFile) ? filesize($tmpFile) : -1);
-		$mimetype = mime_content_type($tmpFile);
+		// save stream to temp file
+		$tmpFile = $this->createTempFile($stream);
+		$tmpFileSize = (file_exists($tmpFile) ? filesize($tmpFile) : -1);
+		$mimeType = mime_content_type($tmpFile);
 
+		// upload to swarm
 		try {
-			$result = $this->uploadStream($path, $tmpFile, $mimetype, $tmpFilesize);
-			$reference = (isset($result["reference"]) ? $result['reference'] : null);
-
-			if (!isset($reference)) {
-				throw new BadRequest("Failed to upload file to " . $this->id . ": " . $result['message']);
-			}
-		} catch (\Exception $e) {
-			throw new \Exception($e->getMessage());
+			$reference = $this->uploadSwarm($path, $tmpFile, $mimeType);
+		} catch (Exception $e) {
+			throw new BadRequest($e->getMessage());
 		} finally {
 			fclose($stream);
 		}
 
-		// Write metadata to table
-		$uploadfiles = [
+		// save to swarm table
+		$uploadFiles = [
 			"name" => $path,
 			"permissions" => (Constants::PERMISSION_ALL - Constants::PERMISSION_DELETE - Constants::PERMISSION_UPDATE),
-			"mimetype" => $this->mimeTypeHandler->getId($mimetype),
+			"mimetype" => $this->mimeTypeHandler->getId($mimeType),
 			"mtime" => time(),
 			"storage_mtime" => time(),
-			"size" => $tmpFilesize,
+			"size" => $tmpFileSize,
 			"etag" => null,
 			"reference" => $reference,
 			"storage" => $this->storageId,
 		];
-		$this->filemapper->createFile($uploadfiles);
+		$this->fileMapper->createFile($uploadFiles);
 
-		// //TODO: Read back from swarm to return filesize?
-		return $tmpFilesize;
+		// TODO: Read back from swarm to return filesize?
+		return $tmpFileSize;
 	}
 }
