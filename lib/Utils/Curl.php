@@ -11,6 +11,8 @@ class Curl
 		CURLOPT_MAXREDIRS => 10,
 		CURLOPT_FOLLOWLOCATION => true,
 		CURLOPT_RETURNTRANSFER => true,
+		CURLOPT_SSL_VERIFYHOST => true,
+		CURLOPT_SSL_VERIFYPEER => true,
 	];
 
 	protected CurlHandle $handler;
@@ -28,11 +30,30 @@ class Curl
 	public function __construct(string $url, array $options = [], array $headers = [], ?string $authorization = null)
 	{
 		$this->url = $url;
-		$this->options = $options + self::DEFAULT_OPTIONS;
+		$this->options = $options + self::getDefaultOptions();
 		$this->headers = $headers;
 		$this->authorization = $authorization;
 
 		$this->init();
+	}
+
+	/**
+	 * @return array
+	 */
+	private static function getDefaultOptions(): array
+	{
+		return self::checkSSLOption() + self::DEFAULT_OPTIONS;
+	}
+
+	/**
+	 * @return bool[]
+	 */
+	private static function checkSSLOption(): array
+	{
+		return [
+			CURLOPT_SSL_VERIFYHOST => !Env::isDevelopment(),
+			CURLOPT_SSL_VERIFYPEER => !Env::isDevelopment(),
+		];
 	}
 
 	/**
@@ -53,7 +74,7 @@ class Curl
 	 */
 	private function setOptions(array $options = []): void
 	{
-		$options = self::DEFAULT_OPTIONS + $this->options + $options;
+		$options = self::getDefaultOptions() + $this->options + $options;
 		curl_setopt_array($this->handler, $options);
 	}
 
@@ -120,5 +141,17 @@ class Curl
 			curl_close($this->handler);
 			throw new CurlException(curl_error($this->handler));
 		}
+	}
+
+	/**
+	 * @return bool
+	 * @throws CurlException
+	 */
+	public function isResponseSuccessful(): bool
+	{
+		if ($this->getInfo(CURLINFO_HTTP_CODE) === 0)
+			throw new CurlException('Curl handler has not been executed');
+
+		return $this->getInfo(CURLINFO_HTTP_CODE) === 200 || $this->getInfo(CURLINFO_HTTP_CODE) === 201;
 	}
 }
