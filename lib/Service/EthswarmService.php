@@ -55,4 +55,19 @@ class EthswarmService {
 
 		return $swarmFile->getSwarmReference();
 	}
+
+	public function getVisiblity(string $filename, int $storageid) {
+		$swarmFile = $this->filemapper->find($filename, $storageid);
+		return $swarmFile->getVisibility();
+	}
+
+	public function setVisiblity(string $filename, int $storageid, int $visibility) {
+		$swarmFile = $this->filemapper->find($filename, $storageid);
+		$swarmFile->setVisibility($visibility);
+		return $this->filemapper->update($swarmFile);
+	}
+
+	public function findExists(string $filename, int $storageid) {
+		return $this->filemapper->findExists($filename, $storageid);
+	}
 }

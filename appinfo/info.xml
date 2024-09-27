@@ -2,10 +2,9 @@
 <info xmlns:xsi= "http://www.w3.org/2001/XMLSchema-instance"
       xsi:noNamespaceSchemaLocation="https://apps.nextcloud.com/schema/apps/info.xsd">
     <id>files_external_ethswarm</id>
-    <name>External Storage: Swarm</name>
-    <summary>Bringing Swarm to Nextcloud - decentralized file-storage, connected to the blockchain</summary>
+    <name>External Storage: Hejbit Swarm</name>
+    <summary>Bring decentralized, sovereign cloud storage to Nextcloud with the Hejbit Swarm plugin!</summary>
     <description><![CDATA[
-# **Hejbit - Nextcloud Swarm Plugin**
 
 *Bring decentralized, sovereign cloud storage to Nextcloud with the Hejbit Swarm plugin!*
 
@@ -24,8 +23,8 @@ This plugin integrates [Swarm](https://www.ethswarm.org/) (a decentralized, bloc
 
 Before using the plugin, ensure you have the following:
 
-- An active Nextcloud instance (version 27,28 or 29)
-- A valid license and URL to activate the service 
+- An active Nextcloud instance (version 28,29 or 30)
+- A valid license and URL to activate the service
   - [Request Your Free Nextcloud Swarm Plugin Trial License](#)
 
 ## **Setup and Installation**
@@ -64,7 +63,7 @@ Experience the future of data storage with 5GB of free, decentralized storage on
 
 [Get your free licence here!](https://metaprovide.org/hejbit/start) .
     ]]></description>
-    <version>0.5.2</version>
+    <version>0.5.4</version>
     <licence>agpl</licence>
     <author>MetaProvide</author>
     <namespace>Files_External_Ethswarm</namespace>
@@ -79,7 +78,7 @@ Experience the future of data storage with 5GB of free, decentralized storage on
     <repository type="git">https://github.com/MetaProvide/nextcloud-swarm-plugin.git</repository>
 	<screenshot>https://raw.githubusercontent.com/MetaProvide/nextcloud-swarm-plugin/main/assets/images/swarm_Files.png</screenshot>
     <dependencies>
-        <nextcloud min-version="27" max-version="29"/>
+        <nextcloud min-version="28" max-version="30"/>
     </dependencies>
 	<settings>
 		<admin>OCA\Files_External_Ethswarm\Settings\Admin</admin>
@@ -88,6 +87,7 @@ Experience the future of data storage with 5GB of free, decentralized storage on
 	<sabre>
 		<plugins>
 			<plugin>OCA\Files_External_Ethswarm\Sabre\PropfindPlugin</plugin>
+			<plugin>OCA\Files_External_Ethswarm\Sabre\PostPlugin</plugin>
 		</plugins>
 	</sabre>
 </info>
