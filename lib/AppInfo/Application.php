@@ -33,10 +33,14 @@ use OCA\Files_External\Service\BackendService;
 use OCA\Files_External\Lib\Config\IAuthMechanismProvider;
 use OCP\AppFramework\App;
 use OCP\Util;
+use OCP\App\IAppManager;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use OCP\AppFramework\Bootstrap\IBootContext;
 use OCP\AppFramework\Bootstrap\IBootstrap;
 use OCP\EventDispatcher\IEventDispatcher;
+
+use Sentry;
+use Sentry\State\Scope;
 
 /**
  * @package OCA\Files_external_beeswarm\AppInfo
@@ -59,6 +63,21 @@ class Application extends App implements IBootstrap, IBackendProvider, IAuthMech
 	}
 
 	public function boot(IBootContext $context): void {
+		$context->injectFn(static function() {
+			Sentry\init([
+				//TODO: Change me!!!
+				'dsn' => 'https://80b89142f9d5083a2143f4e0899ccd6b@o4508025104367616.ingest.de.sentry.io/4508025107054672',
+				'max_breadcrumbs' => 50,
+				//'sample_rate' => .5,  // This would send 50% of issues
+			]);
+
+			Sentry\configureScope(function (Scope $scope): void {
+				$appManager = \OC::$server->get(IAppManager::class);
+				$scope->setContext('appInfo', $appManager->getAppInfo(SELF::APP_ID));
+				$scope->setContext('nextcloudVersion', [ 'version' => Util::getVersion() ]);
+			});
+		});
+
 		$context->injectFn([$this, 'registerEventsScripts']);
 
 		$context->injectFn(function (BackendService $backendService) {
@@ -87,6 +106,7 @@ class Application extends App implements IBootstrap, IBackendProvider, IAuthMech
 	}
 
 	public function register(IRegistrationContext $context): void {
+		include_once __DIR__.'/../../vendor/autoload.php';
 		// Register AddContentSecurityPolicyEvent for CSPListener class listenser here
 	}
 

@@ -35,6 +35,9 @@ use OCP\IConfig;
 use OCP\IDBConnection;
 use Sabre\DAV\Exception\BadRequest;
 
+use Sentry;
+use Sentry\Breadcrumb;
+
 class BeeSwarm extends Common
 {
 	use BeeSwarmTrait;
@@ -431,6 +434,15 @@ class BeeSwarm extends Common
 		                                       incSelf: false,
 		                                       recursive: false);
 		$content = array_map(fn($val) => $this->getMetaData($val->getName()), $rows);
+
+		Sentry\addBreadcrumb( new Breadcrumb(
+			category: 'test',
+			message: 'Got directory contents',
+			metadata: $content[0],
+			level: Breadcrumb::LEVEL_INFO,
+			type: Breadcrumb::TYPE_DEFAULT,
+		));
+		Sentry\captureMessage("We're crashing! Mayday!");
 
 		return new \ArrayIterator($content);
 	}
