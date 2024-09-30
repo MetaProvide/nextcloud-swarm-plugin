@@ -46,7 +46,8 @@ use OCP\AppFramework\Db\Entity;
  * @method string getEncryptionkey()
  * @method void setStorage(int $storage)
  * @method int|null getStorage()
- *
+ * @method void setVisibility(int $visibility)
+ * @method int getVisibility()
  */
 class SwarmFile extends Entity {
 
@@ -77,6 +78,9 @@ class SwarmFile extends Entity {
 	/** @var int */
 	protected $storage;
 
+	/** @var int */
+	protected $visibility;
+
 	public function __construct() {
 		$this->addType('fileid', 'int');
 		$this->addType('name', 'string');
@@ -87,5 +91,6 @@ class SwarmFile extends Entity {
 		$this->addType('storageMtime', 'int');
 		$this->addType('encryptionkey', 'string');
 		$this->addType('storage', 'int');
+		$this->addType('visibility', 'int');
 	}
 }
