@@ -47,8 +47,10 @@ services:
       - nc-app:/app:ro
       - ./dev-environment/nextcloud_source:/source
     command: rsync -avP -e /app/data/ /app/ /source/
+    depends_on:
+      - nextcloud
     networks:
-      - dev
+      - backend
 
   redis:
     image: redis:alpine
@@ -71,28 +73,27 @@ services:
       - nc-db:/var/lib/mysql
     networks:
       - backend
-      - dev
 
-  proxy:
-    image: lucaslorentz/caddy-docker-proxy:alpine
-    restart: unless-stopped
-    ports:
-      - '80:80'
-      - '443:443'
-    volumes:
-      - caddy_data:/data
-      - caddy_config:/config
-      - /var/run/docker.sock:/var/run/docker.sock
-    environment:
-      - CADDY_INGRESS_NETWORKS=proxy
-    networks:
-      - proxy
+#  proxy:
+#    image: lucaslorentz/caddy-docker-proxy:alpine
+#    restart: unless-stopped
+#    ports:
+#      - '80:80'
+#      - '443:443'
+#    volumes:
+#      - caddy_data:/data
+#      - caddy_config:/config
+#      - /var/run/docker.sock:/var/run/docker.sock
+#    environment:
+#      - CADDY_INGRESS_NETWORKS=proxy
+#    networks:
+#      - proxy
 
   adminer:
     image: adminer:latest
     restart: unless-stopped
     networks:
-      - dev
+      - backend
     ports:
       - '8080:8080'
     depends_on:
@@ -110,4 +111,5 @@ networks:
   frontend:
   backend:
   proxy:
-  dev:
+    external: true
+    name: hejbit-proxy
