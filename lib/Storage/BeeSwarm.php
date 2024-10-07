@@ -23,6 +23,7 @@
 
 namespace OCA\Files_External_Ethswarm\Storage;
 
+use OCA\Files_External_Ethswarm\AppInfo\AppConstants;
 use Exception;
 use OC\Files\Cache\Cache;
 use OC\Files\Storage\Common;
@@ -34,12 +35,18 @@ use OCP\Files\IMimeTypeLoader;
 use OCP\IConfig;
 use OCP\IDBConnection;
 use Sabre\DAV\Exception\BadRequest;
+use OCP\IL10N;
+use OCP\L10N\IFactory as IL10NFactory;
+use OCA\Files_External_Ethswarm\Service\NotificationService;
+use OCP\IUserManager;
+use OCP\IUserSession;
+use OCP\Notification\IManager;
 
 class BeeSwarm extends Common
 {
 	use BeeSwarmTrait;
 
-	public const APP_NAME = 'files_external_ethswarm';
+	protected IL10N $l10n;
 
 	/** @var int */
 	protected int $storageId;
@@ -68,9 +75,16 @@ class BeeSwarm extends Common
 	/** @var string */
 	protected string $id;
 
+	/** @var NotificationService */
+	private $notificationService;
 
 	public function __construct($params)
 	{
+		/** @var IL10NFactory $l10nFactory */
+		$l10nFactory = \OC::$server->get(IL10NFactory::class);
+		$this->l10n = $l10nFactory->get(AppConstants::APP_NAME);
+
+		$this->notificationService = new NotificationService( \OC::$server->get(IManager::class),  \OC::$server->get(IUserManager::class), \OC::$server->get(IUserSession::class));
 		$this->parseParams($params);
 		$this->id = 'ethswarm::' . $this->api_url;
 		$this->storageId = $this->getStorageCache()->getNumericId();
@@ -89,7 +103,7 @@ class BeeSwarm extends Common
 			$mountId = $storageMount->getMountId();
 
 			$this->config = \OC::$server->get(IConfig::class);
-			$configSettings = $this->config->getAppValue(self::APP_NAME, "storageconfig", "");    //default
+			$configSettings = $this->config->getAppValue(AppConstants::APP_NAME, "storageconfig", "");    //default
 			$mounts = json_decode($configSettings, true);
 			if (is_array($mounts)) {
 				$mountIds = array_column($mounts, 'mount_id');
@@ -226,7 +240,6 @@ class BeeSwarm extends Common
 		if ($data['mimetype'] === 'httpd/unix-directory') {
 			return false;
 		}
-		return true;
 	}
 
 	public function filetype($path)
@@ -317,6 +330,9 @@ class BeeSwarm extends Common
 		$swarmFile = $this->filemapper->find($path, $this->storageId);
 		$reference = $swarmFile->getSwarmReference();
 
+		if (!isset($reference)) {
+			return false;
+		}
 		switch ($mode) {
 			case 'r':
 			case 'rb':
@@ -374,6 +390,10 @@ class BeeSwarm extends Common
 
 	}
 	*/
+	/*
+	public function getDirectoryContent($directory): \Traversable {
+		return new \EmptyIterator();
+	}*/
 
 	/**
 	 * @param string $path
@@ -425,16 +445,6 @@ class BeeSwarm extends Common
 		return $data;
 	}
 
-	public function getDirectoryContent($path): \Traversable
-	{
-		$rows = $this->filemapper->getPathTree($path, $this->storageId,
-		                                       incSelf: false,
-		                                       recursive: false);
-		$content = array_map(fn($val) => $this->getMetaData($val->getName()), $rows);
-
-		return new \ArrayIterator($content);
-	}
-
 	protected function toTempFile($source)
 	{
 		$extension = '';
@@ -457,8 +467,9 @@ class BeeSwarm extends Common
 			$reference = (isset($result["reference"]) ? $result['reference'] : null);
 
 			if (!isset($reference)) {
-				throw new BadRequest("Failed to upload file to " . $this->id . ": " . $result['message']);
+			 	throw new BadRequest("Failed to upload file to " . $this->id . ": " . $result['message']);
 			}
+
 		} catch (\Exception $e) {
 			throw new \Exception($e->getMessage());
 		} finally {
@@ -478,6 +489,8 @@ class BeeSwarm extends Common
 			"storage" => $this->storageId,
 		];
 		$this->filemapper->createFile($uploadfiles);
+
+		$this->notificationService->sendTemporaryNotification("swarm-fileupload", $path);
 
 		// //TODO: Read back from swarm to return filesize?
 		return $tmpFilesize;
