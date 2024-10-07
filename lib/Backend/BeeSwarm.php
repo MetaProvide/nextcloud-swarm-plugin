@@ -23,7 +23,7 @@
 
 namespace OCA\Files_External_Ethswarm\Backend;
 
-
+use OCA\Files_External_Ethswarm\AppInfo\AppConstants;
 use OCA\Files_External\Lib\Backend\Backend;
 use OCA\Files_External\Lib\DefinitionParameter;
 use OCA\Files_External\Lib\StorageConfig;
@@ -31,7 +31,6 @@ use OCA\Files_External\Service\GlobalStoragesService;
 use OCA\Files_External_Ethswarm\Auth\License;
 use OCP\IConfig;
 use OCP\IL10N;
-use OCP\IUser;
 use Psr\Log\LoggerInterface;
 
 class BeeSwarm extends Backend
@@ -69,10 +68,10 @@ class BeeSwarm extends Backend
 		$this->logger = $logger;
 		$this->globalStoragesService = $globalStoragesService;
 		$this
-			->setIdentifier('files_external_ethswarm')
+			->setIdentifier(AppConstants::APP_NAME)
 			->addIdentifierAlias('\OC\Files\External_Storage\BeeSwarm') // legacy compat
 			->setStorageClass('\OCA\Files_External_Ethswarm\Storage\BeeSwarm')
-			->setText($l->t('Swarm By Hejbit'))
+			->setText($l->t('Swarm'))
 			->addParameters([
 				(new DefinitionParameter(self::OPTION_HOST_URL, $l->t('Server URL')))
 					->setTooltip($l->t("License Server URL")),
