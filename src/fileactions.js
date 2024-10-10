@@ -21,7 +21,7 @@
  *
  */
 
-import { emit } from '@nextcloud/event-bus';
+import { emit,subscribe } from '@nextcloud/event-bus';
 import { FileAction, registerDavProperty, registerFileAction, FileType } from "@nextcloud/files";
 import HideSource from "@material-design-icons/svg/filled/hide_source.svg";
 import SwarmSvg from "../img/swarm-logo.svg";
@@ -264,3 +264,20 @@ const actionDataUnviewFile ={
 const AddUnviewAction = new FileAction(actionDataUnviewFile);
 
 registerFileAction(AddUnviewAction);
+
+let previousPathHasSwarm = false;
+
+subscribe('files:list:updated', (data) => {
+	console.log('JR-files:list:updated');
+
+	if (data.contents.length > 1){
+		if (previousPathHasSwarm && !data.contents[1]._data.attributes["ethswarm-node"]){
+			previousPathHasSwarm = false;
+			window.location.reload();
+		}
+		if (data.contents[1]._data.attributes["ethswarm-node"]){
+			previousPathHasSwarm = true;
+		}
+	}
+
+});
