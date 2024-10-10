@@ -452,6 +452,10 @@ class BeeSwarm extends Common
 		$tmpFilesize = (file_exists($tmpFile) ? filesize($tmpFile) : -1);
 		$mimetype = mime_content_type($tmpFile);
 
+		if (str_ends_with(strtolower($path),'.md' )){
+			$mimetype = "text/markdown";
+		}
+
 		try {
 			$result = $this->uploadStream($path, $tmpFile, $mimetype, $tmpFilesize);
 			$reference = (isset($result["reference"]) ? $result['reference'] : null);
