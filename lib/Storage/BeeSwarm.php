@@ -86,7 +86,7 @@ class BeeSwarm extends Common
 
 		$this->notificationService = new NotificationService( \OC::$server->get(IManager::class),  \OC::$server->get(IUserManager::class), \OC::$server->get(IUserSession::class));
 		$this->parseParams($params);
-		$this->id = 'ethswarm::' . $this->api_url;
+		$this->id = 'ethswarm::' .str_replace("https://", "", $this->api_url) . '::'.$this->access_key;
 		$this->storageId = $this->getStorageCache()->getNumericId();
 
 		// Load handlers
