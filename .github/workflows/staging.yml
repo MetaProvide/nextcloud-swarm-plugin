@@ -19,5 +19,4 @@ jobs:
           host: ${{ vars.STAGING_SERVER_HOST }}
           username: deploy
           key: ${{ secrets.STAGING_SSH_PRIVATE_KEY }}
-          script: |
-            bash /opt/deploy.sh
+          script: bash deploy
