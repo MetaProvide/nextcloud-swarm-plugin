@@ -6,11 +6,15 @@ BLUE='\033[0;34m'
 YELLOW='\033[0;33m'
 NC='\033[0m'
 
+log () {
+	echo -e "$1"
+}
+
 log_message() {
 	echo -e "${BLUE}$1${NC}"
 }
 
-log_warning() {
+log_note() {
 	echo -e "${YELLOW}$1${NC}"
 }
 
@@ -35,12 +39,12 @@ buffer() {
 print_buffer() {
 	for line in "${output[@]}"
 	do
-		echo -e "$line"
+		log "$line"
 	done
 	output=()
 }
 
-deploy_error() {
+failed() {
 	local version=$1
 	local result=$2
 	print_buffer
@@ -50,25 +54,25 @@ deploy_error() {
 	exit 1
 }
 
-exec_action() {
+action() {
 	local action=$1
 	local message=$2
 	buffer "$(log_message "$message")"
-	result=$($action) || deploy_error "$version" "$result"
+	result=$($action) || failed "$version" "$result"
 	buffer "$result"
 }
 
 deploy() {
 	local version=$1
-	cd hejbit-"$version" || log_error "hejbit-$version not found"
+	cd hejbit-"$version" || failed "hejbit-$version not found"
 
-	buffer "$(log_warning "deploying hejbit-$version")"
+	buffer "$(log_note "deploying hejbit-$version")"
 
-	exec_action "sync_code" "syncing code"
+	action "sync_code" "syncing code"
 
-	exec_action "build_app" "building app"
+	action "build_app" "building app"
 
-	exec_action "nextcloud_upgrade" "upgrading Nextcloud"
+	action "nextcloud_upgrade" "upgrading nextcloud"
 
 	buffer "$(log_success "deployed hejbit-$version")"
 
@@ -78,18 +82,18 @@ deploy() {
 
 sync_code() {
 	git reset --hard > /dev/null 2>&1
-	git pull || return 1
+	git pull 2>&1 || return 1
 }
 
 build_app() {
 	result=$(npm install 2>&1)
 	status=$?
-	echo -e "$result"
+	log "$result"
 
 	if [ $status -ne 0 ]; then
 		result=$(npm run build 2>&1)
 		status=$?
-		echo -e "$result"
+		log "$result"
 	fi
 
 	return $status
@@ -105,12 +109,12 @@ nextcloud_upgrade() {
 
     result=$(docker exec -u www-data hejbit-"$version"-nextcloud-1 php occ upgrade 2>&1)
     status=$?
-    echo -e "$result"
+    log "$result"
     return $status
 }
 
 cd /opt/hejbit || log_error "/opt/hejbit not found"
-log_message "deploying hejbit to staging"
+log_note "deploying hejbit to staging"
 log_gap
 
 DEPLOYMENT=()
