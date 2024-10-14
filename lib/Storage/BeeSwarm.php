@@ -72,7 +72,7 @@ class BeeSwarm extends Common
 	public function __construct($params)
 	{
 		$this->parseParams($params);
-		$this->id = 'ethswarm::' .str_replace("https://", "", $this->api_url) . '::'.$this->access_key;
+		$this->id = 'ethswarm::'.$this->access_key;
 		$this->storageId = $this->getStorageCache()->getNumericId();
 
 		// Load handlers
