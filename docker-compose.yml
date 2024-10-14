@@ -39,21 +39,6 @@ services:
       - nc-app:/var/www/html
       - ./:/var/www/html/custom_apps/files_external_ethswarm
 
-  rsync:
-    image: ogivuk/rsync
-    restart: unless-stopped
-    cpu_shares: 512
-    mem_limit: 256m
-    volumes:
-      - rsync:/rsync
-      - nc-app:/app:ro
-      - ./dev-environment/nextcloud_source:/source
-    command: rsync -avP -e /app/data/ /app/ /source/
-    depends_on:
-      - nextcloud
-    networks:
-      - backend
-
   redis:
     image: redis:alpine
     restart: unless-stopped
@@ -88,21 +73,6 @@ services:
     networks:
       - backend
 
-#  proxy:
-#    image: lucaslorentz/caddy-docker-proxy:alpine
-#    restart: unless-stopped
-#    ports:
-#      - '80:80'
-#      - '443:443'
-#    volumes:
-#      - caddy_data:/data
-#      - caddy_config:/config
-#      - /var/run/docker.sock:/var/run/docker.sock
-#    environment:
-#      - CADDY_INGRESS_NETWORKS=proxy
-#    networks:
-#      - proxy
-
   adminer:
     image: adminer:latest
     restart: unless-stopped
@@ -114,6 +84,25 @@ services:
       - mariadb
     environment:
       ADMINER_DEFAULT_SERVER: mariadb
+    profiles:
+      - dev
+
+  rsync:
+    image: ogivuk/rsync
+    restart: unless-stopped
+    cpu_shares: 512
+    mem_limit: 256m
+    volumes:
+      - rsync:/rsync
+      - nc-app:/app:ro
+      - ./dev-environment/nextcloud_source:/source
+    command: rsync -avP -e /app/data/ /app/ /source/
+    depends_on:
+      - nextcloud
+    networks:
+      - backend
+    profiles:
+      - dev
 
 volumes:
   nc-app:
@@ -126,4 +115,4 @@ networks:
   backend:
   proxy:
     external: true
-    name: hejbit-proxy
+    name: hejbit-network
