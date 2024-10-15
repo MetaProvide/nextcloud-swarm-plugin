@@ -240,6 +240,7 @@ class BeeSwarm extends Common
 		if ($data['mimetype'] === 'httpd/unix-directory') {
 			return false;
 		}
+		return true;
 	}
 
 	public function filetype($path)
@@ -391,14 +392,6 @@ class BeeSwarm extends Common
 	}
 	*/
 
-	public function getDirectoryContent($path): \Traversable
-	{
-		$rows = $this->filemapper->getPathTree($path, $this->storageId, false);
-		$content = array_map(fn($val) => $this->getMetaData($val->getName()), $rows);
-
-		return new \ArrayIterator($content);
-	}
-
 	/**
 	 * @param string $path
 	 * @return array|null
@@ -447,6 +440,14 @@ class BeeSwarm extends Common
 			$data['swarm_ref'] = $swarmFile->getSwarmReference();
 		}
 		return $data;
+	}
+
+	public function getDirectoryContent($path): \Traversable
+	{
+		$rows = $this->filemapper->getPathTree($path, $this->storageId, false);
+		$content = array_map(fn($val) => $this->getMetaData($val->getName()), $rows);
+
+		return new \ArrayIterator($content);
 	}
 
 	protected function toTempFile($source)

@@ -114,6 +114,12 @@ trait BeeSwarmTrait
 			'content-type: application/octet-stream',
 		], $this->access_key);
 		$response = $curl->exec();
+
+		$httpCode = $curl->getInfo(CURLINFO_HTTP_CODE);
+		if ($httpCode !== 200) {
+			throw new \Exception('Failed to download file from Swarm');
+		}
+
 		$headerSize = $curl->getInfo(CURLINFO_HEADER_SIZE);
 		$body = substr($response, $headerSize);
 
