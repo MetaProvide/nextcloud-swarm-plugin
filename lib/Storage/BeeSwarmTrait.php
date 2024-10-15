@@ -104,8 +104,7 @@ trait BeeSwarmTrait
 	 */
 	private function downloadStream(string $reference)
 	{
-		$endpoint = $this->api_url . DIRECTORY_SEPARATOR . 'bzz' . DIRECTORY_SEPARATOR . $reference;
-
+		$endpoint = $this->api_url . DIRECTORY_SEPARATOR . 'bzz' . DIRECTORY_SEPARATOR . $reference . DIRECTORY_SEPARATOR;
 		$curl = new Curl($endpoint, [
 			CURLOPT_FOLLOWLOCATION => true,
 			CURLOPT_RETURNTRANSFER => true,

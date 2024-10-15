@@ -71,7 +71,7 @@ class BeeSwarm extends Backend
 			->setIdentifier(AppConstants::APP_NAME)
 			->addIdentifierAlias('\OC\Files\External_Storage\BeeSwarm') // legacy compat
 			->setStorageClass('\OCA\Files_External_Ethswarm\Storage\BeeSwarm')
-			->setText($l->t('Swarm'))
+			->setText($l->t('Swarm By Hejbit'))
 			->addParameters([
 				(new DefinitionParameter(self::OPTION_HOST_URL, $l->t('Server URL')))
 					->setTooltip($l->t("License Server URL")),

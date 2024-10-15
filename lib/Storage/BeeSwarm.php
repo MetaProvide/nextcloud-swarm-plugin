@@ -390,10 +390,14 @@ class BeeSwarm extends Common
 
 	}
 	*/
-	/*
-	public function getDirectoryContent($directory): \Traversable {
-		return new \EmptyIterator();
-	}*/
+
+	public function getDirectoryContent($path): \Traversable
+	{
+		$rows = $this->filemapper->getPathTree($path, $this->storageId, false);
+		$content = array_map(fn($val) => $this->getMetaData($val->getName()), $rows);
+
+		return new \ArrayIterator($content);
+	}
 
 	/**
 	 * @param string $path
