@@ -90,11 +90,11 @@ build_app() {
 	status=$?
 	log "$result"
 
-	if [ $status -ne 0 ]; then
-		result=$(npm run build 2>&1)
-		status=$?
-		log "$result"
-	fi
+	[ $status -ne 0 ] && return $status
+
+	result=$(npm run build 2>&1)
+	status=$?
+	log "$result"
 
 	return $status
 }
