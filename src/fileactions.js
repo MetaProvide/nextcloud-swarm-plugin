@@ -268,9 +268,9 @@ registerFileAction(AddUnviewAction);
 let previousPathHasSwarm = false;
 
 subscribe('files:list:updated', (data) => {
-	console.log('JR-files:list:updated');
+	console.log('Hejbit-files:list:updated');
 
-	if (data.contents.length > 1){
+	if (data.contents.length >= 1){
 		if (previousPathHasSwarm && !data.contents[1]._data.attributes["ethswarm-node"]){
 			previousPathHasSwarm = false;
 			window.location.reload();
@@ -281,3 +281,4 @@ subscribe('files:list:updated', (data) => {
 	}
 
 });
+
