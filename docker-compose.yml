@@ -18,7 +18,7 @@ services:
     build:
       context: ./docker/nextcloud
       dockerfile: ${NC_VERSION:-28}.Dockerfile
-      target: ${ENV:-production}
+      target: ${ENV:-development}
     restart: unless-stopped
     depends_on:
       mariadb:
