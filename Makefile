@@ -87,6 +87,7 @@ build-tarball:
 	--exclude=".vscode" \
 	--exclude="assets" \
 	--exclude="build" \
+	--exclude="cli" \
 	--exclude="dev-environment" \
 	--exclude="docker" \
 	--exclude="node_modules" \
@@ -102,7 +103,7 @@ build-tarball:
 	--exclude="babel.config.js" \
 	--exclude="composer.json" \
 	--exclude="composer.lock" \
-	--exclude="docker-compose.yaml" \
+	--exclude="docker-compose.yml" \
 	--exclude="Makefile" \
 	--exclude="package-lock.json" \
 	--exclude="package.json" \
@@ -121,6 +122,7 @@ build-appstore-tarball:
 	--exclude=".vscode" \
 	--exclude="assets" \
 	--exclude="build" \
+	--exclude="cli" \
 	--exclude="dev-environment" \
 	--exclude="docker" \
 	--exclude="node_modules" \
@@ -136,7 +138,7 @@ build-appstore-tarball:
 	--exclude="babel.config.js" \
 	--exclude="composer.json" \
 	--exclude="composer.lock" \
-	--exclude="docker-compose.yaml" \
+	--exclude="docker-compose.yml" \
 	--exclude="Makefile" \
 	--exclude="package-lock.json" \
 	--exclude="package.json" \
