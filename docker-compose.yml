@@ -44,9 +44,9 @@ services:
     restart: unless-stopped
     environment:
       REDIS_HOST_PASSWORD: ${REDIS_HOST_PASSWORD:-secret}
-    command: redis-server --requirepass ${REDIS_HOST_PASSWORD}
+    command: redis-server --requirepass ${REDIS_HOST_PASSWORD:-secret}
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: [ "CMD", "redis-cli", "ping" ]
       start_period: 3s
       timeout: 5s
       interval: 30s
@@ -66,7 +66,7 @@ services:
     volumes:
       - nc-db:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "healthcheck.sh", "--su-mysql", "--connect", "--innodb_initialized"]
+      test: [ "CMD", "healthcheck.sh", "--su-mysql", "--connect", "--innodb_initialized" ]
       start_period: 3s
       timeout: 5s
       interval: 30s
@@ -93,10 +93,11 @@ services:
     cpu_shares: 512
     mem_limit: 256m
     volumes:
-      - rsync:/rsync
       - nc-app:/app:ro
       - ./dev-environment/nextcloud_source:/source
-    command: rsync -avP -e /app/data/ /app/ /source/
+      - ./cli/dev/rsync:/rsync
+    environment:
+      - RSYNC_CRONTAB=crontab
     depends_on:
       - nextcloud
     networks:
@@ -104,15 +105,39 @@ services:
     profiles:
       - dev
 
+  proxy:
+    image: lucaslorentz/caddy-docker-proxy:alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      CADDY_INGRESS_NETWORKS: hejbit-network
+    networks:
+      - proxy
+    healthcheck:
+      test: [ "CMD", "curl", "--fail", "http://localhost:2019/reverse_proxy/upstreams" ]
+      timeout: 30s
+      retries: 3
+      start_period: 10s
+    profiles:
+      - dev
+
 volumes:
   nc-app:
   nc-db:
   certs:
-  rsync:
+  caddy_data:
+  caddy_config:
 
 networks:
   frontend:
   backend:
   proxy:
-    external: true
+    #    external: true
     name: hejbit-network
