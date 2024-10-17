@@ -105,6 +105,19 @@ services:
     profiles:
       - dev
 
+  onlyoffice:
+    image: onlyoffice/documentserver
+    environment:
+      JWT_ENABLED: "false"
+    restart: unless-stopped
+    volumes:
+      - onlyoffice_data:/var/www/onlyoffice/Data
+      - onlyoffice_logs:/var/log/onlyoffice
+    networks:
+      - backend
+    profiles:
+      - dev
+
   proxy:
     image: lucaslorentz/caddy-docker-proxy:alpine
     restart: unless-stopped
@@ -134,6 +147,8 @@ volumes:
   certs:
   caddy_data:
   caddy_config:
+  onlyoffice_data:
+  onlyoffice_logs:
 
 networks:
   frontend:
