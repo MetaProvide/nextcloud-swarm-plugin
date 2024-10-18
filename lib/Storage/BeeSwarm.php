@@ -23,7 +23,9 @@
 
 namespace OCA\Files_External_Ethswarm\Storage;
 
+use OCA\Files_External_Ethswarm\AppInfo\AppConstants;
 use Exception;
+use OC\AppConfig;
 use OC\Files\Cache\Cache;
 use OC\Files\Storage\Common;
 use OCA\Files_External_Ethswarm\Db\SwarmFileMapper;
@@ -34,12 +36,16 @@ use OCP\Files\IMimeTypeLoader;
 use OCP\IConfig;
 use OCP\IDBConnection;
 use Sabre\DAV\Exception\BadRequest;
+use OCP\IL10N;
+use OCP\L10N\IFactory as IL10NFactory;
+use OCA\Files_External_Ethswarm\Service\NotificationService;
+use OCP\IUserManager;
+use OCP\IUserSession;
+use OCP\Notification\IManager;
 
 class BeeSwarm extends Common
 {
 	use BeeSwarmTrait;
-
-	public const APP_NAME = 'files_external_ethswarm';
 
 	/** @var int */
 	protected int $storageId;
@@ -89,7 +95,7 @@ class BeeSwarm extends Common
 			$mountId = $storageMount->getMountId();
 
 			$this->config = \OC::$server->get(IConfig::class);
-			$configSettings = $this->config->getAppValue(self::APP_NAME, "storageconfig", "");    //default
+			$configSettings = $this->config->getAppValue(AppConstants::APP_NAME, "storageconfig", "");    //default
 			$mounts = json_decode($configSettings, true);
 			if (is_array($mounts)) {
 				$mountIds = array_column($mounts, 'mount_id');
