@@ -65,18 +65,29 @@ class BeeSwarm extends Common
 	/** @var \OCP\IDBConnection */
 	protected IDBConnection $dbConnection;
 
+	/** @var \OCP\IL10N */
+	protected IL10N $l10n;
+
 	/** @var \OCP\Files\IMimeTypeLoader */
 	private IMimeTypeLoader $mimeTypeHandler;
 
 	/** @var \OC\Files\Cache\Cache */
 	private Cache $cacheHandler;
 
+	/** @var NotificationService */
+	private $notificationService;
+
 	/** @var string */
 	protected string $id;
 
-
 	public function __construct($params)
 	{
+		/** @var IL10NFactory $l10nFactory */
+		$l10nFactory = \OC::$server->get(IL10NFactory::class);
+		$this->l10n = $l10nFactory->get(AppConstants::APP_NAME);
+
+		$this->notificationService = new NotificationService( \OC::$server->get(IManager::class),  \OC::$server->get(IUserManager::class), \OC::$server->get(IUserSession::class));
+
 		$this->parseParams($params);
 		$this->id = 'ethswarm::'.$this->access_key;
 		$this->storageId = $this->getStorageCache()->getNumericId();
@@ -488,6 +499,8 @@ class BeeSwarm extends Common
 			"storage" => $this->storageId,
 		];
 		$this->filemapper->createFile($uploadfiles);
+
+		$this->notificationService->sendTemporaryNotification("swarm-fileupload", $path);
 
 		// //TODO: Read back from swarm to return filesize?
 		return $tmpFilesize;

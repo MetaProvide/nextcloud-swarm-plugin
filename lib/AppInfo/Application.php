@@ -89,6 +89,7 @@ class Application extends App implements IBootstrap, IBackendProvider, IAuthMech
 
 	public function register(IRegistrationContext $context): void {
 		// Register AddContentSecurityPolicyEvent for CSPListener class listenser here
+		$context->registerNotifierService(Notifier::class);
 	}
 
 	public function getAuthMechanisms() {
