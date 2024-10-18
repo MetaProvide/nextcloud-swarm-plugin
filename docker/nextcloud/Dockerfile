@@ -1,6 +1,5 @@
-FROM nextcloud:30-fpm-alpine AS base
-
-FROM base AS production
+ARG NC_VERSION
+FROM nextcloud:${NC_VERSION}-fpm-alpine AS base
 
 ENV NEXTCLOUD_UPDATE=1
 
@@ -13,13 +12,16 @@ RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"; \
 	echo "max_input_time=3600"; \
 	} > /usr/local/etc/php/conf.d/nextcloud.ini;
 
-COPY --chown=www-data ./hooks /docker-entrypoint-hooks.d
-
 RUN mkdir -p /var/www/html/custom_apps && \
     chown -R www-data:www-data /var/www/html/custom_apps
 
 
-FROM production AS development
+FROM base AS production
+
+COPY --chown=www-data ./hooks /docker-entrypoint-hooks.d
+
+
+FROM base AS development
 
 RUN apk add --update --no-cache linux-headers $PHPIZE_DEPS;
 RUN pecl install xdebug && docker-php-ext-enable xdebug;
@@ -29,3 +31,5 @@ RUN { \
     echo "xdebug.discover_client_host=true"; \
 	echo "xdebug.client_host=host.docker.internal"; \
 	} >> /usr/local/etc/php/conf.d/nextcloud.ini;
+
+COPY --chown=www-data ./hooks /docker-entrypoint-hooks.d
