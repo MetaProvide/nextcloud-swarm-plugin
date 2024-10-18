@@ -8,7 +8,7 @@ services:
     depends_on:
       - nextcloud
     labels:
-      caddy: ${APP_URL:-localhost}
+      caddy: ${APP_URL:-localhost}, nextcloud.local
       caddy.reverse_proxy: '{{upstreams 80}}'
     networks:
       - frontend
@@ -17,7 +17,9 @@ services:
   nextcloud:
     build:
       context: ./docker/nextcloud
-      dockerfile: ${NC_VERSION:-28}.Dockerfile
+      dockerfile: Dockerfile
+      args:
+        NC_VERSION: ${NC_VERSION:-28}
       target: ${ENV:-development}
     restart: unless-stopped
     depends_on:
@@ -35,9 +37,24 @@ services:
       - backend
     extra_hosts:
       - host.docker.internal:host-gateway
+      - onlyoffice.local:host-gateway
     volumes:
       - nc-app:/var/www/html
       - ./:/var/www/html/custom_apps/files_external_ethswarm
+
+  cron:
+    image: nextcloud:${NC_VERSION:-28}-fpm-alpine
+    restart: always
+    volumes:
+      - nc-app:/var/www/html:z
+    entrypoint: /cron.sh
+    depends_on:
+      nextcloud:
+        condition: service_started
+      mariadb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
   redis:
     image: redis:alpine
@@ -88,14 +105,15 @@ services:
       - dev
 
   rsync:
-    image: ogivuk/rsync
+    build:
+      context: ./docker/rsync
+      dockerfile: Dockerfile
     restart: unless-stopped
     cpu_shares: 512
     mem_limit: 256m
     volumes:
       - nc-app:/app:ro
       - ./dev-environment/nextcloud_source:/source
-      - ./cli/dev/rsync:/rsync
     environment:
       - RSYNC_CRONTAB=crontab
     depends_on:
@@ -108,13 +126,25 @@ services:
   onlyoffice:
     image: onlyoffice/documentserver
     environment:
-      JWT_ENABLED: "false"
+      JWT_ENABLED: true
+      JWT_SECRET: secret
+      JWT_HEADER: AuthorizationJwt
+      JWT_IN_BODY: true
+      USE_UNAUTHORIZED_STORAGE: true
     restart: unless-stopped
     volumes:
       - onlyoffice_data:/var/www/onlyoffice/Data
+      - onlyoffice_db:/var/lib/postgresql
+      - onlyoffice_lib:/var/lib/onlyoffice
       - onlyoffice_logs:/var/log/onlyoffice
+    extra_hosts:
+      - nextcloud.local:host-gateway
     networks:
       - backend
+      - proxy
+    labels:
+      caddy: onlyoffice.local
+      caddy.reverse_proxy: '{{upstreams 80}}'
     profiles:
       - dev
 
@@ -144,10 +174,11 @@ services:
 volumes:
   nc-app:
   nc-db:
-  certs:
   caddy_data:
   caddy_config:
   onlyoffice_data:
+  onlyoffice_db:
+  onlyoffice_lib:
   onlyoffice_logs:
 
 networks:
