@@ -21,6 +21,7 @@
 
 namespace OCA\Files_External_Ethswarm\Backend;
 
+use OCA\Files_External_Ethswarm\AppInfo\AppConstants;
 use OCA\Files_External\Lib\Backend\Backend;
 use OCA\Files_External\Lib\DefinitionParameter;
 use OCA\Files_External\Lib\StorageConfig;

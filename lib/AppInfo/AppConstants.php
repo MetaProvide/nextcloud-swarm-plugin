@@ -1,10 +1,10 @@
 <?php
-
 declare(strict_types=1);
-
 /**
  * @copyright Copyright (c) 2024, MetaProvide Holding EKF
+ *
  * @author Ron Trevor <ecoron@proton.me>
+ *
  * @license GNU AGPL version 3 or any later version
  *
  * This program is free software: you can redistribute it and/or modify
@@ -19,14 +19,11 @@ declare(strict_types=1);
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
  */
-
 namespace OCA\Files_External_Ethswarm\AppInfo;
 
 class AppConstants {
 	// Application-wide constants go here
 	public const APP_NAME = 'files_external_ethswarm';
-	public const TELEMETRY_URL = 'https://c46a60056f22db1db257c1d99fa99e5f@sentry.metaprovide.org/2';
-	public const TELEMETRY_MINIMUM_SUPPORTED_NEXTCLOUD_VERSION = '30.0.0';
-	public const API_URL = 'app.hejbit.com';
 }

@@ -21,9 +21,9 @@
 
 namespace OCA\Files_External_Ethswarm\Storage;
 
-use ArrayIterator;
+use OCA\Files_External_Ethswarm\AppInfo\AppConstants;
 use Exception;
-use OC;
+use OC\AppConfig;
 use OC\Files\Cache\Cache;
 use OC\Files\Storage\Common;
 use OC_Helper;
@@ -47,48 +47,44 @@ use OCP\L10N\IFactory as IL10NFactory;
 use OCP\Notification\IManager;
 use Psr\Log\LoggerInterface;
 use Sabre\DAV\Exception\BadRequest;
-use Traversable;
+use OCP\IL10N;
+use OCP\L10N\IFactory as IL10NFactory;
+use OCA\Files_External_Ethswarm\Service\NotificationService;
+use OCP\IUserManager;
+use OCP\IUserSession;
+use OCP\Notification\IManager;
 
 class BeeSwarm extends Common {
 	use BeeSwarmTrait;
 
+	/** @var int */
 	protected int $storageId;
 
 	protected IDBConnection $dbConnection;
 
+	/** @var \OCP\IL10N */
 	protected IL10N $l10n;
 
-	protected string $id;
-
-	private bool $isEncrypted; // TODO: remove
-
-	private SwarmFileMapper $fileMapper;
-
-	private IConfig $config;
-
+	/** @var \OCP\Files\IMimeTypeLoader */
 	private IMimeTypeLoader $mimeTypeHandler;
 
-	private ITempManager $tempManager;
-
-	private IMimeTypeDetector $mimeTypeDetector;
-
+	/** @var \OC\Files\Cache\Cache */
 	private Cache $cacheHandler;
 
-	private NotificationService $notificationService;
+	/** @var NotificationService */
+	private $notificationService;
 
-	private string $token;
+	/** @var string */
+	protected string $id;
 
-	private LoggerInterface $logger;
+	public function __construct($params)
+	{
+		/** @var IL10NFactory $l10nFactory */
+		$l10nFactory = \OC::$server->get(IL10NFactory::class);
+		$this->l10n = $l10nFactory->get(AppConstants::APP_NAME);
 
-	/**
-	 * @param mixed $params
-	 *
-	 * @throws StorageBadConfigException
-	 */
-	public function __construct($params) {
-		parent::__construct($params);
+		$this->notificationService = new NotificationService( \OC::$server->get(IManager::class),  \OC::$server->get(IUserManager::class), \OC::$server->get(IUserSession::class));
 
-		// Load storage configuration
 		$this->parseParams($params);
 		$this->id = 'ethswarm::'.$this->access_key;
 		$this->storageId = $this->getStorageCache()->getNumericId();
@@ -122,8 +118,8 @@ class BeeSwarm extends Common {
 			$storageMount = $storageMounts[0];
 			$mountId = $storageMount->getMountId();
 
-			$this->config = OC::$server->get(IConfig::class);
-			$configSettings = $this->config->getAppValue(AppConstants::APP_NAME, 'storageconfig');
+			$this->config = \OC::$server->get(IConfig::class);
+			$configSettings = $this->config->getAppValue(AppConstants::APP_NAME, "storageconfig", "");    //default
 			$mounts = json_decode($configSettings, true);
 			if (is_array($mounts)) {
 				$mountIds = array_column($mounts, 'mount_id');
@@ -554,22 +550,9 @@ class BeeSwarm extends Common {
 		];
 		$this->fileMapper->createFile($uploadFiles);
 
-		$this->notificationService->sendTemporaryNotification('swarm-fileupload', $path);
+		$this->notificationService->sendTemporaryNotification("swarm-fileupload", $path);
 
-		// TODO: Read back from swarm to return filesize?
-		return $tmpFileSize;
-	}
-
-	/**
-	 * @param resource $stream
-	 */
-	protected function createTempFile($stream): string {
-		$extension = '';
-		$tmpFile = $this->tempManager->getTemporaryFile($extension);
-		$target = fopen($tmpFile, 'w');
-		OC_Helper::streamCopy($stream, $target);
-		fclose($target);
-
-		return $tmpFile;
+		// //TODO: Read back from swarm to return filesize?
+		return $tmpFilesize;
 	}
 }

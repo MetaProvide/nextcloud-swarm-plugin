@@ -24,14 +24,13 @@ declare(strict_types=1);
 namespace OCA\Files_External_Ethswarm\AppInfo;
 
 use OCA\Files\Event\LoadAdditionalScriptsEvent;
-use OCA\Files_External\Lib\Config\IAuthMechanismProvider;
+use OCA\Files_External_Ethswarm\AppInfo\AppConstants;
+use OCA\Files_External_Ethswarm\Backend\BeeSwarm;
+use OCA\Files_External_Ethswarm\Auth\License;
 use OCA\Files_External\Lib\Config\IBackendProvider;
 use OCA\Files_External\Service\BackendService;
-use OCA\Files_External_Ethswarm\Auth\License;
-use OCA\Files_External_Ethswarm\Backend\BeeSwarm;
-use OCA\Files_External_Ethswarm\Exception\BaseException;
+use OCA\Files_External\Lib\Config\IAuthMechanismProvider;
 use OCA\Files_External_Ethswarm\Notification\Notifier;
-use OCA\Files_External_Ethswarm\Utils\Env;
 use OCP\AppFramework\App;
 use OCP\AppFramework\Bootstrap\IBootContext;
 use OCP\AppFramework\Bootstrap\IBootstrap;
@@ -42,10 +41,12 @@ use OCP\Util;
 use Psr\Log\LoggerInterface;
 use Sentry;
 
-class Application extends App implements IBootstrap, IBackendProvider, IAuthMechanismProvider
-{
-	public function __construct(array $urlParams = [])
-	{
+/**
+ * @package OCA\Files_external_beeswarm\AppInfo
+ */
+class Application extends App implements IBootstrap, IBackendProvider, IAuthMechanismProvider {
+
+	public function __construct(array $urlParams = []) {
 		parent::__construct(AppConstants::APP_NAME, $urlParams);
 	}
 
@@ -103,9 +104,6 @@ class Application extends App implements IBootstrap, IBackendProvider, IAuthMech
 		// Load custom JS
 		Util::addScript(AppConstants::APP_NAME, 'admin-settings');
 
-		// Add feedback CSS
-		Util::addStyle(AppConstants::APP_NAME, 'feedback-js');
-
 		/** @var IEventDispatcher $dispatcher */
 		$dispatcher = $context->getAppContainer()->get(IEventDispatcher::class);
 		$dispatcher->addListener('OCA\Files::loadAdditionalScripts', function () {
@@ -114,8 +112,6 @@ class Application extends App implements IBootstrap, IBackendProvider, IAuthMech
 		});
 		$dispatcher->addListener(LoadAdditionalScriptsEvent::class, function () {
 			Util::addScript(AppConstants::APP_NAME, 'nextcloud-swarm-plugin-fileactions');
-			Util::addInitScript(AppConstants::APP_NAME, 'nextcloud-swarm-plugin-newfilemenu');
-			Util::addScript(AppConstants::APP_NAME, 'nextcloud-swarm-plugin-feedbackform');
 		});
 
 		$this->getAuthMechanisms();
@@ -125,17 +121,9 @@ class Application extends App implements IBootstrap, IBackendProvider, IAuthMech
 	{
 	}
 
-	public function register(IRegistrationContext $context): void
-	{
+	public function register(IRegistrationContext $context): void {
+		// Register AddContentSecurityPolicyEvent for CSPListener class listenser here
 		$context->registerNotifierService(Notifier::class);
-
-		// Register autoloader of sentry
-		$autoloadPath = __DIR__ . '/../../vendor-bin/sentry/vendor/autoload.php';
-		if (!file_exists($autoloadPath)) {
-			throw new BaseException('Vendor autoload.php not found at: ' . $autoloadPath);
-		}
-
-		require_once $autoloadPath;
 	}
 
 	public function getAuthMechanisms()
