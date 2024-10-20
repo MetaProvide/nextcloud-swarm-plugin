@@ -75,7 +75,10 @@ const actionDataEthswarmCopyRefAndOverlay = {
 	enabled(files, view) {
 		if (files.length !== 1) // We don't support batch actions
 			return false;
-		const attrs = files[0].attributes["ethswarm-fileref"];
+
+	// To fix fileaction navigation bug this action is now available for
+	// files and folders on Swarm storage
+		const attrs = files[0].attributes["ethswarm-node"];
 
 		if (attrs === undefined)
 			return false;
@@ -119,6 +122,10 @@ const actionDataEthswarmCopyRefAndOverlay = {
 
 	async exec(node, view) {
 		const swarmref = node.attributes["ethswarm-fileref"];
+		if (node.type === FileType.Folder) {
+			OC.dialogs.info(t('files_external_ethswarm', 'Folder structure is not yet supported on Swarm. This folder is only available on Nextcloud, although all files within it are accessible on Swarm.'), t('files_external_ethswarm', 'Swarm reference'));
+			return;
+		}
 		navigator.clipboard.writeText(swarmref)
 				 .then(() => {
 					/* clipboard successfully set */
@@ -139,8 +146,6 @@ const EthswarmCopyRefAndOverlay = new FileAction(actionDataEthswarmCopyRefAndOve
 registerFileAction(EthswarmCopyRefAndOverlay);
 
 // TODO: Support Batch Option - Challenge: Import p-queue
-// TODO: Support Hide Folder Option - Challenge 1 : Change the enabled function to check if the node is a folder on swarm table
-// TODO: Support Hide Folder Option - Step 2 : Change altert message to hide folder
 // TODO: Batch option import PQueue from 'p-queue';
 // TODO: Batch option const queue = new PQueue({ concurrency: 5 });
 const actionDataUnviewFile ={
@@ -150,7 +155,7 @@ const actionDataUnviewFile ={
          * If we're in the sharing view, we can only unshare
          */
         if (isMixedUnshareAndDelete(nodes)) {
-            return t('files', 'Unview and unshare');
+            return t('files_external_ethswarm', 'Unview and unshare');
         }
         /**
          * If those nodes are all the root node of a
@@ -158,9 +163,9 @@ const actionDataUnviewFile ={
          */
         if (canUnshareOnly(nodes)) {
             if (nodes.length === 1) {
-                return t('files', 'Leave this share');
+                return t('files_external_ethswarm', 'Leave this share');
             }
-            return t('files', 'Leave these shares');
+            return t('files_external_ethswarm', 'Leave these shares');
         }
         /**
          * If those nodes are all the root node of an
@@ -168,29 +173,29 @@ const actionDataUnviewFile ={
          */
         if (canDisconnectOnly(nodes)) {
             if (nodes.length === 1) {
-                return t('files', 'Disconnect storage');
+                return t('files_external_ethswarm', 'Disconnect storage');
             }
-            return t('files', 'Disconnect storages');
+            return t('files_external_ethswarm', 'Disconnect storages');
         }
         /**
          * If we're only selecting files, use proper wording
          */
         if (isAllFiles(nodes)) {
             if (nodes.length === 1) {
-                return t('files', 'Unview file');
+                return t('files_external_ethswarm', 'Unview file');
             }
-            return t('files', 'Unview files');
+            return t('files_external_ethswarm', 'Unview files');
         }
         /**
          * If we're only selecting folders, use proper wording
          */
         if (isAllFolders(nodes)) {
             if (nodes.length === 1) {
-                return t('files', 'Unview folder');
+                return t('files_external_ethswarm', 'Unview folder');
             }
-            return t('files', 'Unview folders');
+            return t('files_external_ethswarm', 'Unview folders');
         }
-        return t('files', 'Unview');
+        return t('files_external_ethswarm', 'Unview');
     },
     iconSvgInline: (nodes) => {
         if (canUnshareOnly(nodes)) {
@@ -215,10 +220,10 @@ const actionDataUnviewFile ={
 	},
     async exec(node, view, dir) {
 		let message = '';
-		if (node.type !== FileType.File) {
-			message = t('files', 'The file will be set to unview on the folder view. The file will continue to exist on the Swarm network.');
-		}else if (node.type !== FileType.Folder) {
-			message = t('files', 'The folder will be set to unview on the folder view. All the files inside the folder will continue to exist on the Swarm network.');
+		if (node.type === FileType.File) {
+			message = t('files_external_ethswarm', 'The file will be set to unview on the folder view. The file will continue to exist on the Swarm network.');
+		}else if (node.type === FileType.Folder) {
+			message = t('files_external_ethswarm', 'The folder will be set to unview on the folder view. All the files inside the folder will continue to exist on the Swarm network.');
 		}
 		alert(message);
         try {
