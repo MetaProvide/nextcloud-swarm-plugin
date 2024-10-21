@@ -19,7 +19,7 @@ services:
       context: ./docker/nextcloud
       dockerfile: Dockerfile
       args:
-        NC_VERSION: ${NC_VERSION:-29}
+        NC_VERSION: ${NC_VERSION:-28}
       target: ${ENV:-development}
     restart: unless-stopped
     depends_on:
@@ -38,14 +38,12 @@ services:
     extra_hosts:
       - host.docker.internal:host-gateway
       - onlyoffice.local:host-gateway
-      - hejbit.local:host-gateway
-      - api.hejbit.local:host-gateway
     volumes:
       - nc-app:/var/www/html
       - ./:/var/www/html/custom_apps/files_external_ethswarm
 
   cron:
-    image: nextcloud:${NC_VERSION:-29}-fpm-alpine
+    image: nextcloud:${NC_VERSION:-28}-fpm-alpine
     restart: always
     volumes:
       - nc-app:/var/www/html:z
