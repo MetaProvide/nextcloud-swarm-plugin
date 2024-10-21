@@ -341,16 +341,19 @@ let previousPathHasSwarm = false;
 
 subscribe('files:list:updated', (data) => {
 	console.log('Hejbit-files:list:updated');
-
-	if (data.contents.length >= 1){
-		if (previousPathHasSwarm && !data.contents[1]._data.attributes["ethswarm-node"]){
-			previousPathHasSwarm = false;
-			window.location.reload();
-		}
-		if (data.contents[1]._data.attributes["ethswarm-node"]){
-			previousPathHasSwarm = true;
-		}
+	let ethswarmNode = data?.contents?.[1]?._data?.attributes?.["ethswarm-node"];
+	if (ethswarmNode === undefined) {
+		ethswarmNode = false;
 	}
+
+	if (previousPathHasSwarm && !ethswarmNode){
+		previousPathHasSwarm = false;
+		window.location.reload();
+	}
+	if (ethswarmNode){
+		previousPathHasSwarm = true;
+	}
+
 
 });
 
