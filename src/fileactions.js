@@ -25,6 +25,7 @@ import { emit,subscribe } from '@nextcloud/event-bus';
 import { FileAction, registerDavProperty, registerFileAction, FileType } from "@nextcloud/files";
 import HideSource from "@material-design-icons/svg/filled/hide_source.svg";
 import SwarmSvg from "../img/swarm-logo.svg";
+import HejBitSvg from "../img/hejbit-logo.svg";
 import axios from '@nextcloud/axios';
 import Close from "@material-design-icons/svg/filled/close.svg";
 import CloudOff from "@material-design-icons/svg/filled/cloud_off.svg";
@@ -61,11 +62,96 @@ const isAllFolders = (nodes) => {
 registerDavProperty("nc:ethswarm-fileref");
 registerDavProperty("nc:ethswarm-node");
 
-const actionDataEthswarmCopyRefAndOverlay = {
-	id: 'EthswarmCopyRefAndOverlay',
+const actionDataEthswarmOverlay = {
+	id: 'EthswarmOverlay',
+
+	title() {
+		return '';
+	},
 
 	displayName() {
 		return '';
+	},
+
+	altText() {
+		return '';
+	},
+
+	enabled(files, view) {
+		if (files.length !== 1) // We don't support batch actions
+			return false;
+
+	// To fix fileaction navigation bug this action is now available for
+	// files and folders on Swarm storage
+		const attrs = files[0].attributes["ethswarm-node"];
+
+		if (attrs === undefined)
+			return false;
+		else if (attrs === "")
+			return false;
+
+		return true;
+	},
+
+	iconSvgInline(files, view) {
+		return Buffer.from(HejBitSvg.split(",")[1], 'base64');
+	},
+
+
+	inline(file, view) {
+
+		return true;
+	  },
+
+
+	async renderInline(file, view) {
+		// Create the overlay element
+		const overlay = document.createElement('div');
+		overlay.classList.add('hejbit-overlay');
+
+
+		const img = document.createElement('img');
+		img.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAJMSURBVDhPzZLPS5RBHMafd2bed/d9X3dd1yytQ0GHqIjUQz+MjS6FXUqki5EaGAQlFUFCnYKKTh2qSxiC1cESCyGki57sYCbRoVCKEixT0E3bd9/dd98fM82+LbT1F/iBYZiZ93m+833mxdrm66jROvPKTJWWaGhqj0ROL1xRu1ZGKk7O7CvuKeHJf4z1Jxobdti3KmN+s+Dg6VXx4NrDnnt9/NIjxdiwVxAC6uWgZ2evkpImZLS/qi79Rru/v8Ga0FTe7HkKPF8hpo5zx1LxVpDq3cTPgbkZCEVBwdh4oMxgO9u2JT9s6n63Hg1UlQlkbIacQxGNABFNcUE0wlUTQl6cM13OFGUGNq1OeElpjMUlDU6BoCbpIlnp4ZcFmHQ4jhWrT3iByxTZgu981wrp/n8yyL3HB91QdloWBaUCnP/ZJ0RW5L6Q04vbQ0PjNz/Vm0nnc+/Pl0eXQwP9xOTWvLb51EDq6XJL08Xjnk8Ox2Ictk1RbEXmgUyWhaZWNnhcl0Jn6CwhFW0fL7jJXVM0sf5629vuG/rlL+OLy/yJky9WFuFHlszClYGaegBDl82XQQp67XmIICH8PBjNV6GmtktT96wwCmSl0M5TGSBHhRFASD+nQH+UtCFEpskDZoIEDnxmAKouAi5vrgEx00dcDsY4sjk2v7AUPXvozLqekjaEUM9+rQjpTiJQiiVI5t3c/OTdTAaDfiDf2iWF9Kp2Z2AkUb/poNM7PT3vlrR/MdpnW6Id38b0jrnOZ2V/59Tz+JGJwcrG0nJNAvwG797lI53h7DYAAAAASUVORK5CYII=';
+		overlay.appendChild(img);
+
+		// Style the overlay icon
+		overlay.style.position = 'absolute';
+		overlay.style.top = '30px';
+		overlay.style.left = '75px';
+		overlay.style.width = '16px';
+		overlay.style.height = '16px';
+		overlay.style.pointerEvents = 'none';
+
+		// Return the overlay element to be appended
+		return overlay;
+	  },
+
+	  async exec(node, view) {
+		if (node.type === FileType.Folder) {
+			OC.dialogs.info(t('files_external_ethswarm', 'Folder structure is not yet supported on Swarm. This folder is only available on Nextcloud, although all files within it are accessible on Swarm.'), t('files_external_ethswarm', 'Hejbit'));
+		}else if (node.type === FileType.File) {
+			OC.dialogs.info(t('files_external_ethswarm', 'This file is on Swarm Network by Hejbit!'), t('files_external_ethswarm', 'Hejbit'));
+		}
+
+	},
+
+	execBatch() {
+		// Not currently supported.
+	}
+};
+
+
+
+const EthswarmOverlay = new FileAction(actionDataEthswarmOverlay);
+
+registerFileAction(EthswarmOverlay);
+
+
+const actionDataEthswarmCopyRef = {
+	id: 'EthswarmCopyRef',
+
+	displayName() {
+		return t('files_external_ethswarm', "Copy Swarm reference to clipboard");
 	},
 
 	altText() {
@@ -91,34 +177,13 @@ const actionDataEthswarmCopyRefAndOverlay = {
 	inline(file, view) {
 		// Determine whether to render the inline element
 		// For example, only for PDF files
-		return true;
+		return false;
 	  },
 
 	iconSvgInline(files, view) {
 		return Buffer.from(SwarmSvg.split(",")[1], 'base64');
 	},
 
-	async renderInline(file, view) {
-		// Create the overlay element
-		const overlay = document.createElement('div');
-		overlay.classList.add('hejbit-overlay');
-
-
-		const img = document.createElement('img');
-		img.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAJMSURBVDhPzZLPS5RBHMafd2bed/d9X3dd1yytQ0GHqIjUQz+MjS6FXUqki5EaGAQlFUFCnYKKTh2qSxiC1cESCyGki57sYCbRoVCKEixT0E3bd9/dd98fM82+LbT1F/iBYZiZ93m+833mxdrm66jROvPKTJWWaGhqj0ROL1xRu1ZGKk7O7CvuKeHJf4z1Jxobdti3KmN+s+Dg6VXx4NrDnnt9/NIjxdiwVxAC6uWgZ2evkpImZLS/qi79Rru/v8Ga0FTe7HkKPF8hpo5zx1LxVpDq3cTPgbkZCEVBwdh4oMxgO9u2JT9s6n63Hg1UlQlkbIacQxGNABFNcUE0wlUTQl6cM13OFGUGNq1OeElpjMUlDU6BoCbpIlnp4ZcFmHQ4jhWrT3iByxTZgu981wrp/n8yyL3HB91QdloWBaUCnP/ZJ0RW5L6Q04vbQ0PjNz/Vm0nnc+/Pl0eXQwP9xOTWvLb51EDq6XJL08Xjnk8Ox2Ictk1RbEXmgUyWhaZWNnhcl0Jn6CwhFW0fL7jJXVM0sf5629vuG/rlL+OLy/yJky9WFuFHlszClYGaegBDl82XQQp67XmIICH8PBjNV6GmtktT96wwCmSl0M5TGSBHhRFASD+nQH+UtCFEpskDZoIEDnxmAKouAi5vrgEx00dcDsY4sjk2v7AUPXvozLqekjaEUM9+rQjpTiJQiiVI5t3c/OTdTAaDfiDf2iWF9Kp2Z2AkUb/poNM7PT3vlrR/MdpnW6Id38b0jrnOZ2V/59Tz+JGJwcrG0nJNAvwG797lI53h7DYAAAAASUVORK5CYII=';
-		overlay.appendChild(img);
-
-		// Style the overlay icon
-		overlay.style.position = 'absolute';
-		overlay.style.top = '30px';
-		overlay.style.left = '75px';
-		overlay.style.width = '16px';
-		overlay.style.height = '16px';
-		overlay.style.pointerEvents = 'none';
-
-		// Return the overlay element to be appended
-		return overlay;
-	  },
 
 	async exec(node, view) {
 		const swarmref = node.attributes["ethswarm-fileref"];
@@ -128,10 +193,10 @@ const actionDataEthswarmCopyRefAndOverlay = {
 		}
 		navigator.clipboard.writeText(swarmref)
 				 .then(() => {
-					/* clipboard successfully set */
+					// clipboard successfully set
 					OC.dialogs.info(t('files_external_ethswarm', 'The following Swarm reference has been copied to the clipboard: ') + swarmref, t('files_external_ethswarm', 'Swarm reference'));
 				 }, () => {
-					/* clipboard write failed */
+					// clipboard write failed
 					OC.dialogs.info(t('files_external_ethswarm', 'Unable to write to the clipboard, you can manually copy the Swarm reference below: ') + swarmref, t('files_external_ethswarm', 'Swarm reference'));
 				 });
 	},
@@ -141,9 +206,11 @@ const actionDataEthswarmCopyRefAndOverlay = {
 	}
 };
 
-const EthswarmCopyRefAndOverlay = new FileAction(actionDataEthswarmCopyRefAndOverlay);
+const EthswarmCopyRef = new FileAction(actionDataEthswarmCopyRef);
 
-registerFileAction(EthswarmCopyRefAndOverlay);
+registerFileAction(EthswarmCopyRef);
+
+
 
 // TODO: Support Batch Option - Challenge: Import p-queue
 // TODO: Batch option import PQueue from 'p-queue';
