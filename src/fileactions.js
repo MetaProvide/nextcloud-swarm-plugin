@@ -65,17 +65,11 @@ registerDavProperty("nc:ethswarm-node");
 const actionDataEthswarmOverlay = {
 	id: 'EthswarmOverlay',
 
-	title() {
-		return '';
-	},
 
 	displayName() {
 		return '';
 	},
 
-	altText() {
-		return '';
-	},
 
 	enabled(files, view) {
 		if (files.length !== 1) // We don't support batch actions
@@ -99,7 +93,6 @@ const actionDataEthswarmOverlay = {
 
 
 	inline(file, view) {
-
 		return true;
 	  },
 
@@ -135,8 +128,8 @@ const actionDataEthswarmOverlay = {
 
 	},
 
-	execBatch() {
-		// Not currently supported.
+	execBatch(nodes, view) {
+		return Promise.all(nodes.map(node => this.exec(node, view)));
 	}
 };
 
@@ -201,8 +194,8 @@ const actionDataEthswarmCopyRef = {
 				 });
 	},
 
-	execBatch() {
-		// Not currently supported.
+	execBatch(nodes,view) {
+		return Promise.all(nodes.map(node => this.exec(node, view)));
 	}
 };
 
@@ -313,7 +306,8 @@ const actionDataUnviewFile ={
             // TODO: update to this? logger.error('Error while deleting a file', { error, source: node.source, node });
             return false;
         }
-    },   /* TODO: Batch option async execBatch(nodes, view, dir) {
+    },   /* TODO: Batch option
+	async execBatch(nodes, view, dir) {
         // Map each node to a promise that resolves with the result of exec(node)
         const promises = nodes.map(node => {
             // Create a promise that resolves with the result of exec(node)
@@ -327,8 +321,8 @@ const actionDataUnviewFile ={
         });
         return Promise.all(promises);
     }, */
-	execBatch() {
-		// Not currently supported.
+	execBatch(nodes, view) {
+		return Promise.all(nodes.map(node => this.exec(node, view)));
 	},
     order: 150,
 };
