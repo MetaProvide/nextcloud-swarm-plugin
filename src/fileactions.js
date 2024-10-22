@@ -1,4 +1,3 @@
-
 /*
  * @copyright Copyright (c) 2022 Henry Bergström <metahenry@metaprovide.org>
  *
@@ -20,6 +19,18 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  */
+
+
+/* TODO - Unview action : Support Batch Option on - Problem > Can't import p-queue: Import p-queue
+Import p-queue
+Batch option import PQueue from 'p-queue';
+Batch option const queue = new PQueue({ concurrency: 5 });
+*/
+
+// TODO - Unview action : Change alert o OC.dialogs.confirm
+
+
+// TODO - All actions  Change the enable function so all this actions don't appear on FilesListTableHeaderActions
 
 import { emit,subscribe } from '@nextcloud/event-bus';
 import { FileAction, registerDavProperty, registerFileAction, FileType } from "@nextcloud/files";
@@ -204,10 +215,6 @@ const EthswarmCopyRef = new FileAction(actionDataEthswarmCopyRef);
 registerFileAction(EthswarmCopyRef);
 
 
-
-// TODO: Support Batch Option - Challenge: Import p-queue
-// TODO: Batch option import PQueue from 'p-queue';
-// TODO: Batch option const queue = new PQueue({ concurrency: 5 });
 const actionDataUnviewFile ={
     id: 'unviewFile',
     displayName(nodes, view) {
@@ -335,19 +342,17 @@ let previousPathHasSwarm = false;
 
 subscribe('files:list:updated', (data) => {
 	console.log('Hejbit-files:list:updated');
-	let ethswarmNode = data?.contents?.[1]?._data?.attributes?.["ethswarm-node"];
-	if (ethswarmNode === undefined) {
-		ethswarmNode = false;
-	}
 
-	if (previousPathHasSwarm && !ethswarmNode){
+	if (data.folder.path === '/' && previousPathHasSwarm){
 		previousPathHasSwarm = false;
 		window.location.reload();
 	}
-	if (ethswarmNode){
-		previousPathHasSwarm = true;
+
+	const ethswarmNode = data?.contents?.[1]?._data?.attributes?.["ethswarm-node"];
+	if (ethswarmNode !== undefined) {
+		if (ethswarmNode){
+			previousPathHasSwarm = true;
+		}
 	}
-
-
 });
 
