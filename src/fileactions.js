@@ -29,6 +29,7 @@ Batch option const queue = new PQueue({ concurrency: 5 });
 
 // TODO - Unview action : Change alert o OC.dialogs.confirm
 
+// TODO - Unview action : Change emit('files:node:deleted', node) to other like files:list:updated
 
 // TODO - All actions  Change the enable function so all this actions don't appear on FilesListTableHeaderActions
 
