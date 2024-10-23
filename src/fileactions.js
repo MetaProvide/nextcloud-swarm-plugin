@@ -349,7 +349,7 @@ subscribe('files:list:updated', (data) => {
 		window.location.reload();
 	}
 
-	const ethswarmNode = data?.contents?.[1]?._data?.attributes?.["ethswarm-node"];
+	const ethswarmNode = data?.contents?.[0]?._data?.attributes?.["ethswarm-node"];
 	if (ethswarmNode !== undefined) {
 		if (ethswarmNode){
 			previousPathHasSwarm = true;
