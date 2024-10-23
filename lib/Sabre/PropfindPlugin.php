@@ -65,13 +65,14 @@ class PropfindPlugin extends ServerPlugin {
 			{
 				return $class->getSwarmRef($filename, $storageid);
 			});
-			$propFind->handle("{http://nextcloud.org/ns}hidden", function () use ($class, $storageid, $filename)
-			{
-				if($class->getVisiblity($filename, $storageid)==1){
-					return "false";
-				} ;
-				return "true";
-			});
+
+			if($class->getVisiblity($filename, $storageid)==1){
+				$propFind->set("{http://nextcloud.org/ns}hidden","false",200);
+			}
+			else{
+				$propFind->set("{http://nextcloud.org/ns}hidden","true",200);
+			}
+
 			$propFind->handle(self::ETHSWARM_NODE, function () use ($class, $storageid, $filename)
 			{
 					return "true";
@@ -88,13 +89,13 @@ class PropfindPlugin extends ServerPlugin {
 			}
 			$class = $this->EthswarmService;
 
-			$propFind->handle("{http://nextcloud.org/ns}hidden", function () use ($class, $storageid, $filename)
-			{
-				if($class->getVisiblity($filename, $storageid)==1){
-					return "false";
-				} ;
-				return "true";
-			});
+			if($class->getVisiblity($filename, $storageid)==1){
+				$propFind->set("{http://nextcloud.org/ns}hidden","false",200);
+			}
+			else{
+				$propFind->set("{http://nextcloud.org/ns}hidden","true",200);
+			}
+
 			$propFind->handle(self::ETHSWARM_NODE, function () use ($class, $storageid, $filename)
 			{
 					return "true";
