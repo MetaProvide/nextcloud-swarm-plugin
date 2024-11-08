@@ -80,6 +80,9 @@ class BeeSwarm extends Common
 	/** @var string */
 	protected string $id;
 
+	/** @var string */
+	private string $token;
+
 	public function __construct($params)
 	{
 		/** @var IL10NFactory $l10nFactory */
@@ -91,6 +94,7 @@ class BeeSwarm extends Common
 		$this->parseParams($params);
 		$this->id = 'ethswarm::'.$this->access_key;
 		$this->storageId = $this->getStorageCache()->getNumericId();
+		$this->token = $this->getStorageCache()->getStorageId($this->storageId);
 
 		// Load handlers
 		$dbConnection = \OC::$server->get(IDBConnection::class);
@@ -139,6 +143,7 @@ class BeeSwarm extends Common
 	 */
 	public function test(): bool
 	{
+		$this->filemapper->updateStorageIds($this->token,$this->storageId);
 		return $this->checkConnection();
 	}
 
@@ -497,6 +502,7 @@ class BeeSwarm extends Common
 			"etag" => null,
 			"reference" => $reference,
 			"storage" => $this->storageId,
+			"token" => $this->token,
 		];
 		$this->filemapper->createFile($uploadfiles);
 

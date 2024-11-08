@@ -35,7 +35,7 @@ use OCP\IDBConnection;
 
 class Version0005Date202411081430 extends SimpleMigrationStep {
 	private $db;
-	public const _TABLENAMEREF = "files_swarm_tokens";
+	public const _TABLENAME = "files_swarm";
 
 
 	public function __construct(IDBConnection $db) {
@@ -52,34 +52,23 @@ class Version0005Date202411081430 extends SimpleMigrationStep {
 	public function changeSchema(IOutput $output, \Closure $schemaClosure, array $options) {
 		/** @var ISchemaWrapper $schema */
 		$schema = $schemaClosure();
+		$table = $schema->getTable(self::_TABLENAME);
 
-		if (!$schema->hasTable(self::_TABLENAMEREF)) {
-			$table = $schema->createTable(self::_TABLENAMEREF);
-			$table->addColumn('id', Types::BIGINT, [
-				'autoincrement' => true,
-				'notnull' => true,
-				'length' => 20,
-			]);
-			$table->addColumn('files_swarm_id', Types::BIGINT, [
-				'notnull' => true,
-				'length' => 20,
-			]);
-			$table->addColumn('token_id', Types::STRING, [
+		if (!$table->hasColumn('token')) {
+			$table->addColumn('token', Types::STRING, [
 				'notnull' => true,
 				'length' => 64,
+				'default' => 'none',
 			]);
-			$table->setPrimaryKey(['id']);
-			$table->addIndex(['token_id'], 'token_index');
+			$table->addIndex(['token'], 'token_index');
+
 		}
 		return $schema;
-
-
 	}
 
 	public function postSchemaChange(IOutput $output, \Closure $schemaClosure, array $options) {
 		$gqbNI = $this->db->getQueryBuilder();
-		$gqbFI = $this->db->getQueryBuilder();
-		$iqb = $this->db->getQueryBuilder();
+		$updateQb = $this->db->getQueryBuilder();
 
 		// Get all the numeric_id's of the swarm storages
 
@@ -93,21 +82,10 @@ class Version0005Date202411081430 extends SimpleMigrationStep {
 			$numeric_id = $row['numeric_id'];
 			$token_id = $row['id'];
 
-			$resultFileIds = $gqbFI->select('id')
-			->from('files_swarm')
-			->where($gqbFI->expr()->eq('storage', $gqbFI->createNamedParameter($numeric_id)))
-			->executeQuery();
-
-			while ($row = $resultFileIds->fetch()) {
-				$file_id = $row['id'];
-				// Insert the file_id and token_id into the new table
-				$result = $iqb->insert(self::_TABLENAMEREF)
-					->values([
-						'files_swarm_id' => $iqb->createNamedParameter($file_id),
-						'token_id' => $iqb->createNamedParameter($token_id)
-					])
-					->executeStatement();
-			}
-
+			$result = $updateQb->update(self::_TABLENAME)
+			->set('token', $updateQb->createNamedParameter($token_id))
+			->where($updateQb->expr()->eq('storage', $updateQb->createNamedParameter($numeric_id)))
+			->executeStatement();
 		}
+
 	}}
