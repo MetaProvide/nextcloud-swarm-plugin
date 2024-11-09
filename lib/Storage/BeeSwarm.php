@@ -203,7 +203,7 @@ class BeeSwarm extends Common
 
 	public function mkdir($path): bool
 	{
-		$this->filemapper->createDirectory($path, $this->storageId);
+		$this->filemapper->createDirectory($path, $this->storageId,$this->token);
 		return true;
 	}
 

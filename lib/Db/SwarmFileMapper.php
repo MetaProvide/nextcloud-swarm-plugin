@@ -89,13 +89,14 @@ class SwarmFileMapper extends QBMapper {
 		return count($this->findEntities($select));
 	}
 
-	public function createDirectory(string $path, int $storage): SwarmFile {
+	public function createDirectory(string $path, int $storage, string $token): SwarmFile {
 		$swarm = new SwarmFile();
 		$swarm->setName($path);
 		$swarm->setMimetype(\OC::$server->get(IMimeTypeLoader::class)->getId("httpd/unix-directory"));
 		$swarm->setSize(1);
 		$swarm->setStorageMtime(time());
 		$swarm->setStorage($storage);
+		$swarm->setToken($token);
 		return $this->insert($swarm);
 	}
 
