@@ -122,6 +122,7 @@ class BeeSwarm extends Common
 				}
 			}
 		}
+		$this->cacheHandler = new Cache($this);
 	}
 
 	public static function checkDependencies()
@@ -144,7 +145,53 @@ class BeeSwarm extends Common
 	public function test(): bool
 	{
 		$this->filemapper->updateStorageIds($this->token,$this->storageId);
+		$this->add_token_files_cache();
 		return $this->checkConnection();
+	}
+
+	/**
+	 * @return bool
+	 * @throws Exception
+	 */
+	public function add_file_cache($file): bool
+	{
+
+		$fileData = [
+			'storage' => $file->getStorage(),
+			'path' => $file->getName(),
+			'path_hash' => md5($file->getName()),
+			'name' => basename($file->getName()),
+			'mimetype' => $this->mimeTypeHandler->getMimetypeById($file->getMimetype()),
+			'size' => $file->getSize(),
+			'etag' => uniqid(),
+			'storage_mtime' => $file->getStorageMtime(),
+			// 2024-11-14 - We still don't support edit, so file is never updated.
+			'mtime' => $file->getStorageMtime(),
+		];
+
+		if ($file->getMimetype() == $this->mimeTypeHandler->getId('httpd/unix-directory'))
+			$fileData['permissions'] = (Constants::PERMISSION_ALL - Constants::PERMISSION_DELETE);
+		else
+			$fileData['permissions'] = (Constants::PERMISSION_ALL - Constants::PERMISSION_DELETE - Constants::PERMISSION_UPDATE);
+
+		$fileId = $this->cacheHandler->put($fileData['path'], $fileData);
+		return true;
+	}
+
+	/**
+	 * @return bool
+	 * @throws Exception
+	 */
+	public function add_token_files_cache(): bool
+	{
+
+		foreach ($this->filemapper->findAllWithToken($this->token) as $file) {
+
+			$this->add_file_cache($file);
+		}
+
+		return true;
+
 	}
 
 	/**
