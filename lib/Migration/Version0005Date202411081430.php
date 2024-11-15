@@ -60,7 +60,7 @@ class Version0005Date202411081430 extends SimpleMigrationStep {
 				'length' => 64,
 				'default' => 'none',
 			]);
-			$table->addIndex(['token'], 'token_index');
+			$table->addIndex(['token'], 'hejbit_token_index');
 
 		}
 		return $schema;
