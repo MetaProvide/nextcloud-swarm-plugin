@@ -144,9 +144,37 @@ class BeeSwarm extends Common
 	 */
 	public function test(): bool
 	{
+		if (!$this->checkConnection()){
+			return false;
+		}
+
 		$this->filemapper->updateStorageIds($this->token,$this->storageId);
+		$this->add_rootfolder_cache();
 		$this->add_token_files_cache();
-		return $this->checkConnection();
+		return true;
+	}
+
+	public function add_rootfolder_cache(): bool
+	{
+
+		$fileData = [
+			'storage' => $this->storageId,
+			'path' => '',
+			'path_hash' => md5(''),
+			'name' => '',
+			'mimetype' => 'httpd/unix-directory',
+			'size' => 1,
+			'etag' => uniqid(),
+			'storage_mtime' => time(),
+			// 2024-11-14 - We still don't support edit, so file is never updated.
+			'mtime' => time(),
+			'permissions' => (Constants::PERMISSION_ALL - Constants::PERMISSION_DELETE),
+			'parent' => -1,
+		];
+
+
+		$fileId = $this->cacheHandler->put($fileData['path'], $fileData);
+		return true;
 	}
 
 	/**
