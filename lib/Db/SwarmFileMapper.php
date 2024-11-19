@@ -92,9 +92,6 @@ class SwarmFileMapper extends QBMapper {
 		return count($this->findEntities($select));
 	}
 
-	/**
-	 * @throws Exception
-	 */
 	public function createDirectory(string $path, int $storage, string $token): SwarmFile {
 		$swarm = new SwarmFile();
 		$swarm->setName($path);
@@ -103,7 +100,6 @@ class SwarmFileMapper extends QBMapper {
 		$swarm->setStorageMtime(time());
 		$swarm->setStorage($storage);
 		$swarm->setToken($token);
-
 		return $this->insert($swarm);
 	}
 
@@ -112,15 +108,14 @@ class SwarmFileMapper extends QBMapper {
 	 */
 	public function createFile(array $data): SwarmFile {
 		$swarm = new SwarmFile();
-		$swarm->setName($data['name']);
-		$swarm->setSwarmReference($data['reference']);
-		$swarm->setSwarmTag($data['etag']);
-		$swarm->setMimetype($data['mimetype']);
-		$swarm->setSize($data['size']);
-		$swarm->setStorageMtime($data['storage_mtime']);
-		$swarm->setStorage($data['storage']);
-		$swarm->setToken($data['token']);
-
+		$swarm->setName($filearray["name"]);
+		$swarm->setSwarmReference($filearray["reference"]);
+		$swarm->setSwarmTag($filearray["etag"]);
+		$swarm->setMimetype($filearray["mimetype"]);
+		$swarm->setSize($filearray["size"]);
+		$swarm->setStorageMtime($filearray["storage_mtime"]);
+		$swarm->setStorage($filearray["storage"]);
+		$swarm->setToken($filearray["token"]);
 		return $this->insert($swarm);
 	}
 
@@ -173,8 +168,6 @@ class SwarmFileMapper extends QBMapper {
 
 	/**
 	 * @return SwarmFile[]
-	 *
-	 * @throws Exception
 	 */
 	public function findAllWithToken(string $token): array {
 		$qb = $this->db->getQueryBuilder();
@@ -182,19 +175,20 @@ class SwarmFileMapper extends QBMapper {
 		$select = $qb
 			->select('*')
 			->from($this->getTableName())
-			->where($qb->expr()->eq('token', $qb->createNamedParameter($token)))
-		;
+			->where($qb->expr()->eq('token', $qb->createNamedParameter($token)));
 
 		return $this->findEntities($select);
 	}
 
-	/**
-	 * @throws Exception
-	 */
-	public function updateStorageIds(string $token, int $storageId): void {
+
+	public function updateStorageIds(string $token,string $storageid): int {
+
 		foreach ($this->findAllWithToken($token) as $swarmFile) {
-			$swarmFile->setStorage($storageId);
+			$swarmFile->setStorage($storageid);
 			$this->update($swarmFile);
-		}
+		};
+
+		return 1;
 	}
+
 }

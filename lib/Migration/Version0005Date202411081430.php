@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 /**
  * @copyright Copyright (c) 2022, MetaProvide Holding EKF
+ *
  * @author Ron Trevor <ecoron@proton.me>
+ *
  * @license GNU AGPL version 3 or any later version
  *
  * This program is free software: you can redistribute it and/or modify
@@ -19,31 +21,35 @@ declare(strict_types=1);
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
  */
-
 namespace OCA\Files_External_Ethswarm\Migration;
 
 use Closure;
 use OCP\DB\ISchemaWrapper;
-use OCP\DB\Types;
-use OCP\IDBConnection;
 use OCP\Migration\IOutput;
 use OCP\Migration\SimpleMigrationStep;
+use OCP\DB\Types;
+use OCP\DB\QueryBuilder\IQueryBuilder;
+use OCP\IDBConnection;
 
 class Version0005Date202411081430 extends SimpleMigrationStep {
-	public const _TABLENAME = 'files_swarm';
 	private $db;
+	public const _TABLENAME = "files_swarm";
+
 
 	public function __construct(IDBConnection $db) {
 		$this->db = $db;
 	}
 
+
 	/**
+	 * @param IOutput $output
 	 * @param Closure $schemaClosure The `\Closure` returns a `ISchemaWrapper`
-	 *
+	 * @param array $options
 	 * @return null|ISchemaWrapper
 	 */
-	public function changeSchema(IOutput $output, Closure $schemaClosure, array $options) {
+	public function changeSchema(IOutput $output, \Closure $schemaClosure, array $options) {
 		/** @var ISchemaWrapper $schema */
 		$schema = $schemaClosure();
 		$table = $schema->getTable(self::_TABLENAME);
@@ -55,33 +61,31 @@ class Version0005Date202411081430 extends SimpleMigrationStep {
 				'default' => 'none',
 			]);
 			$table->addIndex(['token'], 'hejbit_token_index');
-		}
 
+		}
 		return $schema;
 	}
 
-	public function postSchemaChange(IOutput $output, Closure $schemaClosure, array $options) {
+	public function postSchemaChange(IOutput $output, \Closure $schemaClosure, array $options) {
 		$gqbNI = $this->db->getQueryBuilder();
+		$updateQb = $this->db->getQueryBuilder();
 
 		// Get all the numeric_id's of the swarm storages
+
 		$resultNI = $gqbNI->select('numeric_id', 'id')
-			->from('storages')
-			->where($gqbNI->expr()->like('id', $gqbNI->createNamedParameter('ethswarm::%')))
-			->executeQuery()
-		;
+		   ->from('storages')
+		   ->where($gqbNI->expr()->like('id', $gqbNI->createNamedParameter('ethswarm::%')))
+		   ->executeQuery();
 
 		while ($row = $resultNI->fetch()) {
 			// Get all the files on each swarm storage
 			$numeric_id = $row['numeric_id'];
 			$token_id = $row['id'];
 
-			$updateQb = $this->db->getQueryBuilder();
-
 			$result = $updateQb->update(self::_TABLENAME)
-				->set('token', $updateQb->createNamedParameter($token_id))
-				->where($updateQb->expr()->eq('storage', $updateQb->createNamedParameter($numeric_id)))
-				->executeStatement()
-			;
+			->set('token', $updateQb->createNamedParameter($token_id))
+			->where($updateQb->expr()->eq('storage', $updateQb->createNamedParameter($numeric_id)))
+			->executeStatement();
 		}
-	}
-}
+
+	}}

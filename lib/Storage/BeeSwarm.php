@@ -77,6 +77,9 @@ class BeeSwarm extends Common {
 	/** @var string */
 	protected string $id;
 
+	/** @var string */
+	private string $token;
+
 	public function __construct($params)
 	{
 		/** @var IL10NFactory $l10nFactory */
@@ -139,8 +142,98 @@ class BeeSwarm extends Common {
 	/**
 	 * @throws Exception
 	 */
-	public function test(): bool {
-		if (!$this->checkConnection()) {
+	public function test(): bool
+	{
+		if (!$this->checkConnection()){
+			return false;
+		}
+
+		$this->filemapper->updateStorageIds($this->token,$this->storageId);
+		$this->add_rootfolder_cache();
+		$this->add_token_files_cache();
+		return true;
+	}
+
+	public function add_rootfolder_cache(): bool
+	{
+
+		$fileData = [
+			'storage' => $this->storageId,
+			'path' => '',
+			'path_hash' => md5(''),
+			'name' => '',
+			'mimetype' => 'httpd/unix-directory',
+			'size' => 1,
+			'etag' => uniqid(),
+			'storage_mtime' => time(),
+			// 2024-11-14 - We still don't support edit, so file is never updated.
+			'mtime' => time(),
+			'permissions' => (Constants::PERMISSION_ALL - Constants::PERMISSION_DELETE),
+			'parent' => -1,
+		];
+
+
+		$fileId = $this->cacheHandler->put($fileData['path'], $fileData);
+		return true;
+	}
+
+	/**
+	 * @return bool
+	 * @throws Exception
+	 */
+	public function add_file_cache($file): bool
+	{
+
+		$fileData = [
+			'storage' => $file->getStorage(),
+			'path' => $file->getName(),
+			'path_hash' => md5($file->getName()),
+			'name' => basename($file->getName()),
+			'mimetype' => $this->mimeTypeHandler->getMimetypeById($file->getMimetype()),
+			'size' => $file->getSize(),
+			'etag' => uniqid(),
+			'storage_mtime' => $file->getStorageMtime(),
+			// 2024-11-14 - We still don't support edit, so file is never updated.
+			'mtime' => $file->getStorageMtime(),
+		];
+
+		if ($file->getMimetype() == $this->mimeTypeHandler->getId('httpd/unix-directory'))
+			$fileData['permissions'] = (Constants::PERMISSION_ALL - Constants::PERMISSION_DELETE);
+		else
+			$fileData['permissions'] = (Constants::PERMISSION_ALL - Constants::PERMISSION_DELETE - Constants::PERMISSION_UPDATE);
+
+		$fileId = $this->cacheHandler->put($fileData['path'], $fileData);
+		return true;
+	}
+
+	/**
+	 * @return bool
+	 * @throws Exception
+	 */
+	public function add_token_files_cache(): bool
+	{
+
+		foreach ($this->filemapper->findAllWithToken($this->token) as $file) {
+
+			$this->add_file_cache($file);
+		}
+
+		return true;
+
+	}
+
+	/**
+	 * @param $path
+	 * @return bool
+	 */
+	public function file_exists($path): bool
+	{
+		if ($path === '' || $path === '/' || $path === '.') {
+			// Return true always the creation of the root folder
+			return true;
+		}
+		$exists = $this->filemapper->findExists($path, $this->storageId);
+		if ($exists == 0) {
 			return false;
 		}
 
@@ -290,18 +383,9 @@ class BeeSwarm extends Common {
 		return false;
 	}
 
-	public function needsPartFile(): bool {
-		return false;
-	}
-
-	/**
-	 * @param mixed $path
-	 *
-	 * @throws Exception
-	 */
-	public function mkdir($path): bool {
-		$this->fileMapper->createDirectory($path, $this->storageId, $this->token);
-
+	public function mkdir($path): bool
+	{
+		$this->filemapper->createDirectory($path, $this->storageId,$this->token);
 		return true;
 	}
 
@@ -535,18 +619,18 @@ class BeeSwarm extends Common {
 			fclose($stream);
 		}
 
-		// save to swarm table
-		$uploadFiles = [
-			'name' => $path,
-			'permissions' => (Constants::PERMISSION_ALL - Constants::PERMISSION_DELETE - Constants::PERMISSION_UPDATE),
-			'mimetype' => $this->mimeTypeHandler->getId($mimetype),
-			'mtime' => time(),
-			'storage_mtime' => time(),
-			'size' => $tmpFileSize,
-			'etag' => null,
-			'reference' => $reference,
-			'storage' => $this->storageId,
-			'token' => $this->token,
+		// Write metadata to table
+		$uploadfiles = [
+			"name" => $path,
+			"permissions" => (Constants::PERMISSION_ALL - Constants::PERMISSION_DELETE - Constants::PERMISSION_UPDATE),
+			"mimetype" => $this->mimeTypeHandler->getId($mimetype),
+			"mtime" => time(),
+			"storage_mtime" => time(),
+			"size" => $tmpFilesize,
+			"etag" => null,
+			"reference" => $reference,
+			"storage" => $this->storageId,
+			"token" => $this->token,
 		];
 		$this->fileMapper->createFile($uploadFiles);
 
