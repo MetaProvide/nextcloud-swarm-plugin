@@ -83,7 +83,9 @@ class PropfindPlugin extends ServerPlugin {
 			$filename = $node->getFileInfo()->getinternalPath();
 			$mountpoint = $node->getFileInfo()->getMountPoint()->getStorageId();
 
-			if (!str_starts_with($mountpoint, "ethswarm") || $filename === "") {
+			// Removed the $filename === "" to work in the root folder of ethswarm
+			// it might last version before removal  (!str_starts_with($mountpoint, "ethswarm") || $filename === "")
+			if (!str_starts_with($mountpoint, "ethswarm")) {
 				return "";
 			}
 			$class = $this->EthswarmService;
