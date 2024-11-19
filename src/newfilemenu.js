@@ -20,96 +20,65 @@
  *
  */
 import { subscribe } from '@nextcloud/event-bus';
-import {
-	getNewFileMenuEntries, removeNewFileMenuEntry, getNavigation,
-	davRootPath,
-    davGetClient,
-    davGetDefaultPropfind,
-    davResultToNode,
-    davRemoteURL,
-	registerDavProperty
-} from '@nextcloud/files';
+import { getNewFileMenuEntries, removeNewFileMenuEntry, registerDavProperty } from '@nextcloud/files';
 
-registerDavProperty("nc:mount-type");
 registerDavProperty("nc:ethswarm-node");
 
 // //////////////////////////////////////////////////
-// Test 1: Try to obtain storage info from Webdav.
-// Based on example on https://github.com/nextcloud-libraries/nextcloud-files?tab=readme-ov-file#using-webdav-to-list-all-nodes-in-directory
-const path = ''; // swarm-license/'; // the directory you want to list
-const fullpath = davRootPath + path;
-// Query the directory content using the webdav library
-// `davRootPath` is the files root, for Nextcloud this is '/files/USERID', by default the current user is used
-console.log('davRootPath=' + davRootPath + ';davRemoteURL=' + davRemoteURL);
-console.log("fullpath=" + fullpath);
+// Common functions for manipulating New file menu entries.
+let previousPathIsSwarm = false;
+let originalMenu = [];
+const removalMenuEntries = [];
+console.log('Hejbit-files-new-menu:previousPathIsSwarm=' + previousPathIsSwarm + ";originalMenu=" + originalMenu.length);
 
-const client = davGetClient();
-console.log("client=" + JSON.stringify(client));
-const results = client.getDirectoryContents(fullpath, {
-    details: true,
-    // Query all required properties for a Node
-    data: davGetDefaultPropfind(),
-});
-
-// Convert the result to an array of Node
-console.log("results=" + JSON.stringify(results));
-if (results) {
-	const nodes = results?.data?.map((result) => davResultToNode(result));
-	console.log(JSON.stringify(nodes));
-}
-// //////////////////////////////////////////////////
-
-// //////////////////////////////////////////////////
-// Test 2: Inspect the getNavigation object.
-const navigation = getNavigation();
-const views = navigation.views;
-let c1 = 1;
-views.forEach(function (eachView) {
-	console.log("view iteration #" + c1);
-    console.log(eachView);
-	c1++;
-});
-// //////////////////////////////////////////////////
-
-// //////////////////////////////////////////////////
-// Main code: Manipulate the New file menu entries.
-const entries = getNewFileMenuEntries();	// Get current file menu entries
-const removals = [];	// store the File Menu entries to be removed
-console.log(entries);
-
-let c = 1;
-entries.forEach(function (fileMenuEntry) {
-	console.log("iteration #" + c);
-    const name = fileMenuEntry.displayName;
-    console.log(fileMenuEntry);
-	if (fileMenuEntry.id !== 'newFolder') {
-		console.log('"' + name + '" with id "' + fileMenuEntry.id + '" to be removed');
-		removals.push(fileMenuEntry);
-
+/**  Store the Swarm-specific menu entries */
+function storeNewFileMenu() {
+	if (!originalMenu || !originalMenu.length) {
+		originalMenu = getNewFileMenuEntries();
+		console.log("Load getNewFileMenuEntries()=" + originalMenu.length);
 	}
-	c=c+1;
-});
-// Remove unwanted entries
-removals.forEach(function (removeMenuEntry) {
-	console.log('"' + removeMenuEntry.displayName + '" with id "' + removeMenuEntry.id + '" removing');
-	removeNewFileMenuEntry(removeMenuEntry);
-});
+	// Store the Swarm-specfic file menu entries
+	if (!removalMenuEntries || !removalMenuEntries.length) {
+		originalMenu.forEach(function remove(fileMenuEntry) {
+			if (fileMenuEntry.id !== 'newFolder') {
+				removalMenuEntries.push(fileMenuEntry);
+			}
+		});
+	}
+};
 // //////////////////////////////////////////////////
-
 
 // Listeners to detect changes in listing.
 subscribe('files:list:updated', (data) => {
-	console.log('Hejbit-files-new-menu:list:updated');
-	console.log('data=' + JSON.stringify(data));
-	// if (data.contents.length >= 1){
-	// 	if (previousPathHasSwarm && !data.contents[1]._data.attributes["ethswarm-node"]){
-	// 		previousPathHasSwarm = false;
-	// 	}
-	// }
-});
 
-// Test this listener
-subscribe('files:navigation:changed', () => {
-	console.log('Hejbit-files:navigation:changed' + this);
-	// console.log('dataview=' + JSON.stringify(view));
+	if (typeof(data.folder) === 'undefined') {
+		// Not a valid response so ignore.
+		return;
+	}
+
+	let currentPathIsSwarm = false;
+	if (data.folder?.attributes["ethswarm-node"]){
+		currentPathIsSwarm = true;
+	}
+
+	console.log('Hejbit-files-new-menu:list:updated=previousPathIsSwarm=' + previousPathIsSwarm + ";currentPathIsSwarm=" + currentPathIsSwarm + ";originalMenu=" + originalMenu.length);
+	// First condition checks for 1st navigation in Swarm storage
+	// 2nd condition is for direct navigation by URL
+	if ((currentPathIsSwarm && !previousPathIsSwarm) || (currentPathIsSwarm && previousPathIsSwarm)) {
+		// Remove unwanted entries
+		storeNewFileMenu();
+		console.log('Removing ' + removalMenuEntries.length + ' menu entries from ' + originalMenu.length + ' menus.');
+		removalMenuEntries.forEach(function (removeMenuEntry) {
+			removeNewFileMenuEntry(removeMenuEntry);
+		});
+	} else if (!currentPathIsSwarm && !previousPathIsSwarm) {
+		console.log("Default entry - store settings");
+		// Store a copy of the current file menu entries
+		storeNewFileMenu();
+	}
+	else {
+		originalMenu = getNewFileMenuEntries();
+		console.log("Reload originalMenu=" + originalMenu.length);
+	}
+	previousPathIsSwarm = currentPathIsSwarm;
 });
