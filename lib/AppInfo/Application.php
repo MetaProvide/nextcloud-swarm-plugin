@@ -112,6 +112,7 @@ class Application extends App implements IBootstrap, IBackendProvider, IAuthMech
 		});
 		$dispatcher->addListener(LoadAdditionalScriptsEvent::class, function () {
 			Util::addScript(AppConstants::APP_NAME, 'nextcloud-swarm-plugin-fileactions');
+			Util::addInitScript(AppConstants::APP_NAME, 'nextcloud-swarm-plugin-newfilemenu');
 		});
 
 		$this->getAuthMechanisms();
