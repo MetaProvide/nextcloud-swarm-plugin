@@ -63,7 +63,7 @@ Experience the future of data storage with 5GB of free, decentralized storage on
 
 [Get your free licence here!](https://metaprovide.org/hejbit/start) .
     ]]></description>
-    <version>0.5.6</version>
+    <version>0.5.7</version>
     <licence>agpl</licence>
     <author>MetaProvide</author>
     <namespace>Files_External_Ethswarm</namespace>
@@ -80,10 +80,6 @@ Experience the future of data storage with 5GB of free, decentralized storage on
     <dependencies>
         <nextcloud min-version="28" max-version="30"/>
     </dependencies>
-	<settings>
-		<admin>OCA\Files_External_Ethswarm\Settings\Admin</admin>
-		<admin-section>OCA\Files_External_Ethswarm\Settings\Section</admin-section>
-	</settings>
 	<sabre>
 		<plugins>
 			<plugin>OCA\Files_External_Ethswarm\Sabre\PropfindPlugin</plugin>
