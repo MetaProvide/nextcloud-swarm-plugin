@@ -84,10 +84,18 @@ class PropfindPlugin extends ServerPlugin {
 			$filename = $node->getFileInfo()->getinternalPath();
 			$mountpoint = $node->getFileInfo()->getMountPoint()->getStorageId();
 
-			if (!str_starts_with($mountpoint, "ethswarm") || $filename === "") {
+			if (!str_starts_with($mountpoint, "ethswarm")) {
 				return "";
 			}
 			$class = $this->EthswarmService;
+
+			$propFind->handle(self::ETHSWARM_NODE, function () use ($class, $storageid, $filename)
+			{
+					return "true";
+			});
+			if ($filename === "") {
+				return "";
+			}
 
 			if($class->getVisiblity($filename, $storageid)==1){
 				$propFind->set("{http://nextcloud.org/ns}hidden","false",200);
@@ -96,10 +104,7 @@ class PropfindPlugin extends ServerPlugin {
 				$propFind->set("{http://nextcloud.org/ns}hidden","true",200);
 			}
 
-			$propFind->handle(self::ETHSWARM_NODE, function () use ($class, $storageid, $filename)
-			{
-					return "true";
-			});
+
 		}
 
 	}
