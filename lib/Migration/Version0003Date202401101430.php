@@ -63,7 +63,6 @@ class Version0003Date202401101430 extends SimpleMigrationStep {
 		$mimetype = 'text/markdown';
 
 		if (version_compare($currentVersion, '0.5.4', '==')) {
-			$qb = $this->db->getQueryBuilder();
 
 			$updateQb = $this->db->getQueryBuilder();
 			$updateQb->update('files_swarm')
