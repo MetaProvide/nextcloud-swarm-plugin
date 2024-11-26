@@ -68,10 +68,8 @@ class Version0005Date202411081430 extends SimpleMigrationStep {
 
 	public function postSchemaChange(IOutput $output, \Closure $schemaClosure, array $options) {
 		$gqbNI = $this->db->getQueryBuilder();
-		$updateQb = $this->db->getQueryBuilder();
 
 		// Get all the numeric_id's of the swarm storages
-
 		$resultNI = $gqbNI->select('numeric_id', 'id')
 		   ->from('storages')
 		   ->where($gqbNI->expr()->like('id', $gqbNI->createNamedParameter('ethswarm::%')))
@@ -81,6 +79,8 @@ class Version0005Date202411081430 extends SimpleMigrationStep {
 			// Get all the files on each swarm storage
 			$numeric_id = $row['numeric_id'];
 			$token_id = $row['id'];
+
+			$updateQb = $this->db->getQueryBuilder();
 
 			$result = $updateQb->update(self::_TABLENAME)
 			->set('token', $updateQb->createNamedParameter($token_id))
