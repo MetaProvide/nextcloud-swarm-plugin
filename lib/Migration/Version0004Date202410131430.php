@@ -65,12 +65,14 @@ class Version0004Date202410131430 extends SimpleMigrationStep {
 			$numeric_id = $row['numeric_id'];
 
 			// This is assuming we only have one folder with Hejbit Plug (also true on the previous version of the plugin)
+			$qb = $this->db->getQueryBuilder();
 			$result = $qb->select('mount_id')
 			->from('external_mounts')
 			->where($qb->expr()->eq('storage_backend', $qb->createNamedParameter('files_external_ethswarm')))
 			->executeQuery();
 			$mountid = $result->fetchOne();
 
+			$qb = $this->db->getQueryBuilder();
 			$result = $qb->select('value')
 			->from('external_config','m')
 			->where($qb->expr()->eq('m.mount_id', $qb->createNamedParameter($mountid)))
