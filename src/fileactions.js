@@ -510,15 +510,13 @@ let previousPathHasSwarm = false;
 subscribe("files:list:updated", (data) => {
 	console.log("Hejbit-files:list:updated");
 
-	if (data.folder.path === '/' && previousPathHasSwarm){
+	if (data.folder?.path === '/' && previousPathHasSwarm){
 		previousPathHasSwarm = false;
 		window.location.reload();
 	}
 
-	const ethswarmNode = data?.contents?.[0]?._data?.attributes?.["ethswarm-node"];
-	if (ethswarmNode !== undefined) {
-		if (ethswarmNode){
-			previousPathHasSwarm = true;
-		}
+	if (data.folder?.attributes["ethswarm-node"]){
+		previousPathHasSwarm = true;
 	}
+
 });
