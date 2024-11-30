@@ -1,0 +1,22 @@
+name: Staging
+
+on:
+  push:
+    branches:
+      - stage
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ vars.STAGING_SERVER_HOST }}
+          username: deploy
+          key: ${{ secrets.STAGING_SSH_PRIVATE_KEY }}
+          script: bash deploy

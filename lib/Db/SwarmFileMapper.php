@@ -89,13 +89,14 @@ class SwarmFileMapper extends QBMapper {
 		return count($this->findEntities($select));
 	}
 
-	public function createDirectory(string $path, int $storage): SwarmFile {
+	public function createDirectory(string $path, int $storage, string $token): SwarmFile {
 		$swarm = new SwarmFile();
 		$swarm->setName($path);
 		$swarm->setMimetype(\OC::$server->get(IMimeTypeLoader::class)->getId("httpd/unix-directory"));
 		$swarm->setSize(1);
 		$swarm->setStorageMtime(time());
 		$swarm->setStorage($storage);
+		$swarm->setToken($token);
 		return $this->insert($swarm);
 	}
 
@@ -108,10 +109,11 @@ class SwarmFileMapper extends QBMapper {
 		$swarm->setSize($filearray["size"]);
 		$swarm->setStorageMtime($filearray["storage_mtime"]);
 		$swarm->setStorage($filearray["storage"]);
+		$swarm->setToken($filearray["token"]);
 		return $this->insert($swarm);
 	}
 
-	public function getPathTree(string $path1, int $storage, bool $incSelf = true): array {
+	public function getPathTree(string $path1, int $storage, bool $incSelf = true, bool $recursive = true): array {
 		// Get files from directory tree based on path parameter
 		$dir = array();
 		if ($incSelf) {
@@ -130,6 +132,8 @@ class SwarmFileMapper extends QBMapper {
 			->from($this->getTableName())
 			->where($qb->expr()->like('name', $qb->createNamedParameter($this->db->escapeLikeParameter($path1) . '%', $qb::PARAM_STR)))
 			->andWhere($qb->expr()->eq('storage', $qb->createNamedParameter($storage, $qb::PARAM_INT)));
+		if (!$recursive)
+			$select->andWhere($qb->expr()->notLike('name', $qb->createNamedParameter($this->db->escapeLikeParameter($path1) . '%/%', $qb::PARAM_STR)));
 		return array_merge($dir, $this->findEntities($select));
 	}
 
@@ -142,6 +146,31 @@ class SwarmFileMapper extends QBMapper {
 			->andWhere($qb->expr()->eq('storage', $qb->createNamedParameter($storage, $qb::PARAM_INT)));
 		$sql = $qb->getSQL();
 		return $qb->executeStatement();
+	}
+
+	/**
+	 * @return SwarmFile[]
+	 */
+	public function findAllWithToken(string $token): array {
+		$qb = $this->db->getQueryBuilder();
+
+		$select = $qb
+			->select('*')
+			->from($this->getTableName())
+			->where($qb->expr()->eq('token', $qb->createNamedParameter($token)));
+
+		return $this->findEntities($select);
+	}
+
+
+	public function updateStorageIds(string $token,string $storageid): int {
+
+		foreach ($this->findAllWithToken($token) as $swarmFile) {
+			$swarmFile->setStorage($storageid);
+			$this->update($swarmFile);
+		};
+
+		return 1;
 	}
 
 }
