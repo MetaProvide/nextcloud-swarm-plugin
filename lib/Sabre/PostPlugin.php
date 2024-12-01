@@ -36,7 +36,7 @@ class PostPlugin extends ServerPlugin
 	{
 		$action = $request->getRawServerValue('HTTP_HEJBIT_ACTION') ?? null;
 
-		if ($action === 'unview') {
+		if ($action === 'hide') {
 			$path = $request->getPath();
 			$node = $this->server->tree->getNodeForPath($path);
 			if (($node instanceof \OCA\DAV\Connector\Sabre\File)) {
