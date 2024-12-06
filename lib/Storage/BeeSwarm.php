@@ -125,7 +125,7 @@ class BeeSwarm extends Common
 			$this->config = \OC::$server->get(IConfig::class);
 			$configSettings = $this->config->getAppValue(AppConstants::APP_NAME, "storageconfig", "");    //default
 			$mounts = json_decode($configSettings, true);
-w			if (is_array($mounts)) {
+			if (is_array($mounts)) {
 				$mountIds = array_column($mounts, 'mount_id');
 				$key = array_search($mountId, $mountIds);
 				if (!empty($key) || $key === 0) {
