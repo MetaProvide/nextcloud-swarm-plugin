@@ -307,13 +307,14 @@ const actionDataHideFile ={
 			}
 		  });
 
-            // Let's delete even if it's moved to the trashbin
-            // since it has been removed from the current view
-            // and changing the view will trigger a reload anyway.
-			// TODO need to learn how to emit a file:list:updated > emit('files:list:updated', { view, dir, content: '' });
-            emit('files:node:deleted', node);
+		  // The right event is emit('files:node:updated', node);
+		  // it triggers the file:list:update, but unfortunately that doesn't
+		  // a reevaluation of the enable funtion of the fileactions.
+		  // To improve UX we should reload only if show_hidden is true
+		  emit('files:node:deleted', node);
+		  // window.location.reload();
+          return true;
 
-            return true;
         }
         catch (error) {
 			console.log('Error while hidding a file', { error, source: node.source, node });
@@ -401,12 +402,15 @@ const actionDataUnhideFile ={
 			}
 		  });
 
-            // Let's delete even if it's moved to the trashbin
-            // since it has been removed from the current view
-            // and changing the view will trigger a reload anyway.
-			// TODO need to learn how to emit a file:list:updated > emit('files:list:updated', { view, dir, content: '' });
-			emit('files:node:deleted', node);
-			 return true;
+
+		  // the right event is emit('files:node:updated', node);
+		  // it triggers the file:list:update, but unfortunately that doesn't
+		  // a reevaluation of the enable funtion of the fileactions
+		  emit('files:node:deleted', node);
+		  window.location.reload();
+
+
+			return true;
         }
         catch (error) {
 			console.log('Error while unhidding a file', { error, source: node.source, node });
