@@ -53,6 +53,25 @@ class PostPlugin extends ServerPlugin
 
 			return false;
 		}
+		else if ($action === 'unhide') {
+            $path = $request->getPath();
+			$node = $this->server->tree->getNodeForPath($path);
+			if (($node instanceof \OCA\DAV\Connector\Sabre\File)) {
+				$storageid = $node->getFileInfo()->getStorage()->getCache()->getNumericStorageId();
+				$filename = $node->getFileInfo()->getinternalPath();
+			}
+			if (($node instanceof \OCA\DAV\Connector\Sabre\Directory)) {
+				$storageid = $node->getFileInfo()->getStorage()->getCache()->getNumericStorageId();
+				$filename = $node->getFileInfo()->getinternalPath();
+			}
+
+			$this->EthswarmService->setVisiblity($filename, $storageid, 1);
+
+			$response->setStatus(200);
+			$response->setHeader('Content-Length', '0');
+
+			return false;
+        }
         // No Hejbit-action, allow other plugins to handle the request
         else if ($action === null) {
             return true;
