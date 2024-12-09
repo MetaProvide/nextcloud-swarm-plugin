@@ -65,9 +65,7 @@ class PostPlugin extends ServerPlugin
 				$filename = $node->getFileInfo()->getinternalPath();
 			}
 
-			$class = $this->EthswarmService;
-
-			$class->setVisiblity($filename, $storageid, 1);
+			$this->EthswarmService->setVisiblity($filename, $storageid, 1);
 
 			$response->setStatus(200);
 			$response->setHeader('Content-Length', '0');
