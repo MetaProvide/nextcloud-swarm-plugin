@@ -21,15 +21,15 @@
  */
 
 
-/* TODO - Unview action : Support Batch Option on - Problem > Can't import p-queue: Import p-queue
+/* TODO - Hide action : Support Batch Option on - Problem > Can't import p-queue: Import p-queue
 Import p-queue
 Batch option import PQueue from 'p-queue';
 Batch option const queue = new PQueue({ concurrency: 5 });
 */
 
-// TODO - Unview action : Change alert o OC.dialogs.confirm
+// TODO - Hide action : Change alert o OC.dialogs.confirm
 
-// TODO - Unview action : Change emit('files:node:deleted', node) to other like files:list:updated
+// TODO - Hide action : Change emit('files:node:deleted', node) to other like files:list:updated
 
 // TODO - All actions  Change the enable function so all this actions don't appear on FilesListTableHeaderActions
 
@@ -216,14 +216,14 @@ const EthswarmCopyRef = new FileAction(actionDataEthswarmCopyRef);
 registerFileAction(EthswarmCopyRef);
 
 
-const actionDataUnviewFile ={
-    id: 'unviewFile',
+const actionDataHideFile ={
+    id: 'hideFile',
     displayName(nodes, view) {
         /**
          * If we're in the sharing view, we can only unshare
          */
         if (isMixedUnshareAndDelete(nodes)) {
-            return t('files_external_ethswarm', 'Unview and unshare');
+            return t('files_external_ethswarm', 'Hide and unshare');
         }
         /**
          * If those nodes are all the root node of a
@@ -250,20 +250,20 @@ const actionDataUnviewFile ={
          */
         if (isAllFiles(nodes)) {
             if (nodes.length === 1) {
-                return t('files_external_ethswarm', 'Unview file');
+                return t('files_external_ethswarm', 'Hide file');
             }
-            return t('files_external_ethswarm', 'Unview files');
+            return t('files_external_ethswarm', 'Hide files');
         }
         /**
          * If we're only selecting folders, use proper wording
          */
         if (isAllFolders(nodes)) {
             if (nodes.length === 1) {
-                return t('files_external_ethswarm', 'Unview folder');
+                return t('files_external_ethswarm', 'Hide folder');
             }
-            return t('files_external_ethswarm', 'Unview folders');
+            return t('files_external_ethswarm', 'Hide folders');
         }
-        return t('files_external_ethswarm', 'Unview');
+        return t('files_external_ethswarm', 'Hide');
     },
     iconSvgInline: (nodes) => {
         if (canUnshareOnly(nodes)) {
@@ -289,9 +289,9 @@ const actionDataUnviewFile ={
     async exec(node, view, dir) {
 		let message = '';
 		if (node.type === FileType.File) {
-			message = t('files_external_ethswarm', 'The file will be set to unview on the folder view. The file will continue to exist on the Swarm network.');
+			message = t('files_external_ethswarm', 'The file will be set to hide on the folder view. The file will continue to exist on the Swarm network.');
 		}else if (node.type === FileType.Folder) {
-			message = t('files_external_ethswarm', 'The folder will be set to unview on the folder view. All the files inside the folder will continue to exist on the Swarm network.');
+			message = t('files_external_ethswarm', 'The folder will be set to hide on the folder view. All the files inside the folder will continue to exist on the Swarm network.');
 		}
 		alert(message);
         try {
@@ -299,7 +299,7 @@ const actionDataUnviewFile ={
 			method: 'post',
 			url: node.encodedSource,
 			headers: {
-			 'Hejbit-Action': 'unview'
+			 'Hejbit-Action': 'hide'
 			}
 		  });
 
@@ -335,9 +335,9 @@ const actionDataUnviewFile ={
     order: 150,
 };
 
-const AddUnviewAction = new FileAction(actionDataUnviewFile);
+const AddHideAction = new FileAction(actionDataHideFile);
 
-registerFileAction(AddUnviewAction);
+registerFileAction(AddHideAction);
 
 let previousPathHasSwarm = false;
 
