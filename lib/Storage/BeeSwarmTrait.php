@@ -33,6 +33,8 @@ use Safe\Exceptions\CurlException;
 
 trait BeeSwarmTrait
 {
+	private const INFRASTRUCTURE_VERSION_GATEWAY = 1;
+	private const INFRASTRUCTURE_VERSION_HEJBIT = 2;
 
 	/** @var string */
 	protected string $api_url;
@@ -72,36 +74,65 @@ trait BeeSwarmTrait
 	}
 
 	/**
+	 * @return string
+	 * @throws CurlException
+	 * @throws SwarmException
+	 */
+	private function getUploadLink(): string
+	{
+		$endpoint = $this->api_url . '/api/upload';
+		$curl = new Curl($endpoint, authorization: $this->access_key);
+		$response = $curl->exec(true);
+
+		if (!$curl->isResponseSuccessful())
+			throw new SwarmException('Failed to connect to HejBit: ' . $response['message']);
+
+		return $response['url'];
+	}
+
+	/**
+	 * @param string $reference
+	 * @return string
+	 * @throws CurlException
+	 * @throws SwarmException
+	 */
+	private function getDownloadLink(string $reference): string
+	{
+		$endpoint = $this->api_url . '/api/download';
+		$curl = new Curl($endpoint, authorization: $this->access_key);
+		$response = $curl->exec(true);
+
+		if (!$curl->isResponseSuccessful())
+			throw new SwarmException('Failed to connect to HejBit: ' . $response['message']);
+
+		return $response['url'] . DIRECTORY_SEPARATOR . $reference;
+	}
+
+	/**
 	 * @param string $path
 	 * @param string $tempFile
-	 * @param string $mimeType
+	 * @param string $mimetype
 	 * @return string
 	 * @throws SwarmException|CurlException
 	 */
-	private function uploadSwarm(string $path, string $tempFile, string $mimeType): string
+	private function uploadSwarm(string $path, string $tempFile, string $mimetype): string
 	{
-		// prepare the endpoint
-		$endpoint = $this->api_url . DIRECTORY_SEPARATOR . 'api/files';
-		$params = "?file=" . urlencode(basename($path));
+		if ($this->isVersion(self::INFRASTRUCTURE_VERSION_GATEWAY)) {
+			return $this->uploadSwarmV1($path, $tempFile, $mimetype);
+		}
 
-		// prepare the form data
-		$formData = ['file' => new CURLFile($tempFile, $mimeType, basename($path))];
-
-		// prepare the curl request
-		$curl = new Curl($endpoint . $params, [
+		$curl = new Curl($this->getUploadLink(), [
 			CURLOPT_CUSTOMREQUEST => "POST",
-			CURLOPT_POSTFIELDS => $formData,
-		], [], $this->access_key);
-
-		// execute the request
+			CURLOPT_POSTFIELDS => [
+				'file' => new CURLFile($tempFile, $mimetype, basename($path)),
+			],
+		]);
 		$response = $curl->exec(true);
 
-		// check the response
 		if (!$curl->isResponseSuccessful() || !isset($response['reference'])) {
 			throw new SwarmException('Failed to upload file to Swarm: ' . $response['message']);
 		}
 
-		// return the reference
 		return $response['reference'];
 	}
 
@@ -112,13 +143,11 @@ trait BeeSwarmTrait
 	 */
 	private function downloadSwarm(string $reference)
 	{
-		$endpoint = $this->api_url . DIRECTORY_SEPARATOR . 'api/files' . DIRECTORY_SEPARATOR . $reference . DIRECTORY_SEPARATOR;
+		if ($this->isVersion(self::INFRASTRUCTURE_VERSION_GATEWAY)) {
+			return $this->downloadSwarmV1($reference);
+		}
 
-		$curl = new Curl($endpoint, [
-			CURLOPT_RETURNTRANSFER => true,
-		], [
-			'content-type: application/octet-stream',
-		], $this->access_key);
+		$curl = new Curl($this->getDownloadLink($reference));
 		$response = $curl->exec();
 
 		if (!$curl->isResponseSuccessful()) {
@@ -139,15 +168,114 @@ trait BeeSwarmTrait
 	 */
 	private function checkConnection(): bool
 	{
+		if ($this->isVersion(self::INFRASTRUCTURE_VERSION_GATEWAY)) {
+			return $this->checkConnectionV1();
+		}
+
+		$endpoint = $this->api_url . '/api/readiness';
+
+		$curl = new Curl($endpoint, authorization: $this->access_key);
+		$response = $curl->exec(true);
+
+		if (!$curl->isResponseSuccessful() and !isset($response['status'])) {
+			throw new SwarmException('Failed to connect to HejBit: ' . $response['message']);
+		}
+		return $response['status'] === 'ok';
+	}
+
+	/**
+	 * @param int $version
+	 * @return bool
+	 */
+	public function isVersion(int $version = self::INFRASTRUCTURE_VERSION_GATEWAY): bool
+	{
+		return match ($version) {
+			self::INFRASTRUCTURE_VERSION_GATEWAY => $this->api_url === 'https://license.hejbit.com',
+			self::INFRASTRUCTURE_VERSION_HEJBIT => $this->api_url !== 'https://license.hejbit.com',
+			default => false,
+		};
+	}
+
+	/**
+	 * @return bool
+	 * @throws CurlException
+	 */
+	private function checkConnectionV1(): bool
+	{
 		$endpoint = $this->api_url . DIRECTORY_SEPARATOR . 'readiness';
 
 		$curl = new Curl($endpoint);
-		$curl->setAuthorization($this->access_key);
+		$curl->setAuthorization($this->access_key, CURLAUTH_ANY);
 
-		$response = $curl->exec(true);
-		if (!$curl->isResponseSuccessful() and !isset($response['status'])) {
-			throw new SwarmException('Failed to connect to Swarm: ' . $response['message']);
+		$output = $curl->exec();
+		$httpCode = $curl->getInfo(CURLINFO_HTTP_CODE);
+
+		return $httpCode === 200 and $output === 'OK';
+	}
+
+	/**
+	 * @param string $reference
+	 * @return resource
+	 * @throws CurlException|SwarmException
+	 */
+	private function downloadSwarmV1(string $reference)
+	{
+		$endpoint = $this->api_url . DIRECTORY_SEPARATOR . 'bzz' . DIRECTORY_SEPARATOR . $reference . DIRECTORY_SEPARATOR;
+
+		$curl = new Curl($endpoint, [
+			CURLOPT_FOLLOWLOCATION => true,
+			CURLOPT_RETURNTRANSFER => true,
+			CURLOPT_MAXREDIRS => 10,
+			CURLOPT_HEADER => false,
+		], [
+			'content-type: application/octet-stream',
+		]);
+		$curl->setAuthorization($this->access_key, CURLAUTH_ANY);
+		$response = $curl->exec();
+
+		$httpCode = $curl->getInfo(CURLINFO_HTTP_CODE);
+		if ($httpCode !== 200) {
+			throw new SwarmException('Failed to download file from Swarm');
 		}
-		return $response['status'] === 'ok';
+
+		$stream = fopen('php://memory', 'r+');
+		fwrite($stream, $response);
+		rewind($stream);
+		return $stream;
+	}
+
+	/**
+	 * @param string $path
+	 * @param string $tempFile
+	 * @param string $mimetype
+	 * @return array|string
+	 * @throws CurlException|SwarmException
+	 */
+	private function uploadSwarmV1(string $path, string $tempFile, string $mimetype): array|string
+	{
+		$endpoint = $this->api_url . DIRECTORY_SEPARATOR . 'bzz';
+		$params = "?name=" . urlencode(basename($path));
+
+		$curl = new Curl($endpoint . $params, [
+			CURLOPT_PUT => true,
+			CURLOPT_CUSTOMREQUEST => "POST",
+			CURLOPT_POST => true,
+			CURLOPT_INFILE => fopen($tempFile, 'r'),
+			CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+			CURLOPT_VERBOSE => true
+		], [
+			'content-type: ' . $mimetype,
+			'swarm-pin: true',
+			'swarm-redundancy-level: 2',
+		]);
+		$curl->setAuthorization($this->access_key, CURLAUTH_ANY);
+
+		$result = $curl->exec(true);
+		$reference = (isset($result["reference"]) ? $result['reference'] : null);
+
+		if (!isset($reference)) {
+			throw new SwarmException("Failed to upload file to " . $this->id . ": " . $result['message']);
+		}
+		return $reference;
 	}
 }

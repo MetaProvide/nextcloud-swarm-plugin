@@ -8,6 +8,7 @@ services:
     depends_on:
       - nextcloud
     labels:
+      caddy: ${APP_URL:-localhost}, nextcloud.local
       caddy.reverse_proxy: '{{upstreams 80}}'
     networks:
       - frontend
@@ -16,6 +17,10 @@ services:
   nextcloud:
     build:
       context: ./docker/nextcloud
+      dockerfile: Dockerfile
+      args:
+        NC_VERSION: ${NC_VERSION:-28}
+      target: ${ENV:-development}
     restart: unless-stopped
     depends_on:
       mariadb:
@@ -33,6 +38,8 @@ services:
     extra_hosts:
       - host.docker.internal:host-gateway
       - onlyoffice.local:host-gateway
+      - hejbit.local:host-gateway
+      - api.hejbit.local:host-gateway
     volumes:
       - nc-app:/var/www/html
       - ./:/var/www/html/custom_apps/files_external_ethswarm
@@ -56,6 +63,7 @@ services:
     restart: unless-stopped
     environment:
       REDIS_HOST_PASSWORD: ${REDIS_HOST_PASSWORD:-secret}
+    command: redis-server --requirepass ${REDIS_HOST_PASSWORD:-secret}
     healthcheck:
       test: [ "CMD", "redis-cli", "ping" ]
       start_period: 3s
@@ -99,12 +107,17 @@ services:
       - dev
 
   rsync:
+    build:
+      context: ./docker/rsync
+      dockerfile: Dockerfile
     restart: unless-stopped
     cpu_shares: 512
     mem_limit: 256m
     volumes:
       - nc-app:/app:ro
       - ./dev-environment/nextcloud_source:/source
+    environment:
+      - RSYNC_CRONTAB=crontab
     depends_on:
       - nextcloud
     networks:
@@ -163,6 +176,12 @@ services:
 volumes:
   nc-app:
   nc-db:
+  caddy_data:
+  caddy_config:
+  onlyoffice_data:
+  onlyoffice_db:
+  onlyoffice_lib:
+  onlyoffice_logs:
 
 networks:
   frontend:

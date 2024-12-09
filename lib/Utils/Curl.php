@@ -20,6 +20,7 @@ class Curl
 	protected array $options = [];
 	protected array $headers = [];
 	protected ?string $authorization = null;
+	protected int $authorizationType = CURLAUTH_NONE;
 
 	/**
 	 * @param string $url
@@ -32,7 +33,7 @@ class Curl
 		$this->url = $url;
 		$this->options = $options + self::getDefaultOptions();
 		$this->headers = $headers;
-		$this->authorization = $authorization;
+		$this->setAuthorization($authorization);
 
 		$this->init();
 	}
@@ -86,7 +87,10 @@ class Curl
 	{
 		$headers = $this->headers + $headers;
 		if ($this->authorization) {
-			$headers[] = 'Authorization: Bearer ' . $this->authorization;
+			$headers[] = match ($this->authorizationType) {
+				CURLAUTH_BEARER => 'Authorization: Bearer ' . $this->authorization,
+				default => 'Authorization: ' . $this->authorization
+			};
 		}
 		curl_setopt($this->handler, CURLOPT_HTTPHEADER, $headers);
 	}
@@ -94,12 +98,17 @@ class Curl
 	/**
 	 * set authorization
 	 *
-	 * @param string $authorization
+	 * @param string|null $authorization
+	 * @param int $authorizationType
 	 * @return void
 	 */
-	public function setAuthorization(string $authorization): void
+	public function setAuthorization(?string $authorization, int $authorizationType = CURLAUTH_BEARER): void
 	{
 		$this->authorization = $authorization;
+		if (!$authorization) {
+			$this->authorizationType = CURLAUTH_NONE;
+		} else
+			$this->authorizationType = $authorizationType;
 	}
 
 	/**
