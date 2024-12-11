@@ -33,6 +33,7 @@ use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\Constants;
 use OCP\Files\Config\IUserMountCache;
 use OCP\Files\IMimeTypeLoader;
+use OCP\Files\IMimeTypeDetector;
 use OCP\IConfig;
 use OCP\IDBConnection;
 use Sabre\DAV\Exception\BadRequest;
@@ -42,6 +43,8 @@ use OCA\Files_External_Ethswarm\Service\NotificationService;
 use OCP\IUserManager;
 use OCP\IUserSession;
 use OCP\Notification\IManager;
+use Psr\Log\LoggerInterface;
+
 
 class BeeSwarm extends Common
 {
@@ -71,6 +74,9 @@ class BeeSwarm extends Common
 	/** @var \OCP\Files\IMimeTypeLoader */
 	private IMimeTypeLoader $mimeTypeHandler;
 
+	/** @var \OCP\Files\IMimeTypeDetector */
+	private IMimeTypeDetector $mimeTypeDetector;
+
 	/** @var \OC\Files\Cache\Cache */
 	private Cache $cacheHandler;
 
@@ -83,16 +89,19 @@ class BeeSwarm extends Common
 	/** @var string */
 	private string $token;
 
+	/** @var LoggerInterface */
+	private LoggerInterface $logger;
+
 	public function __construct($params)
 	{
 		/** @var IL10NFactory $l10nFactory */
 		$l10nFactory = \OC::$server->get(IL10NFactory::class);
 		$this->l10n = $l10nFactory->get(AppConstants::APP_NAME);
 
-		$this->notificationService = new NotificationService( \OC::$server->get(IManager::class),  \OC::$server->get(IUserManager::class), \OC::$server->get(IUserSession::class));
+		$this->notificationService = new NotificationService(\OC::$server->get(IManager::class), \OC::$server->get(IUserManager::class), \OC::$server->get(IUserSession::class));
 
 		$this->parseParams($params);
-		$this->id = 'ethswarm::'.$this->access_key;
+		$this->id = 'ethswarm::' . $this->access_key;
 		$this->storageId = $this->getStorageCache()->getNumericId();
 		$this->token = $this->getStorageCache()->getStorageId($this->storageId);
 
@@ -100,6 +109,10 @@ class BeeSwarm extends Common
 		$dbConnection = \OC::$server->get(IDBConnection::class);
 		$this->filemapper = new SwarmFileMapper($dbConnection);
 		$this->mimeTypeHandler = \OC::$server->get(IMimeTypeLoader::class);
+		$this->mimeTypeDetector = \OC::$server->get(IMimeTypeDetector::class);
+
+		// Get logger
+		$this->logger = \OC::$server->get(LoggerInterface::class);
 
 		$mountHandler = \OC::$server->get(IUserMountCache::class);
 		$storageMounts = $mountHandler->getMountsForStorageId($this->storageId);
@@ -144,14 +157,55 @@ class BeeSwarm extends Common
 	 */
 	public function test(): bool
 	{
-		if (!$this->checkConnection()){
+		if (!$this->checkConnection()) {
 			return false;
 		}
 
-		$this->filemapper->updateStorageIds($this->token,$this->storageId);
+		$this->filemapper->updateStorageIds($this->token, $this->storageId);
 		$this->add_rootfolder_cache();
 		$this->add_token_files_cache();
 		return true;
+	}
+
+	public function copy($path1, $path2)
+	{
+		try {
+			// Get the source file from the mapper
+			$sourceFile = $this->filemapper->find($path1, $this->storageId);
+			if (!$sourceFile) {
+				$this->logger->error(
+					'copy failed: source file not found in mapper ' . $path1,
+					['app' => AppConstants::APP_NAME]
+				);
+				return false;
+			}
+
+			// Prepare the data for the new file
+			$copyData = [];
+			$copyData["name"] = $path2;
+			$copyData["reference"] = $sourceFile->getSwarmReference();
+			$copyData["etag"] = null;
+			$copyData["mimetype"] = $sourceFile->getMimetype();
+			$copyData["size"] = $sourceFile->getSize();
+			$copyData["storage_mtime"] = time();
+			$copyData["storage"] = $this->storageId;
+			$copyData["token"] = $this->token;
+
+			// Create the new file entry in the mapper
+			$newFile = $this->filemapper->createFile($copyData);
+
+			if (!$newFile) {
+				$this->logger->error(
+					'copy failed: failed to create new file in mapper ' . $path2,
+					['app' => AppConstants::APP_NAME]
+				);
+				return false;
+			}
+
+			return true;
+		} catch (Exception $e) {
+			throw new Exception($e->getMessage());
+		}
 	}
 
 	public function add_rootfolder_cache(): bool
@@ -278,7 +332,7 @@ class BeeSwarm extends Common
 
 	public function mkdir($path): bool
 	{
-		$this->filemapper->createDirectory($path, $this->storageId,$this->token);
+		$this->filemapper->createDirectory($path, $this->storageId, $this->token);
 		return true;
 	}
 
@@ -311,6 +365,8 @@ class BeeSwarm extends Common
 		$data = $this->getMetaData($path);
 		if ($data['mimetype'] === 'httpd/unix-directory') {
 			return true;
+		} else {
+			return false;
 		}
 	}
 
@@ -466,11 +522,11 @@ class BeeSwarm extends Common
 	}
 
 	/* Enabling this function causes a fatal exception "Call to a member function getId() on null /var/www/html/lib/private/Files/Mount/MountPoint.php - line 276: OC\Files\Cache\Wrapper\CacheWrapper->getId("")
-	public function getCache($path = '', $storage = null)
-	{
+														  public function getCache($path = '', $storage = null)
+														  {
 
-	}
-	*/
+														  }
+														  */
 
 	/**
 	 * @param string $path
@@ -489,18 +545,24 @@ class BeeSwarm extends Common
 			$data['size'] = 0; //unknown
 			$data['etag'] = null;
 		}
-		// If not in swarm table, assume it's a folder
+		// If not in swarm table, check if it is a file or directory
 		$exists = $this->filemapper->findExists($path, $this->storageId) !== 0;
 		if (!$exists) {
 			// Create a folder item
 			$data['name'] = $path;
-			// Folder permissions should allow renaming so PERMISSION_UPDATE is included.
 			$data['permissions'] = (Constants::PERMISSION_ALL - Constants::PERMISSION_DELETE);
-			$data['mimetype'] = 'httpd/unix-directory';
-			$data['mtime'] = time();
-			$data['storage_mtime'] = time();
-			$data['size'] = 1; //unknown
-			$data['etag'] = uniqid();
+
+			// Check if this is likely a file based on extension
+			$isFile = pathinfo($path, PATHINFO_EXTENSION) !== '';
+
+			if ($isFile) {
+				$data['mimetype'] = $this->mimeTypeDetector->detectPath($path);
+				$data['size'] = 0;
+			} else {
+				// Directory logic
+				$data['mimetype'] = 'httpd/unix-directory';
+				$data['size'] = 1;
+			}
 		} else {
 			// Get record from table
 			$swarmFile = $this->filemapper->find($path, $this->storageId);
@@ -519,14 +581,18 @@ class BeeSwarm extends Common
 			$data['etag'] = uniqid();
 			$data['swarm_ref'] = $swarmFile->getSwarmReference();
 		}
+
 		return $data;
 	}
 
 	public function getDirectoryContent($path): \Traversable
 	{
-		$rows = $this->filemapper->getPathTree($path, $this->storageId,
-		                                       incSelf: false,
-		                                       recursive: false);
+		$rows = $this->filemapper->getPathTree(
+			$path,
+			$this->storageId,
+			incSelf: false,
+			recursive: false
+		);
 		$content = array_map(fn($val) => $this->getMetaData($val->getName()), $rows);
 
 		return new \ArrayIterator($content);
@@ -549,7 +615,7 @@ class BeeSwarm extends Common
 		$tmpFilesize = (file_exists($tmpFile) ? filesize($tmpFile) : -1);
 		$mimetype = mime_content_type($tmpFile);
 
-		if (str_ends_with(strtolower($path),'.md' )){
+		if (str_ends_with(strtolower($path), '.md')) {
 			$mimetype = "text/markdown";
 		}
 
