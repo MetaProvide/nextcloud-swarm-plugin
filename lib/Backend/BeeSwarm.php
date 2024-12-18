@@ -31,7 +31,6 @@ use OCA\Files_External\Service\GlobalStoragesService;
 use OCA\Files_External_Ethswarm\Auth\License;
 use OCP\IConfig;
 use OCP\IL10N;
-use OCP\IUser;
 use Psr\Log\LoggerInterface;
 
 class BeeSwarm extends Backend

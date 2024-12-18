@@ -11,6 +11,8 @@ class Curl
 		CURLOPT_MAXREDIRS => 10,
 		CURLOPT_FOLLOWLOCATION => true,
 		CURLOPT_RETURNTRANSFER => true,
+		CURLOPT_SSL_VERIFYHOST => true,
+		CURLOPT_SSL_VERIFYPEER => true,
 	];
 
 	protected CurlHandle $handler;
@@ -18,6 +20,7 @@ class Curl
 	protected array $options = [];
 	protected array $headers = [];
 	protected ?string $authorization = null;
+	protected int $authorizationType = CURLAUTH_NONE;
 
 	/**
 	 * @param string $url
@@ -28,11 +31,30 @@ class Curl
 	public function __construct(string $url, array $options = [], array $headers = [], ?string $authorization = null)
 	{
 		$this->url = $url;
-		$this->options = $options + self::DEFAULT_OPTIONS;
+		$this->options = $options + self::getDefaultOptions();
 		$this->headers = $headers;
-		$this->authorization = $authorization;
+		$this->setAuthorization($authorization);
 
 		$this->init();
+	}
+
+	/**
+	 * @return array
+	 */
+	private static function getDefaultOptions(): array
+	{
+		return self::checkSSLOption() + self::DEFAULT_OPTIONS;
+	}
+
+	/**
+	 * @return bool[]
+	 */
+	private static function checkSSLOption(): array
+	{
+		return [
+			CURLOPT_SSL_VERIFYHOST => !Env::isDevelopment(),
+			CURLOPT_SSL_VERIFYPEER => !Env::isDevelopment(),
+		];
 	}
 
 	/**
@@ -53,7 +75,7 @@ class Curl
 	 */
 	private function setOptions(array $options = []): void
 	{
-		$options = self::DEFAULT_OPTIONS + $this->options + $options;
+		$options = self::getDefaultOptions() + $this->options + $options;
 		curl_setopt_array($this->handler, $options);
 	}
 
@@ -65,7 +87,10 @@ class Curl
 	{
 		$headers = $this->headers + $headers;
 		if ($this->authorization) {
-			$headers[] = 'Authorization: ' . $this->authorization;
+			$headers[] = match ($this->authorizationType) {
+				CURLAUTH_BEARER => 'Authorization: Bearer ' . $this->authorization,
+				default => 'Authorization: ' . $this->authorization
+			};
 		}
 		curl_setopt($this->handler, CURLOPT_HTTPHEADER, $headers);
 	}
@@ -73,12 +98,17 @@ class Curl
 	/**
 	 * set authorization
 	 *
-	 * @param string $authorization
+	 * @param string|null $authorization
+	 * @param int $authorizationType
 	 * @return void
 	 */
-	public function setAuthorization(string $authorization): void
+	public function setAuthorization(?string $authorization, int $authorizationType = CURLAUTH_BEARER): void
 	{
 		$this->authorization = $authorization;
+		if (!$authorization) {
+			$this->authorizationType = CURLAUTH_NONE;
+		} else
+			$this->authorizationType = $authorizationType;
 	}
 
 	/**
@@ -120,5 +150,17 @@ class Curl
 			curl_close($this->handler);
 			throw new CurlException(curl_error($this->handler));
 		}
+	}
+
+	/**
+	 * @return bool
+	 * @throws CurlException
+	 */
+	public function isResponseSuccessful(): bool
+	{
+		if ($this->getInfo(CURLINFO_HTTP_CODE) === 0)
+			throw new CurlException('Curl handler has not been executed');
+
+		return $this->getInfo(CURLINFO_HTTP_CODE) === 200 || $this->getInfo(CURLINFO_HTTP_CODE) === 201;
 	}
 }

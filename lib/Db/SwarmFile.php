@@ -23,27 +23,28 @@ declare(strict_types=1);
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
+
 namespace OCA\Files_External_Ethswarm\Db;
 
 use OCP\AppFramework\Db\Entity;
 
 /**
- * @method void setFileid(int $fileid)
- * @method int getFileid()
+ * @method void setFileId(int $fileId)
+ * @method int getFileId()
  * @method void setName(string $name)
  * @method string getName()
- * @method void setSwarmReference(string $reference)
+ * @method void setSwarmReference(string $swarmReference)
  * @method string|null getSwarmReference()
  * @method void setSwarmTag(string $tag)
  * @method string|null getSwarmTag()
  * @method void setMimetype(int $mimetype)
- * @method string|null getMimetype()
+ * @method int getMimetype()
  * @method void setSize(int $size)
  * @method string getSize()
  * @method void setStorageMtime(int $mtime)
  * @method int getStorageMtime()
- * @method void setEncryptionkey(string $encryption)
- * @method string getEncryptionkey()
+ * @method void setEncryptionKey(string $encryptionKey)
+ * @method string getEncryptionKey()
  * @method void setStorage(int $storage)
  * @method int|null getStorage()
  * @method void setVisibility(int $visibility)
@@ -51,10 +52,11 @@ use OCP\AppFramework\Db\Entity;
  * @method void setToken(string $token)
  * @method int getToken()
  */
-class SwarmFile extends Entity {
+class SwarmFile extends Entity
+{
 
-	/** @var int */
-	protected $fileid;
+	/** @var int|null */
+	protected $fileId;
 
 	/** @var string */
 	protected $name;
@@ -75,9 +77,9 @@ class SwarmFile extends Entity {
 	protected $storageMtime;
 
 	/** @var string */
-	protected $encryptionkey;
+	protected $encryptionKey;
 
-	/** @var int */
+	/** @var int|null */
 	protected $storage;
 
 	/** @var int */
@@ -86,8 +88,9 @@ class SwarmFile extends Entity {
 	/** @var string */
 	protected $token;
 
-	public function __construct() {
-		$this->addType('fileid', 'int');
+	public function __construct()
+	{
+		$this->addType('fileId', 'int');
 		$this->addType('name', 'string');
 		$this->addType('swarmReference', 'string');
 		$this->addType('swarmTag', 'string');
