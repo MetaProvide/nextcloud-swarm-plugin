@@ -38,6 +38,8 @@ services:
     extra_hosts:
       - host.docker.internal:host-gateway
       - onlyoffice.local:host-gateway
+      - hejbit.local:host-gateway
+      - api.hejbit.local:host-gateway
     volumes:
       - nc-app:/var/www/html
       - ./:/var/www/html/custom_apps/files_external_ethswarm

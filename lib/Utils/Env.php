@@ -2,18 +2,32 @@
 
 namespace OCA\Files_External_Ethswarm\Utils;
 
-class Env {
-	public static function get(string $name): ?string {
-		$env = getenv($name);
-
-		return false === $env ? null : $env;
+class Env
+{
+	/**
+	 * @param string $name
+	 * @return string
+	 */
+	public static function get(string $name): string
+	{
+		return getenv($name);
 	}
 
-	public static function set(string $name, string $value): bool {
-		return putenv($name.'='.$value);
+	/**
+	 * @param string $name
+	 * @param string $value
+	 * @return bool
+	 */
+	public static function set(string $name, string $value): bool
+	{
+		return putenv($name . '=' . $value);
 	}
 
-	public static function isDevelopment(): bool {
-		return 'development' === self::get('ENV');
+	/**
+	 * @return bool
+	 */
+	public static function isDevelopment(): bool
+	{
+		return self::get('ENV') === 'development';
 	}
 }

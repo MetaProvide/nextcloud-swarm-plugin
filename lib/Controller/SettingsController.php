@@ -23,22 +23,35 @@ declare(strict_types=1);
 
 namespace OCA\Files_External_Ethswarm\Controller;
 
+use OC;
+use OCA\Files_External\Service\DBConfigService;
+use OCA\Files_External\Service\GlobalStoragesService;
+use OCA\Files_External_Ethswarm\AppInfo\AppConstants;
 use OCP\AppFramework\Controller;
+use OCP\AppFramework\Http\DataResponse;
 use OCP\IConfig;
 use OCP\IRequest;
 
-class SettingsController extends Controller {
+class SettingsController extends Controller
+{
+
 	/** @var string */
 	protected $appName;
 
 	/** @var IConfig */
 	private $config;
 
+	/**
+	 * @param string $appName
+	 * @param IConfig $config
+	 * @param IRequest $request
+	 */
 	public function __construct(
-		string $appName,
-		IConfig $config,
-		IRequest $request,
-	) {
+		string   $appName,
+		IConfig  $config,
+		IRequest $request
+	)
+	{
 		parent::__construct($appName, $request);
 		$this->config = $config;
 	}
@@ -46,11 +59,12 @@ class SettingsController extends Controller {
 	/**
 	 * Set the storage config settings.
 	 */
-	public function admin(): void {
-		// Handle telemetry setting
-		$telemetry = $this->request->getParam('telemetry');
-		if (null !== $telemetry) {
-			$this->config->setSystemValue('telemetry.enabled', (bool) $telemetry);
+	public function admin(): void
+	{
+		if ($this->request->getParam("storageconfig")) {
+			$this->config->setAppValue($this->appName, "storageconfig", $this->request->getParam("storageconfig"));
+		} else {
+			$this->config->setAppValue($this->appName, "storageconfig", "");
 		}
 	}
 
@@ -69,11 +83,12 @@ class SettingsController extends Controller {
 	 * @NoAdminRequired
 	 * Save the storage config settings
 	 */
-	public function save(): void {
-		// Handle telemetry setting
-		$telemetry = $this->request->getParam('telemetry');
-		if (null !== $telemetry) {
-			$this->config->setSystemValue('telemetry.enabled', (bool) $telemetry);
+	public function save(): void
+	{
+		if ($this->request->getParam("storageconfig")) {
+			$this->config->setAppValue($this->appName, "storageconfig", $this->request->getParam("storageconfig"));
+		} else {
+			$this->config->setAppValue($this->appName, "storageconfig", "");
 		}
 	}
 }
