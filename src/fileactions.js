@@ -36,6 +36,7 @@ Batch option const queue = new PQueue({ concurrency: 5 });
 import { emit,subscribe } from '@nextcloud/event-bus';
 import { FileAction, registerDavProperty, registerFileAction, FileType } from "@nextcloud/files";
 import HideSource from "@material-design-icons/svg/filled/hide_source.svg";
+import UnhideSource from "@material-design-icons/svg/filled/settings_backup_restore.svg";
 import SwarmSvg from "../img/swarm-logo.svg";
 import HejBitSvg from "../img/hejbit-logo.svg";
 import axios from '@nextcloud/axios';
@@ -278,10 +279,13 @@ const actionDataHideFile ={
 		if (files.length !== 1) // We don't support batch actions
 			return false;
 		const attrs = files[0].attributes["ethswarm-node"];
+		const hidden = files[0].attributes.hidden;
 
 		if (attrs === undefined)
 			return false;
 		else if (attrs === "")
+			return false;
+		if (hidden)
 			return false;
 
 		return attrs;
@@ -290,7 +294,7 @@ const actionDataHideFile ={
 		let message = '';
 		if (node.type === FileType.File) {
 			message = t('files_external_ethswarm', 'The file will be set to hide on the folder view. The file will continue to exist on the Swarm network.');
-		}else if (node.type === FileType.Folder) {
+		} else if (node.type === FileType.Folder) {
 			message = t('files_external_ethswarm', 'The folder will be set to hide on the folder view. All the files inside the folder will continue to exist on the Swarm network.');
 		}
 		alert(message);
@@ -303,19 +307,21 @@ const actionDataHideFile ={
 			}
 		  });
 
-            // Let's delete even if it's moved to the trashbin
-            // since it has been removed from the current view
-            // and changing the view will trigger a reload anyway.
-            emit('files:node:deleted', node);
-            return true;
+		  // The right event is emit('files:node:updated', node);
+		  // it triggers the file:list:update, but unfortunately that doesn't
+		  // a reevaluation of the enable funtion of the fileactions.
+		  // To improve UX we should reload only if show_hidden is true
+		  emit('files:node:deleted', node);
+		  // window.location.reload();
+          return true;
+
         }
         catch (error) {
-			console.log('Error while deleting a file', { error, source: node.source, node });
+			console.log('Error while hidding a file', { error, source: node.source, node });
             // TODO: update to this? logger.error('Error while deleting a file', { error, source: node.source, node });
             return false;
         }
     },   /* TODO: Batch option
-	async execBatch(nodes, view, dir) {
         // Map each node to a promise that resolves with the result of exec(node)
         const promises = nodes.map(node => {
             // Create a promise that resolves with the result of exec(node)
@@ -338,6 +344,107 @@ const actionDataHideFile ={
 const AddHideAction = new FileAction(actionDataHideFile);
 
 registerFileAction(AddHideAction);
+
+
+
+const actionDataUnhideFile ={
+    id: 'unhideFile',
+    displayName(nodes, view) {
+        /**
+         * If we're only selecting files, use proper wording
+         */
+        if (isAllFiles(nodes)) {
+            if (nodes.length === 1) {
+                return t('files_external_ethswarm', 'Unhide');
+            }
+            return t('files_external_ethswarm', 'Unhide');
+        }
+        /**
+         * If we're only selecting folders, use proper wording
+         */
+        if (isAllFolders(nodes)) {
+            if (nodes.length === 1) {
+                return t('files_external_ethswarm', 'Unhide');
+            }
+            return t('files_external_ethswarm', 'Unhide');
+        }
+        return t('files_external_ethswarm', 'Unhide');
+    },
+    iconSvgInline: (nodes) => {
+        return Buffer.from(UnhideSource.split(",")[1], 'base64');
+    },
+	inline(file, view) {
+		return true;
+	},
+
+	enabled(files, view) {
+		if (files.length !== 1) // We don't support batch actions
+			return false;
+		const attrs = files[0].attributes["ethswarm-node"];
+		const hidden = files[0].attributes.hidden;
+
+		if (attrs === undefined)
+			return false;
+		else if (attrs === "")
+			return false;
+		if (!hidden)
+			return false;
+
+		return attrs;
+	},
+    async exec(node, view, dir) {
+        try {
+		   await axios({
+			method: 'post',
+			url: node.encodedSource,
+			headers: {
+			 'Hejbit-Action': 'unhide'
+			}
+		  });
+
+
+		  // the right event is emit('files:node:updated', node);
+		  // it triggers the file:list:update, but unfortunately that doesn't
+		  // a reevaluation of the enable funtion of the fileactions
+		  emit('files:node:deleted', node);
+		  window.location.reload();
+
+
+			return true;
+        }
+        catch (error) {
+			console.log('Error while unhidding a file', { error, source: node.source, node });
+            // TODO: update to this? logger.error('Error while deleting a file', { error, source: node.source, node });
+            return false;
+        }
+    },   /* TODO: Batch option
+	async execBatch(nodes, view, dir) {
+        // Map each node to a promise that resolves with the result of exec(node)
+        const promises = nodes.map(node => {
+            // Create a promise that resolves with the result of exec(node)
+            const promise = new Promise(resolve => {
+                queue.add(async () => {
+                    const result = await this.exec(node, view, dir);
+                    resolve(result !== null ? result : false);
+                });
+            });
+            return promise;
+        });
+        return Promise.all(promises);
+    }, */
+
+	execBatch(nodes, view) {
+		return Promise.all(nodes.map(node => this.exec(node, view)));
+	},
+    order: 150,
+};
+
+const AddUnhideAction = new FileAction(actionDataUnhideFile);
+
+registerFileAction(AddUnhideAction);
+
+
+
 
 let previousPathHasSwarm = false;
 
