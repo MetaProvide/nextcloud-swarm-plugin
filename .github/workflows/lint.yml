@@ -1,0 +1,36 @@
+name: Lint
+
+on:
+  pull_request:
+    branches:
+      - stage
+    types:
+      - opened
+      - synchronize
+      - reopened
+
+jobs:
+  php-cs-fixer:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: true
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          tools: composer
+
+      - name: Install php-cs-fixer
+        run: composer require --dev friendsofphp/php-cs-fixer
+
+      - name: Run php-cs-fixer
+        run: vendor/bin/php-cs-fixer fix
+
+      - name: Commit changes
+        uses: stefanzweifel/git-auto-commit-action@v5
