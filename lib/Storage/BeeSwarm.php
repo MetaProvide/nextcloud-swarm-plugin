@@ -265,6 +265,7 @@ class BeeSwarm extends Common {
 			// Return true always the creation of the root folder
 			return true;
 		}
+
 		return $this->fileMapper->findExists($path, $this->storageId) > 0;
 	}
 
