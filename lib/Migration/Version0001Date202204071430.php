@@ -27,12 +27,12 @@ namespace OCA\Files_External_Ethswarm\Migration;
 
 use Closure;
 use OCP\DB\ISchemaWrapper;
+use OCP\DB\Types;
 use OCP\Migration\IOutput;
 use OCP\Migration\SimpleMigrationStep;
-use OCP\DB\Types;
 
 class Version0001Date202204071430 extends SimpleMigrationStep {
-	public const _TABLENAME = "files_swarm";
+	public const _TABLENAME = 'files_swarm';
 	/**
 	 * @param IOutput $output
 	 * @param Closure $schemaClosure The `\Closure` returns a `ISchemaWrapper`

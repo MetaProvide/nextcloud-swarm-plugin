@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright Copyright (c) 2022, MetaProvide Holding EKF
  *
@@ -23,18 +24,17 @@
 
 namespace OCA\Files_External_Ethswarm\Backend;
 
-use OCA\Files_External_Ethswarm\AppInfo\AppConstants;
 use OCA\Files_External\Lib\Backend\Backend;
 use OCA\Files_External\Lib\DefinitionParameter;
 use OCA\Files_External\Lib\StorageConfig;
 use OCA\Files_External\Service\GlobalStoragesService;
+use OCA\Files_External_Ethswarm\AppInfo\AppConstants;
 use OCA\Files_External_Ethswarm\Auth\License;
 use OCP\IConfig;
 use OCP\IL10N;
 use Psr\Log\LoggerInterface;
 
-class BeeSwarm extends Backend
-{
+class BeeSwarm extends Backend {
 	/** @var IL10N */
 	private IL10N $l;
 
@@ -60,8 +60,7 @@ class BeeSwarm extends Backend
 	 * @param LoggerInterface $logger
 	 * @param GlobalStoragesService $globalStoragesService
 	 */
-	public function __construct(string $appName, IL10N $l, IConfig $config, LoggerInterface $logger, GlobalStoragesService $globalStoragesService)
-	{
+	public function __construct(string $appName, IL10N $l, IConfig $config, LoggerInterface $logger, GlobalStoragesService $globalStoragesService) {
 		$this->l = $l;
 		$this->appName = $appName;
 		$this->config = $config;
@@ -74,20 +73,19 @@ class BeeSwarm extends Backend
 			->setText($l->t('HejBit-Swarm'))
 			->addParameters([
 				(new DefinitionParameter(self::OPTION_HOST_URL, $l->t('Server URL')))
-					->setTooltip($l->t("License Server URL")),
+					->setTooltip($l->t('License Server URL')),
 			])->addAuthScheme(License::SCHEME_ACCESS_KEY);
 	}
 
 	/**
 	 * {@inheritdoc}
 	 */
-	public function validateStorageDefinition(StorageConfig $storage): bool
-	{
+	public function validateStorageDefinition(StorageConfig $storage): bool {
 		$result = true;
 
 		// access key
 		if (!$storage->getBackendOption(License::SCHEME_ACCESS_KEY)) {
-			$this->logger->warning("access key not set");
+			$this->logger->warning('access key not set');
 			$result = false;
 		}
 
@@ -97,7 +95,7 @@ class BeeSwarm extends Backend
 			$host = 'https://' . $host;
 		}
 		if (!filter_var($host, FILTER_VALIDATE_URL)) {
-			$this->logger->warning("invalid url");
+			$this->logger->warning('invalid url');
 			$result = false;
 		}
 

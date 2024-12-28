@@ -27,13 +27,11 @@ namespace OCA\Files_External_Ethswarm\Migration;
 
 use Closure;
 use OCP\DB\ISchemaWrapper;
+use OCP\DB\QueryBuilder\IQueryBuilder;
+use OCP\Files\IMimeTypeLoader;
+use OCP\IDBConnection;
 use OCP\Migration\IOutput;
 use OCP\Migration\SimpleMigrationStep;
-use OCP\DB\Types;
-use OCP\Files\IMimeTypeLoader;
-use OCP\DB\QueryBuilder\IQueryBuilder;
-use OCP\IDBConnection;
-
 
 class Version0003Date202401101430 extends SimpleMigrationStep {
 
@@ -77,12 +75,12 @@ class Version0003Date202401101430 extends SimpleMigrationStep {
 		$qb = $this->db->getQueryBuilder();
 
 		$result = $qb->select('configvalue')
-		->from('appconfig')
-		->where($qb->expr()->eq('appid', $qb->createNamedParameter('files_external_ethswarm')))
-		->andWhere($qb->expr()->eq('configkey', $qb->createNamedParameter('installed_version')))
-		->executeQuery();
+			->from('appconfig')
+			->where($qb->expr()->eq('appid', $qb->createNamedParameter('files_external_ethswarm')))
+			->andWhere($qb->expr()->eq('configkey', $qb->createNamedParameter('installed_version')))
+			->executeQuery();
 		$version = $result->fetchOne();
 
-	    return $version;
+		return $version;
 	}
 }

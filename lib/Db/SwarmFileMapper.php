@@ -30,18 +30,16 @@ use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\AppFramework\Db\QBMapper;
 use OCP\DB\Exception;
-use OCP\IDBConnection;
 use OCP\Files\IMimeTypeLoader;
+use OCP\IDBConnection;
 
 /**
  * @template-extends QBMapper<SwarmFile>
  */
-class SwarmFileMapper extends QBMapper
-{
+class SwarmFileMapper extends QBMapper {
 	public const TABLE_NAME = 'files_swarm';
 
-	public function __construct(IDBConnection $db)
-	{
+	public function __construct(IDBConnection $db) {
 		parent::__construct($db, self::TABLE_NAME);
 	}
 
@@ -49,8 +47,7 @@ class SwarmFileMapper extends QBMapper
 	 * @return SwarmFile[]
 	 * @throws Exception
 	 */
-	public function findAll(string $fileId): array
-	{
+	public function findAll(string $fileId): array {
 		$qb = $this->db->getQueryBuilder();
 
 		$select = $qb
@@ -70,8 +67,7 @@ class SwarmFileMapper extends QBMapper
 	 * @throws Exception
 	 * @throws MultipleObjectsReturnedException
 	 */
-	public function find(string $name, int $storage): SwarmFile
-	{
+	public function find(string $name, int $storage): SwarmFile {
 		$qb = $this->db->getQueryBuilder();
 
 		$select = $qb
@@ -89,8 +85,7 @@ class SwarmFileMapper extends QBMapper
 	 * @return int
 	 * @throws Exception
 	 */
-	public function findExists(string $name, int $storage): int
-	{
+	public function findExists(string $name, int $storage): int {
 		$qb = $this->db->getQueryBuilder();
 
 		$select = $qb
@@ -108,11 +103,10 @@ class SwarmFileMapper extends QBMapper
 	 * @return SwarmFile
 	 * @throws Exception
 	 */
-	public function createDirectory(string $path, int $storage, string $token): SwarmFile
-	{
+	public function createDirectory(string $path, int $storage, string $token): SwarmFile {
 		$swarm = new SwarmFile();
 		$swarm->setName($path);
-		$swarm->setMimeType(OC::$server->get(IMimeTypeLoader::class)->getId("httpd/unix-directory"));
+		$swarm->setMimeType(OC::$server->get(IMimeTypeLoader::class)->getId('httpd/unix-directory'));
 		$swarm->setSize(1);
 		$swarm->setStorageMtime(time());
 		$swarm->setStorage($storage);
@@ -125,17 +119,16 @@ class SwarmFileMapper extends QBMapper
 	 * @return SwarmFile
 	 * @throws Exception
 	 */
-	public function createFile(array $data): SwarmFile
-	{
+	public function createFile(array $data): SwarmFile {
 		$swarm = new SwarmFile();
-		$swarm->setName($data["name"]);
-		$swarm->setSwarmReference($data["reference"]);
-		$swarm->setSwarmTag($data["etag"]);
-		$swarm->setMimetype($data["mimetype"]);
-		$swarm->setSize($data["size"]);
-		$swarm->setStorageMtime($data["storage_mtime"]);
-		$swarm->setStorage($data["storage"]);
-		$swarm->setToken($data["token"]);
+		$swarm->setName($data['name']);
+		$swarm->setSwarmReference($data['reference']);
+		$swarm->setSwarmTag($data['etag']);
+		$swarm->setMimetype($data['mimetype']);
+		$swarm->setSize($data['size']);
+		$swarm->setStorageMtime($data['storage_mtime']);
+		$swarm->setStorage($data['storage']);
+		$swarm->setToken($data['token']);
 		return $this->insert($swarm);
 	}
 
@@ -147,10 +140,9 @@ class SwarmFileMapper extends QBMapper
 	 * @return array
 	 * @throws Exception|MultipleObjectsReturnedException
 	 */
-	public function getPathTree(string $path, int $storage, bool $incSelf = true, bool $recursive = true): array
-	{
+	public function getPathTree(string $path, int $storage, bool $incSelf = true, bool $recursive = true): array {
 		// Get files from directory tree based on path parameter
-		$dir = array();
+		$dir = [];
 		if ($incSelf) {
 			try {
 				$dir[] = $this->find($path, $storage);
@@ -158,8 +150,9 @@ class SwarmFileMapper extends QBMapper
 			}
 		}
 
-		if ($path !== '')
+		if ($path !== '') {
 			$path .= '/';
+		}
 
 		$qb = $this->db->getQueryBuilder();
 		$select = $qb
@@ -167,8 +160,9 @@ class SwarmFileMapper extends QBMapper
 			->from($this->getTableName())
 			->where($qb->expr()->like('name', $qb->createNamedParameter($this->db->escapeLikeParameter($path) . '%'), $qb::PARAM_STR))
 			->andWhere($qb->expr()->eq('storage', $qb->createNamedParameter($storage, $qb::PARAM_INT)));
-		if (!$recursive)
+		if (!$recursive) {
 			$select->andWhere($qb->expr()->notLike('name', $qb->createNamedParameter($this->db->escapeLikeParameter($path) . '%/%'), $qb::PARAM_STR));
+		}
 		return array_merge($dir, $this->findEntities($select));
 	}
 
@@ -179,8 +173,7 @@ class SwarmFileMapper extends QBMapper
 	 * @return int
 	 * @throws Exception
 	 */
-	public function updatePath(string $path1, string $path2, int $storage): int
-	{
+	public function updatePath(string $path1, string $path2, int $storage): int {
 		$qb = $this->db->getQueryBuilder();
 		$qb
 			->update($this->getTableName())
@@ -195,8 +188,7 @@ class SwarmFileMapper extends QBMapper
 	 * @return SwarmFile[]
 	 * @throws Exception
 	 */
-	public function findAllWithToken(string $token): array
-	{
+	public function findAllWithToken(string $token): array {
 		$qb = $this->db->getQueryBuilder();
 
 		$select = $qb
@@ -214,8 +206,7 @@ class SwarmFileMapper extends QBMapper
 	 * @return void
 	 * @throws \OCP\DB\Exception
 	 */
-	public function updateStorageIds(string $token, int $storageId): void
-	{
+	public function updateStorageIds(string $token, int $storageId): void {
 		foreach ($this->findAllWithToken($token) as $swarmFile) {
 			$swarmFile->setStorage($storageId);
 			$this->update($swarmFile);

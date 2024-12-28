@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 /*
  * @copyright Copyright (c) 2023, MetaProvide Holding EKF
@@ -23,11 +24,11 @@ declare(strict_types=1);
  */
 namespace OCA\Files_External_Ethswarm\Sabre;
 
+use OCA\Files_External_Ethswarm\Service\EthswarmService;
 use Sabre\DAV\INode;
 use Sabre\DAV\PropFind;
 use Sabre\DAV\Server;
 use Sabre\DAV\ServerPlugin;
-use OCA\Files_External_Ethswarm\Service\EthswarmService;
 
 class PropfindPlugin extends ServerPlugin {
 	public const ETHSWARM_FILEREF = '{http://nextcloud.org/ns}ethswarm-fileref';
@@ -57,25 +58,22 @@ class PropfindPlugin extends ServerPlugin {
 			$filename = $node->getFileInfo()->getinternalPath();
 			$mountpoint = $node->getFileInfo()->getMountPoint()->getStorageId();
 
-			if (!str_starts_with($mountpoint, "ethswarm")) {
-				return "";
+			if (!str_starts_with($mountpoint, 'ethswarm')) {
+				return '';
 			}
 			$class = $this->EthswarmService;
-			$propFind->handle(self::ETHSWARM_FILEREF, function () use ($class, $storageid, $filename)
-			{
+			$propFind->handle(self::ETHSWARM_FILEREF, function () use ($class, $storageid, $filename) {
 				return $class->getSwarmRef($filename, $storageid);
 			});
 
-			if($class->getVisiblity($filename, $storageid)==1){
-				$propFind->set("{http://nextcloud.org/ns}hidden","false",200);
-			}
-			else{
-				$propFind->set("{http://nextcloud.org/ns}hidden","true",200);
+			if ($class->getVisiblity($filename, $storageid) == 1) {
+				$propFind->set('{http://nextcloud.org/ns}hidden', 'false', 200);
+			} else {
+				$propFind->set('{http://nextcloud.org/ns}hidden', 'true', 200);
 			}
 
-			$propFind->handle(self::ETHSWARM_NODE, function () use ($class, $storageid, $filename)
-			{
-					return "true";
+			$propFind->handle(self::ETHSWARM_NODE, function () use ($class, $storageid, $filename) {
+				return 'true';
 			});
 		}
 
@@ -84,24 +82,22 @@ class PropfindPlugin extends ServerPlugin {
 			$filename = $node->getFileInfo()->getinternalPath();
 			$mountpoint = $node->getFileInfo()->getMountPoint()->getStorageId();
 
-			if (!str_starts_with($mountpoint, "ethswarm")) {
-				return "";
+			if (!str_starts_with($mountpoint, 'ethswarm')) {
+				return '';
 			}
 			$class = $this->EthswarmService;
 
-			$propFind->handle(self::ETHSWARM_NODE, function () use ($class, $storageid, $filename)
-			{
-					return "true";
+			$propFind->handle(self::ETHSWARM_NODE, function () use ($class, $storageid, $filename) {
+				return 'true';
 			});
-			if ($filename === "") {
-				return "";
+			if ($filename === '') {
+				return '';
 			}
 
-			if($class->getVisiblity($filename, $storageid)==1){
-				$propFind->set("{http://nextcloud.org/ns}hidden","false",200);
-			}
-			else{
-				$propFind->set("{http://nextcloud.org/ns}hidden","true",200);
+			if ($class->getVisiblity($filename, $storageid) == 1) {
+				$propFind->set('{http://nextcloud.org/ns}hidden', 'false', 200);
+			} else {
+				$propFind->set('{http://nextcloud.org/ns}hidden', 'true', 200);
 			}
 
 

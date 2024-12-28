@@ -27,15 +27,14 @@ namespace OCA\Files_External_Ethswarm\Migration;
 
 use Closure;
 use OCP\DB\ISchemaWrapper;
+use OCP\DB\Types;
+use OCP\IDBConnection;
 use OCP\Migration\IOutput;
 use OCP\Migration\SimpleMigrationStep;
-use OCP\DB\Types;
-use OCP\DB\QueryBuilder\IQueryBuilder;
-use OCP\IDBConnection;
 
 class Version0005Date202411081430 extends SimpleMigrationStep {
 	private $db;
-	public const _TABLENAME = "files_swarm";
+	public const _TABLENAME = 'files_swarm';
 
 
 	public function __construct(IDBConnection $db) {
@@ -71,9 +70,9 @@ class Version0005Date202411081430 extends SimpleMigrationStep {
 
 		// Get all the numeric_id's of the swarm storages
 		$resultNI = $gqbNI->select('numeric_id', 'id')
-		   ->from('storages')
-		   ->where($gqbNI->expr()->like('id', $gqbNI->createNamedParameter('ethswarm::%')))
-		   ->executeQuery();
+			->from('storages')
+			->where($gqbNI->expr()->like('id', $gqbNI->createNamedParameter('ethswarm::%')))
+			->executeQuery();
 
 		while ($row = $resultNI->fetch()) {
 			// Get all the files on each swarm storage
@@ -83,9 +82,10 @@ class Version0005Date202411081430 extends SimpleMigrationStep {
 			$updateQb = $this->db->getQueryBuilder();
 
 			$result = $updateQb->update(self::_TABLENAME)
-			->set('token', $updateQb->createNamedParameter($token_id))
-			->where($updateQb->expr()->eq('storage', $updateQb->createNamedParameter($numeric_id)))
-			->executeStatement();
+				->set('token', $updateQb->createNamedParameter($token_id))
+				->where($updateQb->expr()->eq('storage', $updateQb->createNamedParameter($numeric_id)))
+				->executeStatement();
 		}
 
-	}}
+	}
+}

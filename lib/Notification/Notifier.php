@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 /**
  * @copyright Copyright (c) 2024, MetaProvide Holding EKF
@@ -30,7 +31,7 @@ class Notifier implements \OCP\Notification\INotifier {
 	protected $url;
 
 	public function __construct(\OCP\L10N\IFactory $factory,
-								\OCP\IURLGenerator $urlGenerator) {
+		\OCP\IURLGenerator $urlGenerator) {
 		$this->factory = $factory;
 		$this->url = $urlGenerator;
 	}
@@ -73,14 +74,14 @@ class Notifier implements \OCP\Notification\INotifier {
 				// for a list of defined objects and their parameters.
 				$parameters = $notification->getSubjectParameters();
 				$notification->setRichSubject($l->t('Your file \'{filename}\' was decentralized.'),
-				[
-					'filename' => [
-						'type' => 'file',
-						'id' => '',
-						'name' => basename($parameters['path']),
-						'path' => $parameters['path'],
-					],
-				]);
+					[
+						'filename' => [
+							'type' => 'file',
+							'id' => '',
+							'name' => basename($parameters['path']),
+							'path' => $parameters['path'],
+						],
+					]);
 
 				// Set the plain text subject automatically
 				$this->setParsedSubjectFromRichSubject($notification);

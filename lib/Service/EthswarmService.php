@@ -1,4 +1,5 @@
 <?php
+
 /*
  * @copyright Copyright (c) 2023, MetaProvide Holding EKF
  *
@@ -22,9 +23,9 @@
  */
 namespace OCA\Files_External_Ethswarm\Service;
 
+use OCA\Files_External_Ethswarm\Db\SwarmFileMapper;
 use OCP\Files\StorageNotAvailableException;
 use OCP\IDBConnection;
-use OCA\Files_External_Ethswarm\Db\SwarmFileMapper;
 use OCP\IL10N;
 
 class EthswarmService {

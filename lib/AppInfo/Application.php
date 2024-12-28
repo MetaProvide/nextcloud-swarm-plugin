@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright Copyright (c) 2022, MetaProvide Holding EKF
  *
@@ -26,19 +27,18 @@ declare(strict_types=1);
 namespace OCA\Files_External_Ethswarm\AppInfo;
 
 use OCA\Files\Event\LoadAdditionalScriptsEvent;
-use OCA\Files_External_Ethswarm\AppInfo\AppConstants;
-use OCA\Files_External_Ethswarm\Backend\BeeSwarm;
-use OCA\Files_External_Ethswarm\Auth\License;
+use OCA\Files_External\Lib\Config\IAuthMechanismProvider;
 use OCA\Files_External\Lib\Config\IBackendProvider;
 use OCA\Files_External\Service\BackendService;
-use OCA\Files_External\Lib\Config\IAuthMechanismProvider;
+use OCA\Files_External_Ethswarm\Auth\License;
+use OCA\Files_External_Ethswarm\Backend\BeeSwarm;
 use OCA\Files_External_Ethswarm\Notification\Notifier;
 use OCP\AppFramework\App;
-use OCP\Util;
-use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use OCP\AppFramework\Bootstrap\IBootContext;
 use OCP\AppFramework\Bootstrap\IBootstrap;
+use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use OCP\EventDispatcher\IEventDispatcher;
+use OCP\Util;
 
 /**
  * @package OCA\Files_external_beeswarm\AppInfo

@@ -52,8 +52,7 @@ use OCP\AppFramework\Db\Entity;
  * @method void setToken(string $token)
  * @method int getToken()
  */
-class SwarmFile extends Entity
-{
+class SwarmFile extends Entity {
 
 	/** @var int|null */
 	protected $fileId;
@@ -88,8 +87,7 @@ class SwarmFile extends Entity
 	/** @var string */
 	protected $token;
 
-	public function __construct()
-	{
+	public function __construct() {
 		$this->addType('fileId', 'int');
 		$this->addType('name', 'string');
 		$this->addType('swarmReference', 'string');
