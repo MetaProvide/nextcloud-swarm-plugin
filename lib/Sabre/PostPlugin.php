@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace OCA\Files_External_Ethswarm\Sabre;
 
+use OCA\DAV\Connector\Sabre\Directory;
+use OCA\DAV\Connector\Sabre\File;
 use OCA\Files_External_Ethswarm\Service\EthswarmService;
+use Sabre\DAV\Exception\NotImplemented;
 use Sabre\DAV\Server;
 use Sabre\DAV\ServerPlugin;
 use Sabre\HTTP\RequestInterface;
@@ -29,14 +32,14 @@ class PostPlugin extends ServerPlugin {
 	public function httpPost(RequestInterface $request, ResponseInterface $response) {
 		$action = $request->getRawServerValue('HTTP_HEJBIT_ACTION') ?? null;
 
-		if ($action === 'hide') {
+		if ('hide' === $action) {
 			$path = $request->getPath();
 			$node = $this->server->tree->getNodeForPath($path);
-			if (($node instanceof \OCA\DAV\Connector\Sabre\File)) {
+			if ($node instanceof File) {
 				$storageid = $node->getFileInfo()->getStorage()->getCache()->getNumericStorageId();
 				$filename = $node->getFileInfo()->getinternalPath();
 			}
-			if (($node instanceof \OCA\DAV\Connector\Sabre\Directory)) {
+			if ($node instanceof Directory) {
 				$storageid = $node->getFileInfo()->getStorage()->getCache()->getNumericStorageId();
 				$filename = $node->getFileInfo()->getinternalPath();
 			}
@@ -49,14 +52,15 @@ class PostPlugin extends ServerPlugin {
 			$response->setHeader('Content-Length', '0');
 
 			return false;
-		} elseif ($action === 'unhide') {
+		}
+		if ('unhide' === $action) {
 			$path = $request->getPath();
 			$node = $this->server->tree->getNodeForPath($path);
-			if (($node instanceof \OCA\DAV\Connector\Sabre\File)) {
+			if ($node instanceof File) {
 				$storageid = $node->getFileInfo()->getStorage()->getCache()->getNumericStorageId();
 				$filename = $node->getFileInfo()->getinternalPath();
 			}
-			if (($node instanceof \OCA\DAV\Connector\Sabre\Directory)) {
+			if ($node instanceof Directory) {
 				$storageid = $node->getFileInfo()->getStorage()->getCache()->getNumericStorageId();
 				$filename = $node->getFileInfo()->getinternalPath();
 			}
@@ -69,13 +73,13 @@ class PostPlugin extends ServerPlugin {
 			return false;
 		}
 		// No Hejbit-action, allow other plugins to handle the request
-		elseif ($action === null) {
+		if (null === $action) {
 			return true;
 		}
 		// Invalid Hejbit-action, throw exception
-		else {
-			$exMessage = 'There was no plugin in the system that was willing to handle a POST method with this action > ' . $action . '.';
-			throw new \Sabre\DAV\Exception\NotImplemented($exMessage);
-		}
+
+		$exMessage = 'There was no plugin in the system that was willing to handle a POST method with this action > '.$action.'.';
+
+		throw new NotImplemented($exMessage);
 	}
 }

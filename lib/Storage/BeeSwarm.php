@@ -2,9 +2,7 @@
 
 /**
  * @copyright Copyright (c) 2022, MetaProvide Holding EKF
- *
  * @author Ron Trevor <ecoron@proton.me>
- *
  * @license GNU AGPL version 3 or any later version
  *
  * This program is free software: you can redistribute it and/or modify
@@ -19,7 +17,6 @@
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
  */
 
 namespace OCA\Files_External_Ethswarm\Storage;
@@ -55,59 +52,45 @@ use Traversable;
 class BeeSwarm extends Common {
 	use BeeSwarmTrait;
 
-	/** @var int */
 	protected int $storageId;
 
-	/** @var bool */
-	private bool $isEncrypted; // TODO: remove
-
-	/** @var SwarmFileMapper */
-	private SwarmFileMapper $fileMapper;
-
-	/** @var IConfig */
-	private IConfig $config;
-
-	/** @var IDBConnection */
 	protected IDBConnection $dbConnection;
 
-	/** @var IL10N */
 	protected IL10N $l10n;
 
-	/** @var IMimeTypeLoader */
-	private IMimeTypeLoader $mimeTypeHandler;
-
-	/** @var ITempManager */
-	private ITempManager $tempManager;
-
-	/** @var IMimeTypeDetector */
-	private IMimeTypeDetector $mimeTypeDetector;
-
-	/** @var Cache */
-	private Cache $cacheHandler;
-
-	/** @var NotificationService */
-	private NotificationService $notificationService;
-
-	/** @var string */
 	protected string $id;
 
-	/** @var string */
+	private bool $isEncrypted; // TODO: remove
+
+	private SwarmFileMapper $fileMapper;
+
+	private IConfig $config;
+
+	private IMimeTypeLoader $mimeTypeHandler;
+
+	private ITempManager $tempManager;
+
+	private IMimeTypeDetector $mimeTypeDetector;
+
+	private Cache $cacheHandler;
+
+	private NotificationService $notificationService;
+
 	private string $token;
 
-	/** @var LoggerInterface */
 	private LoggerInterface $logger;
 
 	/**
-	 * @param $params
-	 * @throws StorageBadConfigException
+	 * @param mixed $params
 	 *
+	 * @throws StorageBadConfigException
 	 */
 	public function __construct($params) {
 		parent::__construct($params);
 
 		// Load storage configuration
 		$this->parseParams($params);
-		$this->id = 'ethswarm::' . $this->access_key;
+		$this->id = 'ethswarm::'.$this->access_key;
 		$this->storageId = $this->getStorageCache()->getNumericId();
 		$this->token = $this->getStorageCache()->getStorageId($this->storageId);
 
@@ -140,28 +123,24 @@ class BeeSwarm extends Common {
 			$mountId = $storageMount->getMountId();
 
 			$this->config = OC::$server->get(IConfig::class);
-			$configSettings = $this->config->getAppValue(AppConstants::APP_NAME, 'storageconfig', '');    //default
+			$configSettings = $this->config->getAppValue(AppConstants::APP_NAME, 'storageconfig');
 			$mounts = json_decode($configSettings, true);
 			if (is_array($mounts)) {
 				$mountIds = array_column($mounts, 'mount_id');
 				$key = array_search($mountId, $mountIds);
-				if (!empty($key) || $key === 0) {
-					$this->isEncrypted = $mounts[$key]['encrypt'] === '1';
+				if (!empty($key) || 0 === $key) {
+					$this->isEncrypted = '1' === $mounts[$key]['encrypt'];
 				}
 			}
 		}
 		$this->cacheHandler = new Cache($this);
 	}
 
-	/**
-	 * @inheritDoc
-	 */
 	public function getId(): string {
 		return $this->id;
 	}
 
 	/**
-	 * @inheritDoc
 	 * @throws Exception
 	 */
 	public function test(): bool {
@@ -172,11 +151,14 @@ class BeeSwarm extends Common {
 		$this->fileMapper->updateStorageIds($this->token, $this->storageId);
 		$this->add_root_folder_cache();
 		$this->add_token_files_cache();
+
 		return true;
 	}
 
 	/**
-	 * @inheritDoc
+	 * @param mixed $source
+	 * @param mixed $target
+	 *
 	 * @throws Exception
 	 */
 	public function copy($source, $target): bool {
@@ -185,9 +167,10 @@ class BeeSwarm extends Common {
 			$sourceFile = $this->fileMapper->find($source, $this->storageId);
 			if (!$sourceFile->getFileId()) {
 				$this->logger->error(
-					'copy failed: source file not found in mapper ' . $source,
+					'copy failed: source file not found in mapper '.$source,
 					['app' => AppConstants::APP_NAME]
 				);
+
 				return false;
 			}
 
@@ -207,9 +190,10 @@ class BeeSwarm extends Common {
 
 			if (!$newFile->getFileId()) {
 				$this->logger->error(
-					'copy failed: failed to create new file in mapper ' . $target,
+					'copy failed: failed to create new file in mapper '.$target,
 					['app' => AppConstants::APP_NAME]
 				);
+
 				return false;
 			}
 
@@ -219,9 +203,6 @@ class BeeSwarm extends Common {
 		}
 	}
 
-	/**
-	 * @return void
-	 */
 	public function add_root_folder_cache(): void {
 		$fileData = [
 			'storage' => $this->storageId,
@@ -240,10 +221,6 @@ class BeeSwarm extends Common {
 		$this->cacheHandler->put($fileData['path'], $fileData);
 	}
 
-	/**
-	 * @param SwarmFile $file
-	 * @return bool
-	 */
 	public function add_file_cache(SwarmFile $file): bool {
 		$fileData = [
 			'storage' => $file->getStorage(),
@@ -265,6 +242,7 @@ class BeeSwarm extends Common {
 		}
 
 		$this->cacheHandler->put($fileData['path'], $fileData);
+
 		return true;
 	}
 
@@ -275,79 +253,74 @@ class BeeSwarm extends Common {
 		foreach ($this->fileMapper->findAllWithToken($this->token) as $file) {
 			$this->add_file_cache($file);
 		}
-
 	}
 
 	/**
-	 * @inheritDoc
+	 * @param mixed $path
+	 *
 	 * @throws Exception
 	 */
 	public function file_exists($path): bool {
-		if ($path === '' || $path === '/' || $path === '.') {
+		if ('' === $path || '/' === $path || '.' === $path) {
 			// Return true always the creation of the root folder
 			return true;
 		}
 		$exists = $this->fileMapper->findExists($path, $this->storageId);
-		if ($exists == 0) {
+		if (0 == $exists) {
 			return false;
 		}
+
 		return true;
 	}
 
-	/**
-	 * @inheritDoc
-	 */
 	public function filemtime($path): int {
 		return 0;
 	}
 
 	/**
-	 * @inheritDoc
+	 * @param mixed $path
+	 *
 	 * @throws Exception
 	 */
-	public function stat($path): bool|array {
+	public function stat($path): array|bool {
 		$data = $this->getMetaData($path);
-		if ($data['mimetype'] === 'httpd/unix-directory') {
+		if ('httpd/unix-directory' === $data['mimetype']) {
 			return false;
 		}
+
 		return [
 			'mtime' => $data['mtime'],
 			'size' => $data['size'],
 		];
 	}
 
-	/**
-	 * @inheritDoc
-	 */
 	public function getETag($path): ?string {
 		return null;
 	}
 
-	/**
-	 * @inheritDoc
-	 */
 	public function needsPartFile(): bool {
 		return false;
 	}
 
 	/**
-	 * @inheritDoc
+	 * @param mixed $path
+	 *
 	 * @throws Exception
 	 */
 	public function mkdir($path): bool {
 		$this->fileMapper->createDirectory($path, $this->storageId, $this->token);
+
 		return true;
 	}
 
-	/**
-	 * @inheritDoc
-	 */
 	public function rmdir($path): void {
 		// TODO: Implement rmdir() method.
 	}
 
 	/**
-	 * @inheritDoc
+	 * @param mixed $source
+	 * @param mixed $target
+	 *
 	 * @throws Exception
 	 */
 	public function rename($source, $target): bool {
@@ -357,118 +330,89 @@ class BeeSwarm extends Common {
 			$newPath = substr_replace($oldPath, $target, 0, strlen($source));
 			$this->fileMapper->updatePath($oldPath, $newPath, $this->storageId);
 		}
+
 		return true;
 	}
 
-	/**
-	 * @inheritDoc
-	 */
 	public function opendir($path): bool {
 		return true;
 	}
 
 	/**
-	 * * @inheritDoc
+	 * * {@inheritDoc}
+	 *
 	 * @throws Exception
 	 */
 	public function is_dir($path): bool {
-		return $this->getMetaData($path)['mimetype'] === 'httpd/unix-directory';
+		return 'httpd/unix-directory' === $this->getMetaData($path)['mimetype'];
 	}
 
 	/**
-	 * @inheritDoc
+	 * @param mixed $path
+	 *
 	 * @throws Exception
 	 */
 	public function is_file($path): bool {
-		return $this->getMetaData($path)['mimetype'] !== 'httpd/unix-directory';
+		return 'httpd/unix-directory' !== $this->getMetaData($path)['mimetype'];
 	}
 
 	/**
-	 * @inheritDoc
+	 * @param mixed $path
+	 *
 	 * @throws Exception
 	 */
 	public function filetype($path): string {
 		return $this->is_file($path) ? 'file' : 'dir';
 	}
 
-	/**
-	 * @inheritDoc
-	 */
 	public function getPermissions($path = null): int {
-		return (Constants::PERMISSION_ALL - Constants::PERMISSION_DELETE - Constants::PERMISSION_UPDATE);
+		return Constants::PERMISSION_ALL - Constants::PERMISSION_DELETE - Constants::PERMISSION_UPDATE;
 	}
 
-	/**
-	 * @inheritDoc
-	 */
-	public function free_space($path): float|false|int {
+	public function free_space($path): false|float|int {
 		return FileInfo::SPACE_UNLIMITED;
 	}
 
-	/**
-	 * @inheritDoc
-	 */
 	public function hasUpdated($path, $time): bool {
 		return true;
 	}
 
-	/**
-	 * @inheritDoc
-	 */
 	public function isLocal(): bool {
 		// the common implementation returns a temporary file by
 		// default, which is not local
 		return false;
 	}
 
-	/**
-	 * @inheritDoc
-	 */
 	public function setMountOptions(array $options): void {
 		// TODO: Implement setMountOptions() method.
 	}
 
-	/**
-	 * @inheritDoc
-	 */
 	public function getMountOption($name, $default = null): ?string {
 		return $this->mountOptions[$name] ?? $default;
 	}
 
-	/**
-	 * @inheritDoc
-	 */
-	public function verifyPath($path, $fileName) {
+	public function verifyPath($path, $fileName) {}
 
-	}
-
-	/**
-	 * @inheritDoc
-	 */
 	public function isCreatable($path): bool {
 		return true;
 	}
 
-	/**
-	 * @inheritDoc
-	 */
 	public function isUpdatable($path): bool {
 		return true;
 	}
 
-	/**
-	 * @inheritDoc
-	 */
 	public function unlink($path): bool {
 		return true;
 	}
 
 	/**
-	 * @inheritDoc
+	 * @param mixed $path
+	 * @param mixed $mode
+	 *
 	 * @throws Exception
 	 */
 	public function fopen($path, $mode) {
-		if ($path === '' || $path === '/' || $path === '.') {
+		if ('' === $path || '/' === $path || '.' === $path) {
 			return false;
 		}
 		$swarmFile = $this->fileMapper->find($path, $this->storageId);
@@ -479,6 +423,7 @@ class BeeSwarm extends Common {
 			case 'rb':
 				// Get file from swarm
 				return $this->downloadSwarm($reference);
+
 			case 'w':    // Open for writing only; place the file pointer at the beginning of the file
 			case 'w+':    // Open for reading and writing
 			case 'wb':
@@ -492,37 +437,31 @@ class BeeSwarm extends Common {
 			case 'c':    // Open the file for writing only
 			case 'c+':    // Open the file for reading and writing;
 		}
+
 		return false;
 	}
 
-	/**
-	 * @inheritDoc
-	 */
 	public function touch($path, $mtime = null): bool {
 		return true;
 	}
 
 	/**
-	 * @inheritDoc
+	 * @param mixed $path
+	 *
 	 * @throws Exception
 	 */
-	public function file_get_contents($path): string|false {
+	public function file_get_contents($path): false|string {
 		$swarmFile = $this->fileMapper->find($path, $this->storageId);
 		$reference = $swarmFile->getSwarmReference();
+
 		return stream_get_contents($this->downloadSwarm($reference));
 	}
 
-	/**
-	 * @inheritDoc
-	 */
-	public function file_put_contents($path, $data): int|float|false {
+	public function file_put_contents($path, $data): false|float|int {
 		// TODO: Implement file_put_contents() method.
 		return parent::file_put_contents($path, $data);
 	}
 
-	/**
-	 * @inheritDoc
-	 */
 	public function getDirectDownload($path): array|bool {
 		// TODO: Implement getDirectDownload() method.
 		return parent::getDirectDownload($path);
@@ -536,13 +475,14 @@ class BeeSwarm extends Common {
 	*/
 
 	/**
-	 * @inheritDoc
+	 * @param mixed $path
+	 *
 	 * @throws Exception
 	 */
 	public function getMetaData($path): ?array {
 		$data = [];
 		// If not in swarm table, assume it's a folder
-		$exists = $this->fileMapper->findExists($path, $this->storageId) !== 0;
+		$exists = 0 !== $this->fileMapper->findExists($path, $this->storageId);
 		if (!$exists) {
 			// Create a folder item
 			$data['name'] = $path;
@@ -550,7 +490,7 @@ class BeeSwarm extends Common {
 			$data['permissions'] = (Constants::PERMISSION_ALL - Constants::PERMISSION_DELETE);
 
 			// Check if this is likely a file based on extension
-			$isFile = pathinfo($path, PATHINFO_EXTENSION) !== '';
+			$isFile = '' !== pathinfo($path, PATHINFO_EXTENSION);
 
 			if ($isFile) {
 				$data['mimetype'] = $this->mimeTypeDetector->detectPath($path);
@@ -570,7 +510,7 @@ class BeeSwarm extends Common {
 			} else {
 				$data['permissions'] = (Constants::PERMISSION_ALL - Constants::PERMISSION_DELETE - Constants::PERMISSION_UPDATE);
 			}
-			$data['name'] = basename($path); //TODO: Test
+			$data['name'] = basename($path); // TODO: Test
 			$data['mimetype'] = $this->mimeTypeHandler->getMimetypeById($mimeTypeId);
 			$data['mtime'] = time();
 			$data['storage_mtime'] = $swarmFile->getStorageMtime();
@@ -578,11 +518,13 @@ class BeeSwarm extends Common {
 			$data['etag'] = uniqid();
 			$data['swarm_ref'] = $swarmFile->getSwarmReference();
 		}
+
 		return $data;
 	}
 
 	/**
-	 * @inheritDoc
+	 * @param mixed $directory
+	 *
 	 * @throws Exception
 	 */
 	public function getDirectoryContent($directory): Traversable {
@@ -594,19 +536,7 @@ class BeeSwarm extends Common {
 
 	/**
 	 * @param resource $stream
-	 * @return string
-	 */
-	protected function createTempFile($stream): string {
-		$extension = '';
-		$tmpFile = $this->tempManager->getTemporaryFile($extension);
-		$target = fopen($tmpFile, 'w');
-		OC_Helper::streamCopy($stream, $target);
-		fclose($target);
-		return $tmpFile;
-	}
-
-	/**
-	 * @inheritDoc
+	 *
 	 * @throws Exception
 	 */
 	public function writeStream(string $path, $stream, ?int $size = null): int {
@@ -642,5 +572,18 @@ class BeeSwarm extends Common {
 
 		// TODO: Read back from swarm to return filesize?
 		return $tmpFileSize;
+	}
+
+	/**
+	 * @param resource $stream
+	 */
+	protected function createTempFile($stream): string {
+		$extension = '';
+		$tmpFile = $this->tempManager->getTemporaryFile($extension);
+		$target = fopen($tmpFile, 'w');
+		OC_Helper::streamCopy($stream, $target);
+		fclose($target);
+
+		return $tmpFile;
 	}
 }

@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 /**
  * @copyright Copyright (c) 2022, MetaProvide Holding EKF
- *
  * @author Ron Trevor <ecoron@proton.me>
- *
  * @license GNU AGPL version 3 or any later version
  *
  * This program is free software: you can redistribute it and/or modify
@@ -21,7 +19,6 @@ declare(strict_types=1);
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
  */
 
 namespace OCA\Files_External_Ethswarm\Db;
@@ -29,41 +26,40 @@ namespace OCA\Files_External_Ethswarm\Db;
 use OCP\AppFramework\Db\Entity;
 
 /**
- * @method void setFileId(int $fileId)
- * @method int getFileId()
- * @method void setName(string $name)
- * @method string getName()
- * @method void setSwarmReference(string $swarmReference)
- * @method string|null getSwarmReference()
- * @method void setSwarmTag(string $tag)
- * @method string|null getSwarmTag()
- * @method void setMimetype(int $mimetype)
- * @method int getMimetype()
- * @method void setSize(int $size)
- * @method string getSize()
- * @method void setStorageMtime(int $mtime)
- * @method int getStorageMtime()
- * @method void setEncryptionKey(string $encryptionKey)
- * @method string getEncryptionKey()
- * @method void setStorage(int $storage)
- * @method int|null getStorage()
- * @method void setVisibility(int $visibility)
- * @method int getVisibility()
- * @method void setToken(string $token)
- * @method int getToken()
+ * @method void        setFileId(int $fileId)
+ * @method int         getFileId()
+ * @method void        setName(string $name)
+ * @method string      getName()
+ * @method void        setSwarmReference(string $swarmReference)
+ * @method null|string getSwarmReference()
+ * @method void        setSwarmTag(string $tag)
+ * @method null|string getSwarmTag()
+ * @method void        setMimetype(int $mimetype)
+ * @method int         getMimetype()
+ * @method void        setSize(int $size)
+ * @method string      getSize()
+ * @method void        setStorageMtime(int $mtime)
+ * @method int         getStorageMtime()
+ * @method void        setEncryptionKey(string $encryptionKey)
+ * @method string      getEncryptionKey()
+ * @method void        setStorage(int $storage)
+ * @method null|int    getStorage()
+ * @method void        setVisibility(int $visibility)
+ * @method int         getVisibility()
+ * @method void        setToken(string $token)
+ * @method int         getToken()
  */
 class SwarmFile extends Entity {
-
-	/** @var int|null */
+	/** @var null|int */
 	protected $fileId;
 
 	/** @var string */
 	protected $name;
 
-	/** @var string|null */
+	/** @var null|string */
 	protected $swarmReference;
 
-	/** @var string|null */
+	/** @var null|string */
 	protected $swarmTag;
 
 	/** @var int */
@@ -78,7 +74,7 @@ class SwarmFile extends Entity {
 	/** @var string */
 	protected $encryptionKey;
 
-	/** @var int|null */
+	/** @var null|int */
 	protected $storage;
 
 	/** @var int */

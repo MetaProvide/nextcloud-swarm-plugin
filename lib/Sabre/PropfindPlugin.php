@@ -22,8 +22,11 @@ declare(strict_types=1);
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  */
+
 namespace OCA\Files_External_Ethswarm\Sabre;
 
+use OCA\DAV\Connector\Sabre\Directory;
+use OCA\DAV\Connector\Sabre\File;
 use OCA\Files_External_Ethswarm\Service\EthswarmService;
 use Sabre\DAV\INode;
 use Sabre\DAV\PropFind;
@@ -48,12 +51,10 @@ class PropfindPlugin extends ServerPlugin {
 		$this->server = $server;
 
 		$this->server->on('propFind', [$this, 'propFind']);
-
-
 	}
 
 	public function propFind(PropFind $propFind, INode $node) {
-		if (($node instanceof \OCA\DAV\Connector\Sabre\File)) {
+		if ($node instanceof File) {
 			$storageid = $node->getFileInfo()->getStorage()->getCache()->getNumericStorageId();
 			$filename = $node->getFileInfo()->getinternalPath();
 			$mountpoint = $node->getFileInfo()->getMountPoint()->getStorageId();
@@ -66,18 +67,18 @@ class PropfindPlugin extends ServerPlugin {
 				return $class->getSwarmRef($filename, $storageid);
 			});
 
-			if ($class->getVisiblity($filename, $storageid) == 1) {
+			if (1 == $class->getVisiblity($filename, $storageid)) {
 				$propFind->set('{http://nextcloud.org/ns}hidden', 'false', 200);
 			} else {
 				$propFind->set('{http://nextcloud.org/ns}hidden', 'true', 200);
 			}
 
-			$propFind->handle(self::ETHSWARM_NODE, function () use ($class, $storageid, $filename) {
+			$propFind->handle(self::ETHSWARM_NODE, function () {
 				return 'true';
 			});
 		}
 
-		if (($node instanceof \OCA\DAV\Connector\Sabre\Directory)) {
+		if ($node instanceof Directory) {
 			$storageid = $node->getFileInfo()->getStorage()->getCache()->getNumericStorageId();
 			$filename = $node->getFileInfo()->getinternalPath();
 			$mountpoint = $node->getFileInfo()->getMountPoint()->getStorageId();
@@ -87,22 +88,18 @@ class PropfindPlugin extends ServerPlugin {
 			}
 			$class = $this->EthswarmService;
 
-			$propFind->handle(self::ETHSWARM_NODE, function () use ($class, $storageid, $filename) {
+			$propFind->handle(self::ETHSWARM_NODE, function () {
 				return 'true';
 			});
-			if ($filename === '') {
+			if ('' === $filename) {
 				return '';
 			}
 
-			if ($class->getVisiblity($filename, $storageid) == 1) {
+			if (1 == $class->getVisiblity($filename, $storageid)) {
 				$propFind->set('{http://nextcloud.org/ns}hidden', 'false', 200);
 			} else {
 				$propFind->set('{http://nextcloud.org/ns}hidden', 'true', 200);
 			}
-
-
 		}
-
 	}
-
 }

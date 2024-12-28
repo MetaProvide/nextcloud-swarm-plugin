@@ -1,6 +1,7 @@
 {
 	"autoload-dev": {
 		"psr-4": {
+			"OC\\": "dev-environment/nextcloud_source/lib/",
 			"OCP\\": "dev-environment/nextcloud_source/lib/public/",
 			"OCA\\Files_External\\": "dev-environment/nextcloud_source/apps/files_external/lib/",
 			"OCA\\Files_External_Ethswarm\\": "lib/"

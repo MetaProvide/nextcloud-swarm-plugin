@@ -21,14 +21,18 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  */
+
 namespace OCA\Files_External_Ethswarm\Service;
 
+use OC;
 use OCA\Files_External_Ethswarm\Db\SwarmFileMapper;
 use OCP\Files\StorageNotAvailableException;
 use OCP\IDBConnection;
 use OCP\IL10N;
 
 class EthswarmService {
+	/** @var IDBConnection */
+	protected $dbConnection;
 
 	/** @var IL10N */
 	private $l10n;
@@ -36,20 +40,16 @@ class EthswarmService {
 	/** @var SwarmFileMapper */
 	private $filemapper;
 
-	/** @var \OCP\IDBConnection */
-	protected $dbConnection;
-
 	public function __construct(IL10N $l10n) {
 		$this->l10n = $l10n;
-		$dbConnection = \OC::$server->get(IDBConnection::class);
+		$dbConnection = OC::$server->get(IDBConnection::class);
 		$this->filemapper = new SwarmFileMapper($dbConnection);
 	}
 
 	/**
-	 * @param string $filename
-	 * @param int $storageid
-	 * @throws StorageNotAvailableException
 	 * @return string
+	 *
+	 * @throws StorageNotAvailableException
 	 */
 	public function getSwarmRef(string $filename, int $storageid) {
 		$swarmFile = $this->filemapper->find($filename, $storageid);
@@ -59,12 +59,14 @@ class EthswarmService {
 
 	public function getVisiblity(string $filename, int $storageid) {
 		$swarmFile = $this->filemapper->find($filename, $storageid);
+
 		return $swarmFile->getVisibility();
 	}
 
 	public function setVisiblity(string $filename, int $storageid, int $visibility) {
 		$swarmFile = $this->filemapper->find($filename, $storageid);
 		$swarmFile->setVisibility($visibility);
+
 		return $this->filemapper->update($swarmFile);
 	}
 
