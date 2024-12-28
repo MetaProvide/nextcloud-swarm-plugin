@@ -265,12 +265,7 @@ class BeeSwarm extends Common {
 			// Return true always the creation of the root folder
 			return true;
 		}
-		$exists = $this->fileMapper->findExists($path, $this->storageId);
-		if (0 == $exists) {
-			return false;
-		}
-
-		return true;
+		return $this->fileMapper->findExists($path, $this->storageId) > 0;
 	}
 
 	public function filemtime($path): int {
