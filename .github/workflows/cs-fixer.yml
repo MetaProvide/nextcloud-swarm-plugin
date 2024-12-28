@@ -1,0 +1,45 @@
+name: Code Style Fixer
+
+on:
+  pull_request:
+    branches:
+      - 'stage'
+    types:
+      - opened
+      - synchronize
+      - reopened
+
+jobs:
+  php-cs-fixer:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          tools: composer
+
+      - name: Install dependencies
+        run: composer install
+
+      - name: Run code fixer
+        run: vendor/bin/php-cs-fixer fix
+
+      - name: Check for fix changes
+        run: |
+          if [[ -n "$(git status --porcelain)" ]]; then
+            echo "Fix changes detected";
+            git config user.name "${{ github.actor }}";
+            git config user.email "${{ github.actor }}@users.noreply.github.com";
+            git commit -am "chore: code style fix";
+          else
+            echo "No fix changes detected";
+          fi
+
+      - name: Push changes
+        if: success()
+        run: git push
