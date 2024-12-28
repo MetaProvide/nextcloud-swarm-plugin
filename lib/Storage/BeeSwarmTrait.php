@@ -46,11 +46,9 @@ trait BeeSwarmTrait {
 	}
 
 	/**
-	 * @param mixed $params
-	 *
 	 * @throws StorageBadConfigException
 	 */
-	protected function parseParams($params): void {
+	protected function parseParams(array $params): void {
 		$this->validateParams($params);
 
 		$this->api_url = $params[BeeSwarm::OPTION_HOST_URL];
@@ -241,7 +239,7 @@ trait BeeSwarmTrait {
 		$curl->setAuthorization($this->access_key, CURLAUTH_ANY);
 
 		$result = $curl->exec(true);
-		$reference = (isset($result['reference']) ? $result['reference'] : null);
+		$reference = ($result['reference'] ?? null);
 
 		if (!isset($reference)) {
 			throw new SwarmException('Failed to upload file to '.$this->id.': '.$result['message']);
