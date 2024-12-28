@@ -30,17 +30,17 @@ script('files_external_ethswarm', 'settings');
 	<?php
 	// Get configured storage mounts from parameters
 	$mounts = json_decode($_['mounts'], true);
-	$mountIds = array_column($mounts, 'mount_id');
-	// Make comma-seperated list of storageIds to use in hidden control in this form.
-	$controlmountIds = implode(",", $mountIds);
+$mountIds = array_column($mounts, 'mount_id');
+// Make comma-seperated list of storageIds to use in hidden control in this form.
+$controlmountIds = implode(',', $mountIds);
 
-	foreach ($mounts as $mount) :
-		$mountId = $mount['mount_id'];
-		$mountName = $mount['mount_name'];
-		$encrypted = $mount['encrypt'];
-		$batchId = isset($mount['batchid']) ? $mount['batchid'] : "";
-		$batchBalance = isset($mount['batchbalance']) ? $mount['batchbalance'] : "";
-		$chequeBalance = isset($mount['chequebalance']) ? $mount['chequebalance'] : "";
+foreach ($mounts as $mount) :
+	$mountId = $mount['mount_id'];
+	$mountName = $mount['mount_name'];
+	$encrypted = $mount['encrypt'];
+	$batchId = isset($mount['batchid']) ? $mount['batchid'] : '';
+	$batchBalance = isset($mount['batchbalance']) ? $mount['batchbalance'] : '';
+	$chequeBalance = isset($mount['chequebalance']) ? $mount['chequebalance'] : '';
 	?>
 	<div>
 		<label>
@@ -52,7 +52,7 @@ script('files_external_ethswarm', 'settings');
 			<span class="label"><?php p($l->t('Allow encryption')) ?></span>
 			<?php
 			if ($encrypted) {
-				$checked = "checked";
+				$checked = 'checked';
 			}?>
 			<span><input id="beeswarm_encrypt_<?php p($mountId); ?>" type="checkbox" <?php p($checked) ?>/></span>
 		</label>
@@ -80,5 +80,5 @@ script('files_external_ethswarm', 'settings');
 	<?php endforeach;	?>
 	<input id="mountsIds" type="hidden" value='<?php p($controlmountIds);?>'>
 
-	<button id="beeswarm-save-settings"><?php p($l->t("Save")); ?></button>
+	<button id="beeswarm-save-settings"><?php p($l->t('Save')); ?></button>
 </div>
