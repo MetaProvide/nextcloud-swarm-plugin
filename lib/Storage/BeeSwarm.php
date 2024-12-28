@@ -81,8 +81,6 @@ class BeeSwarm extends Common {
 	private LoggerInterface $logger;
 
 	/**
-	 * @param mixed $params
-	 *
 	 * @throws StorageBadConfigException
 	 */
 	public function __construct($params) {
