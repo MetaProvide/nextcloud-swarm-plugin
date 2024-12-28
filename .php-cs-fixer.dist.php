@@ -10,6 +10,7 @@ $config = new Config();
 $config
 	->getFinder()
 	->ignoreVCSIgnored(true)
+	->notPath('dev-environment')
 	->notPath('build')
 	->notPath('l10n')
 	->notPath('src')
