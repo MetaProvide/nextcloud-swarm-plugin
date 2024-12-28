@@ -34,3 +34,8 @@ jobs:
 
       - name: Commit changes
         uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: fix code style"
+          commit_options: "--no-verify"
+          commit_user_name: "GitHub Actions"
+          commit_user_email: "github-actions[bot]@users.noreply.github.com"
