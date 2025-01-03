@@ -26,6 +26,7 @@ declare(strict_types=1);
 
 namespace OCA\Files_External_Ethswarm\Db;
 
+use OC;
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\AppFramework\Db\QBMapper;
@@ -112,7 +113,7 @@ class SwarmFileMapper extends QBMapper
 	{
 		$swarm = new SwarmFile();
 		$swarm->setName($path);
-		$swarm->setMimeType(OC::$server->get(IMimeTypeLoader::class)->getId("httpd/unix-directory"));
+		$swarm->setMimetype(OC::$server->get(IMimeTypeLoader::class)->getId('httpd/unix-directory'));
 		$swarm->setSize(1);
 		$swarm->setStorageMtime(time());
 		$swarm->setStorage($storage);
