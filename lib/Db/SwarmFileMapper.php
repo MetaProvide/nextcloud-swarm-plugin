@@ -111,7 +111,7 @@ class SwarmFileMapper extends QBMapper
 	{
 		$swarm = new SwarmFile();
 		$swarm->setName($path);
-		$swarm->setMimeType(OC::$server->get(IMimeTypeLoader::class)->getId("httpd/unix-directory"));
+		$swarm->setMimetype(OC::$server->get(IMimeTypeLoader::class)->getId('httpd/unix-directory'));
 		$swarm->setSize(1);
 		$swarm->setStorageMtime(time());
 		$swarm->setStorage($storage);
