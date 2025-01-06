@@ -1,9 +1,8 @@
 <?php
+
 /**
  * @copyright Copyright (c) 2022, MetaProvide Holding EKF
- *
  * @author Ron Trevor <ecoron@proton.me>
- *
  * @license GNU AGPL version 3 or any later version
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,7 +17,6 @@
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
  */
 
 namespace OCA\Files_External_Ethswarm\Auth;
@@ -28,26 +26,22 @@ use OCA\Files_External\Lib\DefinitionParameter;
 use OCP\IL10N;
 
 /**
- * Basic Http Authentication
+ * Basic Http Authentication.
  */
-class License extends AuthMechanism
-{
+class License extends AuthMechanism {
 	/** @const string */
 	public const SCHEME_ACCESS_KEY = 'access_key';
 
-	/**
-	 * @param IL10N $l
-	 */
-	public function __construct(IL10N $l)
-	{
+	public function __construct(IL10N $l) {
 		$this
 			->setIdentifier('access:key')
 			->setScheme(self::SCHEME_ACCESS_KEY)
 			->setText($l->t('License'))
 			->addParameters([
 				(new DefinitionParameter(self::SCHEME_ACCESS_KEY, $l->t('Access Key')))
-					->setTooltip($l->t("License Access Key"))
+					->setTooltip($l->t('License Access Key'))
 					->setType(DefinitionParameter::VALUE_PASSWORD),
-			]);
+			])
+		;
 	}
 }

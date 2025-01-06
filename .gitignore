@@ -3,7 +3,7 @@
 /build
 /dev-environment
 js/nextcloud-swarm-plugin*.*
-/.php_cs.cache
+/.php-cs-fixer.cache
 
 # Package Manages
 /node_modules
