@@ -24,34 +24,25 @@ declare(strict_types=1);
 namespace OCA\Files_External_Ethswarm\AppInfo;
 
 use OCA\Files\Event\LoadAdditionalScriptsEvent;
-use OCA\Files_External_Ethswarm\AppInfo\AppConstants;
-use OCA\Files_External_Ethswarm\Backend\BeeSwarm;
-use OCA\Files_External_Ethswarm\Auth\License;
+use OCA\Files_External\Lib\Config\IAuthMechanismProvider;
 use OCA\Files_External\Lib\Config\IBackendProvider;
 use OCA\Files_External\Service\BackendService;
-use OCA\Files_External\Lib\Config\IAuthMechanismProvider;
+use OCA\Files_External_Ethswarm\Auth\License;
+use OCA\Files_External_Ethswarm\Backend\BeeSwarm;
 use OCA\Files_External_Ethswarm\Notification\Notifier;
 use OCP\AppFramework\App;
 use OCP\AppFramework\Bootstrap\IBootContext;
 use OCP\AppFramework\Bootstrap\IBootstrap;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use OCP\EventDispatcher\IEventDispatcher;
-use OCP\IConfig;
 use OCP\Util;
-use Psr\Log\LoggerInterface;
-use Sentry;
 
-/**
- * @package OCA\Files_external_beeswarm\AppInfo
- */
 class Application extends App implements IBootstrap, IBackendProvider, IAuthMechanismProvider {
-
 	public function __construct(array $urlParams = []) {
 		parent::__construct(AppConstants::APP_NAME, $urlParams);
 	}
 
-	public function getBackends()
-	{
+	public function getBackends() {
 		$container = $this->getContainer();
 
 		return [
@@ -118,9 +109,7 @@ class Application extends App implements IBootstrap, IBackendProvider, IAuthMech
 		$this->getAuthMechanisms();
 	}
 
-	public function registerEventsScripts(IEventDispatcher $dispatcher)
-	{
-	}
+	public function registerEventsScripts(IEventDispatcher $dispatcher) {}
 
 	public function register(IRegistrationContext $context): void {
 		// Register AddContentSecurityPolicyEvent for CSPListener class listenser here

@@ -13,37 +13,33 @@ use Sabre\DAV\ServerPlugin;
 use Sabre\HTTP\RequestInterface;
 use Sabre\HTTP\ResponseInterface;
 
-class PostPlugin extends ServerPlugin
-{
+class PostPlugin extends ServerPlugin {
 	/** @var Server */
 	private $server;
 
 	/** @var EthswarmService */
 	private $EthswarmService;
 
-	public function __construct(EthswarmService $service)
-	{
+	public function __construct(EthswarmService $service) {
 		$this->EthswarmService = $service;
 	}
 
-	public function initialize(Server $server)
-	{
+	public function initialize(Server $server) {
 		$this->server = $server;
 		$this->server->on('method:POST', [$this, 'httpPost']);
 	}
 
-	public function httpPost(RequestInterface $request, ResponseInterface $response)
-	{
+	public function httpPost(RequestInterface $request, ResponseInterface $response) {
 		$action = $request->getRawServerValue('HTTP_HEJBIT_ACTION') ?? null;
 
-		if ($action === 'hide') {
+		if ('hide' === $action) {
 			$path = $request->getPath();
 			$node = $this->server->tree->getNodeForPath($path);
-			if (($node instanceof \OCA\DAV\Connector\Sabre\File)) {
+			if ($node instanceof File) {
 				$storageid = $node->getFileInfo()->getStorage()->getCache()->getNumericStorageId();
 				$filename = $node->getFileInfo()->getinternalPath();
 			}
-			if (($node instanceof \OCA\DAV\Connector\Sabre\Directory)) {
+			if ($node instanceof Directory) {
 				$storageid = $node->getFileInfo()->getStorage()->getCache()->getNumericStorageId();
 				$filename = $node->getFileInfo()->getinternalPath();
 			}
@@ -57,14 +53,14 @@ class PostPlugin extends ServerPlugin
 
 			return false;
 		}
-		else if ($action === 'unhide') {
-            $path = $request->getPath();
+		if ('unhide' === $action) {
+			$path = $request->getPath();
 			$node = $this->server->tree->getNodeForPath($path);
-			if (($node instanceof \OCA\DAV\Connector\Sabre\File)) {
+			if ($node instanceof File) {
 				$storageid = $node->getFileInfo()->getStorage()->getCache()->getNumericStorageId();
 				$filename = $node->getFileInfo()->getinternalPath();
 			}
-			if (($node instanceof \OCA\DAV\Connector\Sabre\Directory)) {
+			if ($node instanceof Directory) {
 				$storageid = $node->getFileInfo()->getStorage()->getCache()->getNumericStorageId();
 				$filename = $node->getFileInfo()->getinternalPath();
 			}
@@ -75,15 +71,15 @@ class PostPlugin extends ServerPlugin
 			$response->setHeader('Content-Length', '0');
 
 			return false;
-        }
-        // No Hejbit-action, allow other plugins to handle the request
-        else if ($action === null) {
-            return true;
-        }
-        // Invalid Hejbit-action, throw exception
-        else {
-            $exMessage = 'There was no plugin in the system that was willing to handle a POST method with this action > '.$action.'.';
-            throw new \Sabre\DAV\Exception\NotImplemented($exMessage);
-        }
+		}
+		// No Hejbit-action, allow other plugins to handle the request
+		if (null === $action) {
+			return true;
+		}
+		// Invalid Hejbit-action, throw exception
+
+		$exMessage = 'There was no plugin in the system that was willing to handle a POST method with this action > '.$action.'.';
+
+		throw new NotImplemented($exMessage);
 	}
 }

@@ -21,7 +21,6 @@
 
 namespace OCA\Files_External_Ethswarm\Backend;
 
-use OCA\Files_External_Ethswarm\AppInfo\AppConstants;
 use OCA\Files_External\Lib\Backend\Backend;
 use OCA\Files_External\Lib\DefinitionParameter;
 use OCA\Files_External\Lib\StorageConfig;
@@ -57,12 +56,8 @@ class BeeSwarm extends Backend {
 			->setStorageClass('\OCA\Files_External_Ethswarm\Storage\BeeSwarm')
 			->setText($l->t('HejBit-Swarm'))
 			->addParameters([
-				(new DefinitionParameter(
-					self::OPTION_HOST_URL,
-					$l->t('Access Server'),
-					'app.hejbit.com'
-				))
-					->setTooltip($l->t('Access Server')),
+				(new DefinitionParameter(self::OPTION_HOST_URL, $l->t('Server URL')))
+					->setTooltip($l->t('License Server URL')),
 			])->addAuthScheme(License::SCHEME_ACCESS_KEY)
 		;
 	}
