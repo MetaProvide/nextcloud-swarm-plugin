@@ -72,9 +72,9 @@ Once setup and configured, the Decentralized Storage is ready to use.
 
 ### Additional Integration with Moodle
 
-You can also enhance your experience by integrating the Hejbit Swarm plugin with the **Moodle Nextcloud plugin**. This integration allows users to access decentralized storage directly within the Moodle environment, providing a seamless experience for educational content management. For more information on how to set up this integration, visit the ![Moodle Nextcloud repository documentation](https://docs.moodle.org/405/en/Nextcloud_repository).
+You can also enhance your experience by integrating the Hejbit Swarm plugin with the **Moodle Nextcloud plugin**. This integration allows users to access decentralized storage directly within the Moodle environment, providing a seamless experience for educational content management. For more information on how to set up this integration, visit the [Moodle Nextcloud repository documentation](https://docs.moodle.org/405/en/Nextcloud_repository).
 
-For detailed guidance on using the integrated features, please refer to the ![Metaprovide Learning Platform](https://learning.metaprovide.org/login/index.php).
+For detailed guidance on using the integrated features, please refer to the [Metaprovide Learning Platform](https://learning.metaprovide.org/login/index.php).
 
 ### Get Hejbit License
 
