@@ -12,8 +12,7 @@ This plugin integrates [Swarm](https://www.ethswarm.org/) (a decentralized, bloc
 -   [Setup and Installation](#setup-and-installation)
 -   [Usage](#usage)
     -   [Settings](#settings)
-    -   [Using Hejbit Swarm](#using-hejbit-swarm)
-    -   [Additional Integration with Moodle](#additional-integration-with-moodle)
+    -   [Usage](#usage)
 -   [Get Hejbit License](#get-hejbit-license)
 -   [License](#license)
 
@@ -21,7 +20,7 @@ This plugin integrates [Swarm](https://www.ethswarm.org/) (a decentralized, bloc
 
 Before using the plugin, ensure you have the following:
 
--   An active Nextcloud instance (version 29,30 or 31)
+-   An active Nextcloud instance (version 27,28 or 29)
 -   A valid license and URL to activate the service
     -   [Request Your Free Nextcloud Swarm Plugin Trial License](https://metaprovide.org/hejbit/start)
 
@@ -77,7 +76,7 @@ You can also enhance your experience by integrating the Hejbit Swarm plugin with
 
 For detailed guidance on using the integrated features, please refer to the [Metaprovide Learning Platform](https://learning.metaprovide.org/login/index.php).
 
-## Get Hejbit License
+### Get Hejbit License
 
 Experience the future of data storage with 5GB of free, decentralized storage on the Ethereum Swarm network. Our plugin seamlessly integrates with your existing Nextcloud interface, providing true data sovereignty without the complexity.
 
