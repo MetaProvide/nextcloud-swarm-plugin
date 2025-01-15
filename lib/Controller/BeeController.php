@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 /**
  * @copyright Copyright (c) 2023, MetaProvide Holding EKF
- *
  * @author Ron Trevor <ecoron@proton.me>
- *
  * @license GNU AGPL version 3 or any later version
  *
  * This program is free software: you can redistribute it and/or modify
@@ -21,33 +19,27 @@ declare(strict_types=1);
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
  */
 
 namespace OCA\Files_External_Ethswarm\Controller;
 
+use OCA\Files_External_Ethswarm\Settings\Admin;
 use OCP\AppFramework\Controller;
+use OCP\AppFramework\Http;
+use OCP\AppFramework\Http\DataResponse;
 use OCP\IConfig;
 use OCP\IRequest;
-use OCA\Files_External_Ethswarm\Settings\Admin;
-use OCP\AppFramework\Http\DataResponse;
-use OCP\AppFramework\Http;
 
 class BeeController extends Controller {
+	/** @var string */
+	protected $appName;
 
 	/** @var Admin */
 	private $admin;
 
-	/** @var string */
-	protected $appName;
-
 	/** @var IConfig */
 	private $config;
 
-	/**
-	 * @param IConfig $config
-	 * @param IRequest $request
-	 */
 	public function __construct(
 		string $appName,
 		IConfig $config,
@@ -61,42 +53,50 @@ class BeeController extends Controller {
 
 	/**
 	 * @NoCSRFRequired
+	 *
 	 * @NoAdminRequired
 	 * Create a new postage batch stamp
+	 *
 	 * @return \DataResponse
 	 */
-	public function createPostageBatch(): DataResponse  {
-		if ($this->request->getParam("postageBatch")) {
-			$postageBatch = json_decode($this->request->getParam("postageBatch"), true);
+	public function createPostageBatch(): DataResponse {
+		if ($this->request->getParam('postageBatch')) {
+			$postageBatch = json_decode($this->request->getParam('postageBatch'), true);
 
-			$response_data = $this->admin->buyPostageStamp($postageBatch["amount"],$postageBatch["depth"],$postageBatch["mount_urloptions"]);
+			$response_data = $this->admin->buyPostageStamp($postageBatch['amount'], $postageBatch['depth'], $postageBatch['mount_urloptions']);
 
-			if (isset($response_data["batchID"])) {
-				return new DataResponse(array('batchID' => $response_data["batchID"]), Http::STATUS_OK);
-			} else if (isset($response_data["message"])) {
-				return new DataResponse(array('msg' => $response_data["message"]), $response_data["code"]);
+			if (isset($response_data['batchID'])) {
+				return new DataResponse(['batchID' => $response_data['batchID']], Http::STATUS_OK);
+			}
+			if (isset($response_data['message'])) {
+				return new DataResponse(['msg' => $response_data['message']], $response_data['code']);
 			}
 		}
-		return new DataResponse(array('msg' => "Error in request"), Http::STATUS_CONFLICT);
+
+		return new DataResponse(['msg' => 'Error in request'], Http::STATUS_CONFLICT);
 	}
 
 	/**
 	 * @NoCSRFRequired
+	 *
 	 * @NoAdminRequired
 	 * Top up an existing batch stamp based on the batchID
+	 *
 	 * @return \DataResponse
 	 */
 	public function topUpBatch(): DataResponse {
-		if ($this->request->getParam("postageBatch")) {
-			$postageBatch = json_decode($this->request->getParam("postageBatch"), true);
+		if ($this->request->getParam('postageBatch')) {
+			$postageBatch = json_decode($this->request->getParam('postageBatch'), true);
 
-			$response_data = $this->admin->topUpPostageStamp($postageBatch["activeBatchId"],$postageBatch["topUpValue"],$postageBatch["mount_urloptions"]);
-			if (isset($response_data["batchID"])) {
-				return new DataResponse(array('batchID' => $response_data["batchID"]), Http::STATUS_OK);
-			} else if (isset($response_data["message"])) {
-				return new DataResponse(array('msg' => $response_data["message"]), $response_data["code"]);
+			$response_data = $this->admin->topUpPostageStamp($postageBatch['activeBatchId'], $postageBatch['topUpValue'], $postageBatch['mount_urloptions']);
+			if (isset($response_data['batchID'])) {
+				return new DataResponse(['batchID' => $response_data['batchID']], Http::STATUS_OK);
+			}
+			if (isset($response_data['message'])) {
+				return new DataResponse(['msg' => $response_data['message']], $response_data['code']);
 			}
 		}
-		return new DataResponse(array('msg' => "Error in request"), Http::STATUS_CONFLICT);
+
+		return new DataResponse(['msg' => 'Error in request'], Http::STATUS_CONFLICT);
 	}
 }
