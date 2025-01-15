@@ -1,6 +1,7 @@
 {
 	"autoload-dev": {
 		"psr-4": {
+			"OC\\": "dev-environment/nextcloud_source/lib/",
 			"OCP\\": "dev-environment/nextcloud_source/lib/public/",
 			"OCA\\Files_External\\": "dev-environment/nextcloud_source/apps/files_external/lib/",
 			"OCA\\Files_External_Ethswarm\\": "lib/"
@@ -10,7 +11,12 @@
 		"ext-curl": "*"
 	},
 	"require-dev": {
-		"nextcloud/coding-standard": "^0.5.0",
-		"christophwurst/nextcloud": "^22"
+		"nextcloud/coding-standard": "^1.3.2",
+		"ext-fileinfo": "*",
+		"friendsofphp/php-cs-fixer": "*"
+	},
+	"scripts": {
+		"cs:check": "./vendor/php-cs-fixer/shim/php-cs-fixer.phar fix --dry-run --diff",
+		"cs:fix": "./vendor/php-cs-fixer/shim/php-cs-fixer.phar fix"
 	}
 }

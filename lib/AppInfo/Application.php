@@ -1,9 +1,8 @@
 <?php
+
 /**
  * @copyright Copyright (c) 2022, MetaProvide Holding EKF
- *
  * @author Ron Trevor <ecoron@proton.me>
- *
  * @license GNU AGPL version 3 or any later version
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,7 +17,6 @@
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
  */
 
 declare(strict_types=1);
@@ -26,36 +24,29 @@ declare(strict_types=1);
 namespace OCA\Files_External_Ethswarm\AppInfo;
 
 use OCA\Files\Event\LoadAdditionalScriptsEvent;
-use OCA\Files_External_Ethswarm\AppInfo\AppConstants;
-use OCA\Files_External_Ethswarm\Backend\BeeSwarm;
-use OCA\Files_External_Ethswarm\Auth\License;
+use OCA\Files_External\Lib\Config\IAuthMechanismProvider;
 use OCA\Files_External\Lib\Config\IBackendProvider;
 use OCA\Files_External\Service\BackendService;
-use OCA\Files_External\Lib\Config\IAuthMechanismProvider;
+use OCA\Files_External_Ethswarm\Auth\License;
+use OCA\Files_External_Ethswarm\Backend\BeeSwarm;
 use OCA\Files_External_Ethswarm\Notification\Notifier;
 use OCP\AppFramework\App;
-use OCP\Util;
-use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use OCP\AppFramework\Bootstrap\IBootContext;
 use OCP\AppFramework\Bootstrap\IBootstrap;
+use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use OCP\EventDispatcher\IEventDispatcher;
+use OCP\Util;
 
-/**
- * @package OCA\Files_external_beeswarm\AppInfo
- */
 class Application extends App implements IBootstrap, IBackendProvider, IAuthMechanismProvider {
-
 	public function __construct(array $urlParams = []) {
 		parent::__construct(AppConstants::APP_NAME, $urlParams);
 	}
 
-	/**
-	 * @{inheritdoc}
-	 */
 	public function getBackends() {
 		$container = $this->getContainer();
+
 		return [
-			$container->query(BeeSwarm::class)
+			$container->query(BeeSwarm::class),
 		];
 	}
 
@@ -82,11 +73,9 @@ class Application extends App implements IBootstrap, IBackendProvider, IAuthMech
 		});
 
 		$this->getAuthMechanisms();
-
 	}
 
-	public function registerEventsScripts(IEventDispatcher $dispatcher) {
-	}
+	public function registerEventsScripts(IEventDispatcher $dispatcher) {}
 
 	public function register(IRegistrationContext $context): void {
 		// Register AddContentSecurityPolicyEvent for CSPListener class listenser here
@@ -95,6 +84,7 @@ class Application extends App implements IBootstrap, IBackendProvider, IAuthMech
 
 	public function getAuthMechanisms() {
 		$container = $this->getContainer();
+
 		return [
 			// AuthMechanism::BASIC HTTP mechanisms
 			$container->get(License::class),
