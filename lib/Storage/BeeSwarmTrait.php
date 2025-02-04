@@ -114,6 +114,7 @@ trait BeeSwarmTrait {
 			CURLOPT_CUSTOMREQUEST => 'POST',
 			CURLOPT_POSTFIELDS => [
 				'file' => new CURLFile($tempFile, $mimetype, basename($path)),
+				'name' => basename($path),
 			],
 		]);
 		$response = $curl->exec(true);
