@@ -39,7 +39,7 @@ class License extends AuthMechanism {
 			->setText($l->t('Access Key'))
 			->addParameters([
 				(new DefinitionParameter(self::SCHEME_ACCESS_KEY, $l->t('Access Key')))
-					->setTooltip($l->t('License Access Key'))
+					->setTooltip($l->t('Access Key'))
 					->setType(DefinitionParameter::VALUE_PASSWORD),
 			])
 		;
