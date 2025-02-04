@@ -58,10 +58,10 @@ class BeeSwarm extends Backend {
 			->addParameters([
 				(new DefinitionParameter(
 					self::OPTION_HOST_URL,
-					$l->t('Access Key Server URL'),
+					$l->t('Access Server'),
 					'app.hejbit.com'
 				))
-					->setTooltip($l->t('Access Key Server URL')),
+					->setTooltip($l->t('Access Server')),
 			])->addAuthScheme(License::SCHEME_ACCESS_KEY)
 		;
 	}
