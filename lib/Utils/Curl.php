@@ -10,8 +10,6 @@ class Curl {
 		CURLOPT_MAXREDIRS => 10,
 		CURLOPT_FOLLOWLOCATION => true,
 		CURLOPT_RETURNTRANSFER => true,
-		CURLOPT_SSL_VERIFYHOST => true,
-		CURLOPT_SSL_VERIFYPEER => true,
 	];
 
 	protected CurlHandle $handler;
@@ -82,10 +80,10 @@ class Curl {
 	 * @return bool[]
 	 */
 	private static function checkSSLOption(): array {
-		return [
-			CURLOPT_SSL_VERIFYHOST => !Env::isDevelopment(),
-			CURLOPT_SSL_VERIFYPEER => !Env::isDevelopment(),
-		];
+		return Env::isDevelopment() ? [
+			CURLOPT_SSL_VERIFYHOST => false,
+			CURLOPT_SSL_VERIFYPEER => false,
+		] : [];
 	}
 
 	/**
