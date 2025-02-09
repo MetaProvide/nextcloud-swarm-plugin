@@ -13,19 +13,20 @@ After running the \\cli\\dev\\windows\\clean.bat and start.bat files (which remo
     or
 
     returns the error "base table or view not found: 1146 Table 'nextcloud.oc_appconfig' doesn't exist":
-  
+
     ![missing tables in nextcloud database](https://github.com/user-attachments/assets/e0c12d9f-427c-45ce-ad5b-4ca675bbe4f3)
 
 -   then check the /config/config.php on the nextcloud container for the following entries:
-    
-    Expected entries in config.php](https://github.com/user-attachments/assets/de1a11a3-3749-469e-9502-3a05fc3e4d9f)
+
+    ![Expected entries in config.php](https://github.com/user-attachments/assets/de1a11a3-3749-469e-9502-3a05fc3e4d9f)
 
     -   If entries are missing (namely that identify the dbhost, dbuser, dbpassword etc), then this could be due to Windows build process not being able to read the \\.env file in the docker-compose.yaml file. The cause of this is unknown. As a workaround, it is good practice to set the default value of environment variables inside the docker-compose (and not rely on the settings defined in \\.env file) eg:
-      
+
     ![NC_VERSION default value is set in the docker-compose](https://github.com/user-attachments/assets/3492e330-081d-41fa-b3ab-b912a17e632a)
 
     -   Note: After any changes to docker-compose, remember to rebuild the docker-compose:
-        -   docker-compose --profile dev up -d --force-recreate --remove-orphans --build
+
+        `docker-compose --profile dev up -d --force-recreate --remove-orphans --build`
 
 ##### Known issue: Local path containimng NC source code has folder(s) with special character.
 
