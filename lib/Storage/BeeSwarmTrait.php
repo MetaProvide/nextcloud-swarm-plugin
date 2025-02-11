@@ -26,6 +26,7 @@ use OCA\Files_External_Ethswarm\Auth\License;
 use OCA\Files_External_Ethswarm\Backend\BeeSwarm;
 use OCA\Files_External_Ethswarm\Exception\SwarmException;
 use OCA\Files_External_Ethswarm\Utils\Curl;
+use OCP\Files\StorageNotAvailableException;
 use OCP\Files\StorageBadConfigException;
 use Safe\Exceptions\CurlException;
 
@@ -163,13 +164,13 @@ trait BeeSwarmTrait {
 		$endpoint = $this->api_url.'/api/readiness';
 
 		$curl = new Curl($endpoint, authorization: $this->access_key);
-		$response = $curl->exec(true);
+		$response = $curl->exec();
 
-		if (!$curl->isResponseSuccessful() and !isset($response['status'])) {
-			throw new SwarmException('Failed to connect to HejBit: '.$response['message']);
+		if (!$curl->isResponseSuccessful()) {
+			throw new StorageNotAvailableException('Failed to connect to HejBit');
 		}
 
-		return 'ok' === $response['status'];
+		return '{"status":"ok"}' === $response;
 	}
 
 	/**
