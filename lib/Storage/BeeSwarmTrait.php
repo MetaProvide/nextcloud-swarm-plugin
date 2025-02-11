@@ -26,8 +26,8 @@ use OCA\Files_External_Ethswarm\Auth\License;
 use OCA\Files_External_Ethswarm\Backend\BeeSwarm;
 use OCA\Files_External_Ethswarm\Exception\SwarmException;
 use OCA\Files_External_Ethswarm\Utils\Curl;
-use OCP\Files\StorageNotAvailableException;
 use OCP\Files\StorageBadConfigException;
+use OCP\Files\StorageNotAvailableException;
 use Safe\Exceptions\CurlException;
 
 trait BeeSwarmTrait {
