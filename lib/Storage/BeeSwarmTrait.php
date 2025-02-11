@@ -122,7 +122,7 @@ trait BeeSwarmTrait {
 		}
 
 		$link = $this->getLink('/api/download');
-		$curl = new Curl($link->url."/$reference", authorization: $link->token);
+		$curl = new Curl($link->url."/{$reference}", authorization: $link->token);
 		$response = $curl->exec();
 
 		if (!$curl->isResponseSuccessful()) {
