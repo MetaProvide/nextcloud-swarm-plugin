@@ -74,8 +74,8 @@ trait BeeSwarmTrait {
 	/**
 	 * @throws CurlException|HejBitException
 	 */
-	private function getUploadLink(): string {
-		$endpoint = $this->api_url.'/api/upload';
+	private function getLink(string $endpoint): LinkDto {
+		$endpoint = $this->api_url.$endpoint;
 		$curl = new Curl($endpoint, authorization: $this->access_key);
 		$response = $curl->exec(true);
 
@@ -83,39 +83,25 @@ trait BeeSwarmTrait {
 			throw new HejBitException('Failed to access HejBit: '.$response['message']);
 		}
 
-		return $response['url'];
+		return new LinkDto($response['url'], $response['token'], $response['method']);
 	}
 
 	/**
 	 * @throws CurlException|HejBitException
 	 */
-	private function getDownloadLink(string $reference): string {
-		$endpoint = $this->api_url.'/api/download';
-		$curl = new Curl($endpoint, authorization: $this->access_key);
-		$response = $curl->exec(true);
-
-		if (!$curl->isResponseSuccessful()) {
-			throw new SwarmException('Failed to connect to HejBit: '.$response['message']);
-		}
-
-		return $response['url'].DIRECTORY_SEPARATOR.$reference;
-	}
-
-	/**
-	 * @throws CurlException|SwarmException
-	 */
 	private function uploadSwarm(string $path, string $tempFile, string $mimetype): string {
-		if ($this->isVersion(self::INFRASTRUCTURE_VERSION_GATEWAY)) {
+		if ($this->isVersion()) {
 			return $this->uploadSwarmV1($path, $tempFile, $mimetype);
 		}
 
-		$curl = new Curl($this->getUploadLink(), [
+		$link = $this->getLink('/api/upload');
+		$curl = new Curl($link->url, [
 			CURLOPT_CUSTOMREQUEST => 'POST',
 			CURLOPT_POSTFIELDS => [
 				'file' => new CURLFile($tempFile, $mimetype, basename($path)),
 				'name' => basename($path),
 			],
-		]);
+		], authorization: $link->token);
 		$response = $curl->exec(true);
 
 		if (!$curl->isResponseSuccessful() || !isset($response['reference'])) {
@@ -131,11 +117,12 @@ trait BeeSwarmTrait {
 	 * @throws CurlException|HejBitException
 	 */
 	private function downloadSwarm(string $reference) {
-		if ($this->isVersion(self::INFRASTRUCTURE_VERSION_GATEWAY)) {
+		if ($this->isVersion()) {
 			return $this->downloadSwarmV1($reference);
 		}
 
-		$curl = new Curl($this->getDownloadLink($reference));
+		$link = $this->getLink('/api/download');
+		$curl = new Curl($link->url."/$reference", authorization: $link->token);
 		$response = $curl->exec();
 
 		if (!$curl->isResponseSuccessful()) {
@@ -155,7 +142,7 @@ trait BeeSwarmTrait {
 	 * @throws CurlException|HejBitException
 	 */
 	private function checkConnection(): bool {
-		if ($this->isVersion(self::INFRASTRUCTURE_VERSION_GATEWAY)) {
+		if ($this->isVersion()) {
 			return $this->checkConnectionV1();
 		}
 
