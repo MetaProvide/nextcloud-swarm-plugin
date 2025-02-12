@@ -65,11 +65,15 @@ class Curl {
 	 * @throws CurlException
 	 */
 	public function isResponseSuccessful(): bool {
-		if (0 === $this->getInfo(CURLINFO_HTTP_CODE)) {
+		if (0 === $this->getStatusCode()) {
 			throw new CurlException('Curl handler has not been executed');
 		}
 
-		return 200 === $this->getInfo(CURLINFO_HTTP_CODE) || 201 === $this->getInfo(CURLINFO_HTTP_CODE);
+		return $this->getStatusCode() < 400;
+	}
+
+	public function getStatusCode(): int {
+		return $this->getInfo(CURLINFO_HTTP_CODE);
 	}
 
 	private static function getDefaultOptions(): array {

@@ -29,6 +29,7 @@ use OCA\Files_External_Ethswarm\Exception\CurlException;
 use OCA\Files_External_Ethswarm\Exception\HejBitException;
 use OCA\Files_External_Ethswarm\Utils\Curl;
 use OCP\Files\StorageBadConfigException;
+use OCP\Files\StorageNotAvailableException;
 
 trait BeeSwarmTrait {
 	private const INFRASTRUCTURE_VERSION_GATEWAY = 1;
@@ -139,7 +140,7 @@ trait BeeSwarmTrait {
 	/**
 	 * Returns the connection status of Swarm node.
 	 *
-	 * @throws CurlException|HejBitException
+	 * @throws CurlException|StorageNotAvailableException
 	 */
 	private function checkConnection(): bool {
 		if ($this->isVersion()) {
@@ -149,13 +150,22 @@ trait BeeSwarmTrait {
 		$endpoint = $this->api_url.'/api/readiness';
 
 		$curl = new Curl($endpoint, authorization: $this->access_key);
-		$response = $curl->exec(true);
+		$curl->exec();
+		$statusCode = $curl->getStatusCode();
 
-		if (!$curl->isResponseSuccessful() and !isset($response['status'])) {
-			throw new HejBitException('Failed to connect to HejBit: '.$response['message']);
+		if (!$curl->isResponseSuccessful()) {
+			if (401 === $statusCode) {
+				throw new StorageNotAvailableException('Invalid access key');
+			}
+
+			throw new StorageNotAvailableException('Failed to connect to HejBit');
 		}
 
-		return 'ok' === $response['status'];
+		if (204 !== $statusCode) {
+			throw new StorageNotAvailableException('Failed to connect to HejBit');
+		}
+
+		return true;
 	}
 
 	/**
@@ -167,11 +177,10 @@ trait BeeSwarmTrait {
 		$curl = new Curl($endpoint);
 		$curl->setAuthorization($this->access_key, CURLAUTH_ANY);
 
-		$request = new Curl($endpoint, authorization: $this->access_key);
-		$request->get();
-		$statusCode = $request->getStatusCode();
+		$output = $curl->exec();
+		$statusCode = $curl->getStatusCode();
 
-		return 200 === $httpCode and 'OK' === $output;
+		return 200 === $statusCode and 'OK' === $output;
 	}
 
 	/**
