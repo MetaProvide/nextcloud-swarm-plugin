@@ -27,8 +27,7 @@ use OCP\AppFramework\Controller;
 use OCP\IConfig;
 use OCP\IRequest;
 
-class SettingsController extends Controller
-{
+class SettingsController extends Controller {
 	/** @var string */
 	protected $appName;
 
@@ -47,26 +46,20 @@ class SettingsController extends Controller
 	/**
 	 * Set the storage config settings.
 	 */
-	public function admin(): void
-	{
-
-
+	public function admin(): void {
 		// Handle telemetry setting
 		$telemetry = $this->request->getParam('telemetry');
-		if ($telemetry !== null) {
+		if (null !== $telemetry) {
 			$this->config->setSystemValue('telemetry.enabled', (bool) $telemetry);
 		}
 	}
 
 	/**
-	 * Get the current settings
-	 *
-	 * @return array
+	 * Get the current settings.
 	 */
-	public function getSettings(): array
-	{
+	public function getSettings(): array {
 		return [
-			'telemetry_enabled' => $this->config->getSystemValue('telemetry.enabled', false)
+			'telemetry_enabled' => $this->config->getSystemValue('telemetry.enabled', false),
 		];
 	}
 
@@ -76,11 +69,10 @@ class SettingsController extends Controller
 	 * @NoAdminRequired
 	 * Save the storage config settings
 	 */
-	public function save(): void
-	{
+	public function save(): void {
 		// Handle telemetry setting
 		$telemetry = $this->request->getParam('telemetry');
-		if ($telemetry !== null) {
+		if (null !== $telemetry) {
 			$this->config->setSystemValue('telemetry.enabled', (bool) $telemetry);
 		}
 	}
