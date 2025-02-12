@@ -18,5 +18,10 @@
 	"scripts": {
 		"cs:check": "./vendor/php-cs-fixer/shim/php-cs-fixer.phar fix --dry-run --diff",
 		"cs:fix": "./vendor/php-cs-fixer/shim/php-cs-fixer.phar fix"
+	},
+	"config": {
+		"allow-plugins": {
+			"php-http/discovery": true
+		}
 	}
 }

@@ -20,25 +20,27 @@ declare(strict_types=1);
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-return ['routes' => [
-	[
-		'name' => 'Settings#save',
-		'url' => '/save',
-		'verb' => 'POST',
-	],
-	[
-		'name' => 'Bee#createPostageBatch',
-		'url' => '/bee/createPostageBatch',
-		'verb' => 'POST',
-	],
-	[
-		'name' => 'Bee#verifyBeeNodeAccess',
-		'url' => '/bee/verifyBeeNodeAccess',
-		'verb' => 'POST',
-	],
-	[
-		'name' => 'Bee#topUpBatch',
-		'url' => '/bee/topUpBatch',
-		'verb' => 'POST',
-	],
-]];
+return [
+	'routes' => [
+		[
+			'name' => 'Settings#save',
+			'url' => '/settings',
+			'verb' => 'POST',
+		],
+		[
+			'name' => 'Bee#createPostageBatch',
+			'url' => '/bee/createPostageBatch',
+			'verb' => 'POST',
+		],
+		[
+			'name' => 'Bee#verifyBeeNodeAccess',
+			'url' => '/bee/verifyBeeNodeAccess',
+			'verb' => 'POST',
+		],
+		[
+			'name' => 'Bee#topUpBatch',
+			'url' => '/bee/topUpBatch',
+			'verb' => 'POST',
+		],
+	]
+];
