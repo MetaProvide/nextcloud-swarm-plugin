@@ -154,7 +154,7 @@ trait BeeSwarmTrait {
 	/**
 	 * Returns the connection status of Swarm node.
 	 *
-	 * @throws CurlException|SwarmException
+	 * @throws CurlException|StorageNotAvailableException
 	 */
 	private function checkConnection(): bool {
 		if ($this->isVersion(self::INFRASTRUCTURE_VERSION_GATEWAY)) {
@@ -164,13 +164,22 @@ trait BeeSwarmTrait {
 		$endpoint = $this->api_url.'/api/readiness';
 
 		$curl = new Curl($endpoint, authorization: $this->access_key);
-		$response = $curl->exec();
+		$curl->exec();
+		$statusCode = $curl->getInfo(CURLINFO_HTTP_CODE);
 
 		if (!$curl->isResponseSuccessful()) {
+			if (401 === $statusCode) {
+				throw new StorageNotAvailableException('Invalid access key');
+			} else {
+				throw new StorageNotAvailableException('Failed to connect to HejBit');
+			}
+		}
+
+		if (204 !== $statusCode) {
 			throw new StorageNotAvailableException('Failed to connect to HejBit');
 		}
 
-		return '{"status":"ok"}' === $response;
+		return true;
 	}
 
 	/**
@@ -183,9 +192,9 @@ trait BeeSwarmTrait {
 		$curl->setAuthorization($this->access_key, CURLAUTH_ANY);
 
 		$output = $curl->exec();
-		$httpCode = $curl->getInfo(CURLINFO_HTTP_CODE);
+		$statusCode = $curl->getStatusCode();
 
-		return 200 === $httpCode and 'OK' === $output;
+		return 200 === $statusCode and 'OK' === $output;
 	}
 
 	/**
