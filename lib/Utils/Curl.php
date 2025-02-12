@@ -3,7 +3,7 @@
 namespace OCA\Files_External_Ethswarm\Utils;
 
 use CurlHandle;
-use Safe\Exceptions\CurlException;
+use OCA\Files_External_Ethswarm\Exception\CurlException;
 
 class Curl {
 	private const DEFAULT_OPTIONS = [
