@@ -36,13 +36,18 @@ use OCP\AppFramework\Bootstrap\IBootstrap;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use OCP\EventDispatcher\IEventDispatcher;
 use OCP\Util;
+use Sentry;
 
-class Application extends App implements IBootstrap, IBackendProvider, IAuthMechanismProvider {
-	public function __construct(array $urlParams = []) {
+
+class Application extends App implements IBootstrap, IBackendProvider, IAuthMechanismProvider
+{
+	public function __construct(array $urlParams = [])
+	{
 		parent::__construct(AppConstants::APP_NAME, $urlParams);
 	}
 
-	public function getBackends() {
+	public function getBackends()
+	{
 		$container = $this->getContainer();
 
 		return [
@@ -50,7 +55,30 @@ class Application extends App implements IBootstrap, IBackendProvider, IAuthMech
 		];
 	}
 
-	public function boot(IBootContext $context): void {
+	public function boot(IBootContext $context): void
+	{
+		$container = $this->getContainer();
+		$config = $container->get('OCP\IConfig');
+
+		// Register autoloader
+		$autoloadPath = __DIR__ . '/../../vendor/autoload.php';
+		if (!file_exists($autoloadPath)) {
+			throw new \Exception('Vendor autoload.php not found at: ' . $autoloadPath);
+		}
+		require_once $autoloadPath;
+
+		// Initialize Sentry if telemetry is enabled
+		$environment = $config->getSystemValue('environment', 'production');
+		if ($config->getSystemValue('telemetry.enabled', false)) {
+			\Sentry\init([
+				'dsn' => AppConstants::TELEMETRY_URL,
+				'traces_sample_rate' => 1.0,//$environment === 'production' ? 0.2 : 1.0,
+				'environment' => $environment,
+			]);
+		}
+
+		throw new \OCA\Files_External_Ethswarm\Exception\BaseException('test');
+
 		$context->injectFn([$this, 'registerEventsScripts']);
 
 		$context->injectFn(function (BackendService $backendService) {
@@ -61,28 +89,33 @@ class Application extends App implements IBootstrap, IBackendProvider, IAuthMech
 		// Load custom JS
 		Util::addScript(AppConstants::APP_NAME, 'admin-settings');
 
-		/** @var IEventDispatcher $dispatcher */
-		$dispatcher = $context->getAppContainer()->get(IEventDispatcher::class);
-		$dispatcher->addListener('OCA\Files::loadAdditionalScripts', function () {
-			Util::addScript(AppConstants::APP_NAME, 'fileactions');
-			Util::addScript(AppConstants::APP_NAME, 'menuobserver');
-		});
-		$dispatcher->addListener(LoadAdditionalScriptsEvent::class, function () {
-			Util::addScript(AppConstants::APP_NAME, 'nextcloud-swarm-plugin-fileactions');
-			Util::addInitScript(AppConstants::APP_NAME, 'nextcloud-swarm-plugin-newfilemenu');
+		// Use injectFn for dispatcher-related code
+		$context->injectFn(function (IEventDispatcher $dispatcher) {
+			$dispatcher->addListener('OCA\Files::loadAdditionalScripts', function () {
+				Util::addScript(AppConstants::APP_NAME, 'fileactions');
+				Util::addScript(AppConstants::APP_NAME, 'menuobserver');
+			});
+			$dispatcher->addListener(LoadAdditionalScriptsEvent::class, function () {
+				Util::addScript(AppConstants::APP_NAME, 'nextcloud-swarm-plugin-fileactions');
+				Util::addInitScript(AppConstants::APP_NAME, 'nextcloud-swarm-plugin-newfilemenu');
+			});
 		});
 
 		$this->getAuthMechanisms();
 	}
 
-	public function registerEventsScripts(IEventDispatcher $dispatcher) {}
+	public function registerEventsScripts(IEventDispatcher $dispatcher)
+	{
+	}
 
-	public function register(IRegistrationContext $context): void {
+	public function register(IRegistrationContext $context): void
+	{
 		// Register AddContentSecurityPolicyEvent for CSPListener class listenser here
 		$context->registerNotifierService(Notifier::class);
 	}
 
-	public function getAuthMechanisms() {
+	public function getAuthMechanisms()
+	{
 		$container = $this->getContainer();
 
 		return [
