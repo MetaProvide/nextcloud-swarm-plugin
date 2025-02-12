@@ -2,37 +2,43 @@
 
 namespace OCA\Files_External_Ethswarm\Tests\Unit;
 
-use OCA\Files_External_Ethswarm\AppInfo\Application;
 use OCA\Files_External_Ethswarm\AppInfo\AppConstants;
+use OCA\Files_External_Ethswarm\AppInfo\Application;
 use OCA\Files_External_Ethswarm\Exception\BaseException;
 use OCP\IConfig;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Psr\Container\ContainerInterface;
+use Sentry\ClientBuilder;
 use Sentry\State\Hub;
 use Sentry\State\HubInterface;
-use Sentry\ClientBuilder;
-use Psr\Container\ContainerInterface;
 
-class SentryTest extends TestCase
-{
+/**
+ * @internal
+ *
+ * @coversNothing
+ */
+class SentryTest extends TestCase {
 	private IConfig $config;
 	private Application $application;
-	/** @var ContainerInterface&\PHPUnit\Framework\MockObject\MockObject */
+
+	/** @var ContainerInterface&MockObject */
 	private $serverContainer;
 	private HubInterface $hub;
 
-	protected function setUp(): void
-	{
+	protected function setUp(): void {
 		parent::setUp();
 
 		// Mock the config
 		$this->config = $this->createMock(IConfig::class);
-		/** @var ContainerInterface&\PHPUnit\Framework\MockObject\MockObject */
+		// @var ContainerInterface&\PHPUnit\Framework\MockObject\MockObject
 		$this->serverContainer = $this->createMock(ContainerInterface::class);
 
 		// Set up container to return our mocked config
 		$this->serverContainer->method('get')
 			->with(IConfig::class)
-			->willReturn($this->config);
+			->willReturn($this->config)
+		;
 
 		$this->hub = new Hub();
 
@@ -43,24 +49,24 @@ class SentryTest extends TestCase
 		// Create application with mocked container
 		$this->application = $this->getMockBuilder(Application::class)
 			->disableOriginalConstructor()
-			->getMock();
+			->getMock()
+		;
 	}
 
-	protected function tearDown(): void
-	{
+	protected function tearDown(): void {
 		BaseException::setContainer(null);
 		BaseException::setHub(null);
 		parent::tearDown();
 	}
 
-	public function testSentryInitializationWhenEnabled()
-	{
+	public function testSentryInitializationWhenEnabled() {
 		// Configure mock
 		$this->config->method('getSystemValue')
 			->willReturnMap([
 				['environment', 'production', 'testing'],
-				['telemetry.enabled', false, true]
-			]);
+				['telemetry.enabled', false, true],
+			])
+		;
 
 		// Initialize Sentry
 		$client = ClientBuilder::create([
@@ -75,14 +81,14 @@ class SentryTest extends TestCase
 		$this->assertNotNull($this->hub->getClient());
 	}
 
-	public function testSentryInitializationWhenDisabled()
-	{
+	public function testSentryInitializationWhenDisabled() {
 		// Configure mock
 		$this->config->method('getSystemValue')
 			->willReturnMap([
 				['environment', 'production', 'testing'],
-				['telemetry.enabled', false, false]
-			]);
+				['telemetry.enabled', false, false],
+			])
+		;
 
 		// Initialize Sentry (should not happen when disabled)
 		$client = null;
@@ -101,13 +107,13 @@ class SentryTest extends TestCase
 		$this->assertNull($this->hub->getClient());
 	}
 
-	public function testBaseExceptionSentryCapture()
-	{
+	public function testBaseExceptionSentryCapture() {
 		// Configure mock
 		$this->config->method('getSystemValue')
 			->willReturnMap([
-				['telemetry.enabled', false, true]
-			]);
+				['telemetry.enabled', false, true],
+			])
+		;
 
 		// Create a test exception
 		$testMessage = 'Test Exception';
@@ -118,13 +124,13 @@ class SentryTest extends TestCase
 		$this->assertEquals(0, $exception->getCode());
 	}
 
-	public function testBaseExceptionWithoutSentry()
-	{
+	public function testBaseExceptionWithoutSentry() {
 		// Configure mock
 		$this->config->method('getSystemValue')
 			->willReturnMap([
-				['telemetry.enabled', false, false]
-			]);
+				['telemetry.enabled', false, false],
+			])
+		;
 
 		// Create a test exception
 		$testMessage = 'Test Exception';

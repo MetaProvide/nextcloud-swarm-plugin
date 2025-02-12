@@ -42,5 +42,5 @@ return [
 			'url' => '/bee/topUpBatch',
 			'verb' => 'POST',
 		],
-	]
+	],
 ];

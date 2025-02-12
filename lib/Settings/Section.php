@@ -1,9 +1,8 @@
 <?php
+
 /**
  * @copyright Copyright (c) 2022, MetaProvide Holding EKF
- *
  * @author Ron Trevor <ecoron@proton.me>
- *
  * @license GNU AGPL version 3 or any later version
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,17 +17,15 @@
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
  */
+
 namespace OCA\Files_External_Ethswarm\Settings;
 
 use OCP\IL10N;
 use OCP\IURLGenerator;
 use OCP\Settings\IIconSection;
 
-class Section implements IIconSection
-{
-
+class Section implements IIconSection {
 	/** @var string */
 	protected $appName;
 
@@ -38,12 +35,7 @@ class Section implements IIconSection
 	/** @var IURLGenerator */
 	private $url;
 
-	/**
-	 * @param IURLGenerator $url
-	 * @param IL10N $l
-	 */
-	public function __construct(string $appName, IURLGenerator $url, IL10N $l)
-	{
+	public function __construct(string $appName, IURLGenerator $url, IL10N $l) {
 		$this->appName = $appName;
 		$this->url = $url;
 		$this->l = $l;
@@ -51,12 +43,11 @@ class Section implements IIconSection
 
 	/**
 	 * returns the ID of the section. It is supposed to be a lower case string,
-	 * e.g. 'ldap'
+	 * e.g. 'ldap'.
 	 *
 	 * @returns string
 	 */
-	public function getID()
-	{
+	public function getID() {
 		return $this->appName;
 	}
 
@@ -66,28 +57,22 @@ class Section implements IIconSection
 	 *
 	 * @return string
 	 */
-	public function getName()
-	{
+	public function getName() {
 		return $this->l->t('Swarm By Hejbit');
 	}
 
 	/**
 	 * @return int whether the form should be rather on the top or bottom of
-	 * the settings navigation. The sections are arranged in ascending order of
-	 * the priority values. It is required to return a value between 0 and 99.
+	 *             the settings navigation. The sections are arranged in ascending order of
+	 *             the priority values. It is required to return a value between 0 and 99.
 	 *
 	 * E.g.: 70
 	 */
-	public function getPriority()
-	{
+	public function getPriority() {
 		return 10;
 	}
 
-	/**
-	 * {@inheritdoc}
-	 */
-	public function getIcon()
-	{
+	public function getIcon() {
 		return $this->url->imagePath($this->appName, 'hejbit-logo.svg');
 	}
 }

@@ -1,9 +1,8 @@
 <?php
+
 /**
  * @copyright Copyright (c) 2022, MetaProvide Holding EKF
- *
  * @author Ron Trevor <ecoron@proton.me>
- *
  * @license GNU AGPL version 3 or any later version
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,20 +17,17 @@
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
  */
+
 namespace OCA\Files_External_Ethswarm\Settings;
 
-use OCA\Files_External\Service\BackendService;
 use OCA\Files_External\Service\GlobalStoragesService;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\IConfig;
 use OCP\Settings\ISettings;
 use OCP\Util;
 
-class Admin implements ISettings
-{
-
+class Admin implements ISettings {
 	/** @var string */
 	protected $appName;
 
@@ -51,30 +47,24 @@ class Admin implements ISettings
 		$this->globalStoragesService = $globalStoragesService;
 	}
 
-	/**
-	 * @return TemplateResponse
-	 */
-	public function getForm(): TemplateResponse
-	{
+	public function getForm(): TemplateResponse {
 		$parameters = [
 			'telemetry_enabled' => $this->config->getSystemValue('telemetry.enabled', false),
 		];
 
 		Util::addScript($this->appName, 'nextcloud-swarm-plugin-main');
-		$response = new TemplateResponse($this->appName, 'vue-admin-settings', ['params' => $parameters]);
-		return $response;
+
+		return new TemplateResponse($this->appName, 'vue-admin-settings', ['params' => $parameters]);
 	}
 
 	/**
 	 * @return string the section ID, e.g. 'sharing'
 	 */
-	public function getSection(): string
-	{
+	public function getSection(): string {
 		return $this->appName;
 	}
 
-	public function getPriority(): int
-	{
+	public function getPriority(): int {
 		return 5;
 	}
 }
