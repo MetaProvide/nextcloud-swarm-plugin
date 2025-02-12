@@ -170,9 +170,9 @@ trait BeeSwarmTrait {
 		if (!$curl->isResponseSuccessful()) {
 			if (401 === $statusCode) {
 				throw new StorageNotAvailableException('Invalid access key');
-			} else {
-				throw new StorageNotAvailableException('Failed to connect to HejBit');
 			}
+
+			throw new StorageNotAvailableException('Failed to connect to HejBit');
 		}
 
 		if (204 !== $statusCode) {

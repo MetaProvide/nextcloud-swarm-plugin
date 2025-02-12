@@ -72,6 +72,10 @@ class Curl {
 		return $this->getStatusCode() < 400;
 	}
 
+	public function getStatusCode(): int {
+		return $this->getInfo(CURLINFO_HTTP_CODE);
+	}
+
 	private static function getDefaultOptions(): array {
 		return self::checkSSLOption() + self::DEFAULT_OPTIONS;
 	}
@@ -124,9 +128,5 @@ class Curl {
 
 			throw new CurlException(curl_error($this->handler));
 		}
-	}
-
-	public function getStatusCode(): int {
-		return $this->getInfo(CURLINFO_HTTP_CODE);
 	}
 }
