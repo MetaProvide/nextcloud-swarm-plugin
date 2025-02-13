@@ -24,10 +24,12 @@ namespace OCA\Files_External_Ethswarm\Storage;
 use CURLFile;
 use OCA\Files_External_Ethswarm\Auth\License;
 use OCA\Files_External_Ethswarm\Backend\BeeSwarm;
-use OCA\Files_External_Ethswarm\Exception\SwarmException;
+use OCA\Files_External_Ethswarm\Dto\LinkDto;
+use OCA\Files_External_Ethswarm\Exception\CurlException;
+use OCA\Files_External_Ethswarm\Exception\HejBitException;
 use OCA\Files_External_Ethswarm\Utils\Curl;
 use OCP\Files\StorageBadConfigException;
-use Safe\Exceptions\CurlException;
+use OCP\Files\StorageNotAvailableException;
 
 trait BeeSwarmTrait {
 	private const INFRASTRUCTURE_VERSION_GATEWAY = 1;
@@ -71,56 +73,40 @@ trait BeeSwarmTrait {
 	}
 
 	/**
-	 * @throws CurlException
-	 * @throws SwarmException
+	 * @throws CurlException|HejBitException
 	 */
-	private function getUploadLink(): string {
-		$endpoint = $this->api_url.'/api/upload';
+	private function getLink(string $endpoint): LinkDto {
+		$endpoint = $this->api_url.$endpoint;
 		$curl = new Curl($endpoint, authorization: $this->access_key);
 		$response = $curl->exec(true);
 
 		if (!$curl->isResponseSuccessful()) {
-			throw new SwarmException('Failed to connect to HejBit: '.$response['message']);
+			throw new HejBitException('Failed to access HejBit: '.$response['message']);
 		}
 
-		return $response['url'];
+		return new LinkDto($response['url'], $response['token'], $response['method']);
 	}
 
 	/**
-	 * @throws CurlException
-	 * @throws SwarmException
-	 */
-	private function getDownloadLink(string $reference): string {
-		$endpoint = $this->api_url.'/api/download';
-		$curl = new Curl($endpoint, authorization: $this->access_key);
-		$response = $curl->exec(true);
-
-		if (!$curl->isResponseSuccessful()) {
-			throw new SwarmException('Failed to connect to HejBit: '.$response['message']);
-		}
-
-		return $response['url'].DIRECTORY_SEPARATOR.$reference;
-	}
-
-	/**
-	 * @throws CurlException|SwarmException
+	 * @throws CurlException|HejBitException
 	 */
 	private function uploadSwarm(string $path, string $tempFile, string $mimetype): string {
-		if ($this->isVersion(self::INFRASTRUCTURE_VERSION_GATEWAY)) {
+		if ($this->isVersion()) {
 			return $this->uploadSwarmV1($path, $tempFile, $mimetype);
 		}
 
-		$curl = new Curl($this->getUploadLink(), [
+		$link = $this->getLink('/api/upload');
+		$curl = new Curl($link->url, [
 			CURLOPT_CUSTOMREQUEST => 'POST',
 			CURLOPT_POSTFIELDS => [
 				'file' => new CURLFile($tempFile, $mimetype, basename($path)),
 				'name' => basename($path),
 			],
-		]);
+		], authorization: $link->token);
 		$response = $curl->exec(true);
 
 		if (!$curl->isResponseSuccessful() || !isset($response['reference'])) {
-			throw new SwarmException('Failed to upload file to Swarm: '.$response['message']);
+			throw new HejBitException('Failed to upload file to HejBit: '.$response['message']);
 		}
 
 		return $response['reference'];
@@ -129,18 +115,19 @@ trait BeeSwarmTrait {
 	/**
 	 * @return resource
 	 *
-	 * @throws CurlException|SwarmException
+	 * @throws CurlException|HejBitException
 	 */
 	private function downloadSwarm(string $reference) {
-		if ($this->isVersion(self::INFRASTRUCTURE_VERSION_GATEWAY)) {
+		if ($this->isVersion()) {
 			return $this->downloadSwarmV1($reference);
 		}
 
-		$curl = new Curl($this->getDownloadLink($reference));
+		$link = $this->getLink('/api/download');
+		$curl = new Curl($link->url."/{$reference}", authorization: $link->token);
 		$response = $curl->exec();
 
 		if (!$curl->isResponseSuccessful()) {
-			throw new SwarmException('Failed to download file from Swarm: '.$response['message']);
+			throw new HejBitException('Failed to download file from HejBit: '.$response['message']);
 		}
 
 		$stream = fopen('php://memory', 'r+');
@@ -153,23 +140,32 @@ trait BeeSwarmTrait {
 	/**
 	 * Returns the connection status of Swarm node.
 	 *
-	 * @throws CurlException|SwarmException
+	 * @throws CurlException|StorageNotAvailableException
 	 */
 	private function checkConnection(): bool {
-		if ($this->isVersion(self::INFRASTRUCTURE_VERSION_GATEWAY)) {
+		if ($this->isVersion()) {
 			return $this->checkConnectionV1();
 		}
 
 		$endpoint = $this->api_url.'/api/readiness';
 
 		$curl = new Curl($endpoint, authorization: $this->access_key);
-		$response = $curl->exec(true);
+		$curl->exec();
+		$statusCode = $curl->getStatusCode();
 
-		if (!$curl->isResponseSuccessful() and !isset($response['status'])) {
-			throw new SwarmException('Failed to connect to HejBit: '.$response['message']);
+		if (!$curl->isResponseSuccessful()) {
+			if (401 === $statusCode) {
+				throw new StorageNotAvailableException('Invalid access key');
+			}
+
+			throw new StorageNotAvailableException('Failed to connect to HejBit');
 		}
 
-		return 'ok' === $response['status'];
+		if (204 !== $statusCode) {
+			throw new StorageNotAvailableException('Failed to connect to HejBit');
+		}
+
+		return true;
 	}
 
 	/**
@@ -182,15 +178,15 @@ trait BeeSwarmTrait {
 		$curl->setAuthorization($this->access_key, CURLAUTH_ANY);
 
 		$output = $curl->exec();
-		$httpCode = $curl->getInfo(CURLINFO_HTTP_CODE);
+		$statusCode = $curl->getStatusCode();
 
-		return 200 === $httpCode and 'OK' === $output;
+		return 200 === $statusCode and 'OK' === $output;
 	}
 
 	/**
 	 * @return resource
 	 *
-	 * @throws CurlException|SwarmException
+	 * @throws CurlException|HejBitException
 	 */
 	private function downloadSwarmV1(string $reference) {
 		$endpoint = $this->api_url.DIRECTORY_SEPARATOR.'bzz'.DIRECTORY_SEPARATOR.$reference.DIRECTORY_SEPARATOR;
@@ -208,7 +204,7 @@ trait BeeSwarmTrait {
 
 		$httpCode = $curl->getInfo(CURLINFO_HTTP_CODE);
 		if (200 !== $httpCode) {
-			throw new SwarmException('Failed to download file from Swarm');
+			throw new HejBitException('Failed to download file from HejBit');
 		}
 
 		$stream = fopen('php://memory', 'r+');
@@ -219,7 +215,7 @@ trait BeeSwarmTrait {
 	}
 
 	/**
-	 * @throws CurlException|SwarmException
+	 * @throws CurlException|HejBitException
 	 */
 	private function uploadSwarmV1(string $path, string $tempFile, string $mimetype): array|string {
 		$endpoint = $this->api_url.DIRECTORY_SEPARATOR.'bzz';
@@ -243,7 +239,7 @@ trait BeeSwarmTrait {
 		$reference = ($result['reference'] ?? null);
 
 		if (!isset($reference)) {
-			throw new SwarmException('Failed to upload file to '.$this->id.': '.$result['message']);
+			throw new HejBitException('Failed to upload file to HejBit: '.$result['message']);
 		}
 
 		return $reference;
