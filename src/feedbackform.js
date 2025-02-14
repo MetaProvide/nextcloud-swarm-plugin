@@ -30,6 +30,13 @@ let previousPathIsSwarm = false;
 let feedbackformLoaded = false;
 console.log('Hejbit-files-feedback-form:previousPathIsSwarm=' + previousPathIsSwarm );
 
+// TODO - Try adding email getuser from oc object or from another request before sending the request
+// TODO - Send the request to NC first  and get the user from the backend and Remove CSP
+// TODO - Fix CSS issues
+// TODO - Remove wiget when not is not in swarm folders
+
+
+
 
 // Listeners to detect changes in listing.
 subscribe('files:list:updated', (data) => {
@@ -52,9 +59,9 @@ subscribe('files:list:updated', (data) => {
 
             const options = {
                 id: 'feedback',
-                endpoint: 'https://www.webit.ws/FeedbackPOC/sendfeedback.php',
+                endpoint: 'https://test.hejbit.com/api/feedback',
                 emailField: false,
-                events: false,
+                events: true,
                 forceShowButton: false,
                 types: {
                     general: {
@@ -97,6 +104,30 @@ subscribe('files:list:updated', (data) => {
             } catch (error) {
                 console.error('Error:', error);
             }
+
+			window.addEventListener('feedback-submit', (event) => {
+				const feedbackData = event.detail;
+
+				// Get request token for Nextcloud
+				const requestToken = OC.requestToken;
+
+				fetch(OC.generateUrl('/apps/your-app/endpoint'), {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+						'RequestToken': requestToken,
+						'Accept': 'application/json'
+					},
+					body: JSON.stringify(feedbackData)
+				})
+				.then(response => response.json())
+				.then(data => {
+					console.log('Success:', data);
+				})
+				.catch((error) => {
+					console.error('Error:', error);
+				});
+			});
 
 
 	} else if (!currentPathIsSwarm && !previousPathIsSwarm) {
