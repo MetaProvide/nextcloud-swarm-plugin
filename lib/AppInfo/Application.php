@@ -40,12 +40,15 @@ use OCP\EventDispatcher\IEventDispatcher;
 use OCP\Util;
 use Sentry;
 
-class Application extends App implements IBootstrap, IBackendProvider, IAuthMechanismProvider {
-	public function __construct(array $urlParams = []) {
+class Application extends App implements IBootstrap, IBackendProvider, IAuthMechanismProvider
+{
+	public function __construct(array $urlParams = [])
+	{
 		parent::__construct(AppConstants::APP_NAME, $urlParams);
 	}
 
-	public function getBackends() {
+	public function getBackends()
+	{
 		$container = $this->getContainer();
 
 		return [
@@ -53,14 +56,15 @@ class Application extends App implements IBootstrap, IBackendProvider, IAuthMech
 		];
 	}
 
-	public function boot(IBootContext $context): void {
+	public function boot(IBootContext $context): void
+	{
 		$container = $this->getContainer();
 		$config = $container->get('OCP\IConfig');
 
-		// Register autoloader
-		$autoloadPath = __DIR__.'/../../vendor/autoload.php';
+		// Register autoloader of sentry
+		$autoloadPath = __DIR__ . '/../../vendor-bin/sentry/vendor/autoload.php';
 		if (!file_exists($autoloadPath)) {
-			throw new Exception('Vendor autoload.php not found at: '.$autoloadPath);
+			throw new Exception('Vendor autoload.php not found at: ' . $autoloadPath);
 		}
 
 		require_once $autoloadPath;
@@ -101,14 +105,18 @@ class Application extends App implements IBootstrap, IBackendProvider, IAuthMech
 		$this->getAuthMechanisms();
 	}
 
-	public function registerEventsScripts(IEventDispatcher $dispatcher) {}
+	public function registerEventsScripts(IEventDispatcher $dispatcher)
+	{
+	}
 
-	public function register(IRegistrationContext $context): void {
+	public function register(IRegistrationContext $context): void
+	{
 		// Register AddContentSecurityPolicyEvent for CSPListener class listenser here
 		$context->registerNotifierService(Notifier::class);
 	}
 
-	public function getAuthMechanisms() {
+	public function getAuthMechanisms()
+	{
 		$container = $this->getContainer();
 
 		return [
