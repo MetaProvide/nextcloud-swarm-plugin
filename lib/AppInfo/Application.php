@@ -30,7 +30,6 @@ use OCA\Files_External\Service\BackendService;
 use OCA\Files_External_Ethswarm\Auth\License;
 use OCA\Files_External_Ethswarm\Backend\BeeSwarm;
 use OCA\Files_External_Ethswarm\Notification\Notifier;
-use OCA\Files_External_Ethswarm\Listener\ContentSecurityPolicyListener;
 
 use OCP\AppFramework\App;
 use OCP\AppFramework\Bootstrap\IBootContext;
@@ -89,8 +88,6 @@ class Application extends App implements IBootstrap, IBackendProvider, IAuthMech
 	public function registerEventsScripts(IEventDispatcher $dispatcher) {}
 
 	public function register(IRegistrationContext $context): void {
-		// Register AddContentSecurityPolicyEvent for CSPListener class listenser here
-		$context->registerEventListener(AddContentSecurityPolicyEvent::class, ContentSecurityPolicyListener::class);
 		$context->registerNotifierService(Notifier::class);
 	}
 

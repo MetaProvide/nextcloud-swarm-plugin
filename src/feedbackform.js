@@ -30,9 +30,8 @@ let previousPathIsSwarm = false;
 let feedbackformLoaded = false;
 console.log('Hejbit-files-feedback-form:previousPathIsSwarm=' + previousPathIsSwarm );
 
-// TODO - Try adding email getuser from oc object or from another request before sending the request
-// TODO - Send the request to NC first  and get the user from the backend and Remove CSP
-// TODO - Fix CSS issues
+// TODO - Get API Url from beeswarmtrait or another place
+// TODO - Improve layout with css
 // TODO - Remove wiget when not is not in swarm folders
 
 
@@ -59,9 +58,9 @@ subscribe('files:list:updated', (data) => {
 
             const options = {
                 id: 'feedback',
-                endpoint: 'https://test.hejbit.com/api/feedback',
+                endpoint: OC.generateUrl('/apps/files_external_ethswarm/feedback/submit'),
                 emailField: false,
-                events: true,
+                events: false,
                 forceShowButton: false,
                 types: {
                     general: {
@@ -88,7 +87,7 @@ subscribe('files:list:updated', (data) => {
                 typeMessage: 'How can we improve?',
                 success: 'We Appreciate Your Feedback!',
                 failedTitle: 'Oops, an error ocurred!',
-                failedMessage: 'Please try again. If this keeps happening, try to send an email instead.',
+                failedMessage: 'Please try again. If this keeps happening, try to send an email to feedback@hejbit.com instead.',
                 position: 'right',
                 primary: '#0d6efd',
                 background: '#fff',
@@ -104,32 +103,6 @@ subscribe('files:list:updated', (data) => {
             } catch (error) {
                 console.error('Error:', error);
             }
-
-			window.addEventListener('feedback-submit', (event) => {
-				const feedbackData = event.detail;
-
-				// Get request token for Nextcloud
-				const requestToken = OC.requestToken;
-
-				fetch(OC.generateUrl('/apps/your-app/endpoint'), {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-						'RequestToken': requestToken,
-						'Accept': 'application/json'
-					},
-					body: JSON.stringify(feedbackData)
-				})
-				.then(response => response.json())
-				.then(data => {
-					console.log('Success:', data);
-				})
-				.catch((error) => {
-					console.error('Error:', error);
-				});
-			});
-
-
 	} else if (!currentPathIsSwarm && !previousPathIsSwarm) {
 		console.log("Default entry - Don't Show feedback form");
 	}
