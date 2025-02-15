@@ -30,13 +30,11 @@ use OCA\Files_External\Service\BackendService;
 use OCA\Files_External_Ethswarm\Auth\License;
 use OCA\Files_External_Ethswarm\Backend\BeeSwarm;
 use OCA\Files_External_Ethswarm\Notification\Notifier;
-
 use OCP\AppFramework\App;
 use OCP\AppFramework\Bootstrap\IBootContext;
 use OCP\AppFramework\Bootstrap\IBootstrap;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use OCP\EventDispatcher\IEventDispatcher;
-use OCP\Security\CSP\AddContentSecurityPolicyEvent;
 use OCP\Util;
 
 class Application extends App implements IBootstrap, IBackendProvider, IAuthMechanismProvider {
@@ -69,7 +67,6 @@ class Application extends App implements IBootstrap, IBackendProvider, IAuthMech
 		// Add feedback Css
 		Util::addStyle(AppConstants::APP_NAME, 'feedback-js');
 
-
 		/** @var IEventDispatcher $dispatcher */
 		$dispatcher = $context->getAppContainer()->get(IEventDispatcher::class);
 		$dispatcher->addListener('OCA\Files::loadAdditionalScripts', function () {
@@ -100,4 +97,3 @@ class Application extends App implements IBootstrap, IBackendProvider, IAuthMech
 		];
 	}
 }
-
