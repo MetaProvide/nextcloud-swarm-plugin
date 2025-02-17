@@ -40,12 +40,15 @@ use OCP\EventDispatcher\IEventDispatcher;
 use OCP\Util;
 use Sentry;
 
-class Application extends App implements IBootstrap, IBackendProvider, IAuthMechanismProvider {
-	public function __construct(array $urlParams = []) {
+class Application extends App implements IBootstrap, IBackendProvider, IAuthMechanismProvider
+{
+	public function __construct(array $urlParams = [])
+	{
 		parent::__construct(AppConstants::APP_NAME, $urlParams);
 	}
 
-	public function getBackends() {
+	public function getBackends()
+	{
 		$container = $this->getContainer();
 
 		return [
@@ -53,21 +56,23 @@ class Application extends App implements IBootstrap, IBackendProvider, IAuthMech
 		];
 	}
 
-	public function boot(IBootContext $context): void {
+	public function boot(IBootContext $context): void
+	{
 		$container = $this->getContainer();
 		$config = $container->get('OCP\IConfig');
 
 		// Register autoloader of sentry
-		$autoloadPath = __DIR__.'/../../vendor-bin/sentry/vendor/autoload.php';
+		$autoloadPath = __DIR__ . '/../../vendor-bin/sentry/vendor/autoload.php';
 		if (!file_exists($autoloadPath)) {
-			throw new Exception('Vendor autoload.php not found at: '.$autoloadPath);
+			throw new Exception('Vendor autoload.php not found at: ' . $autoloadPath);
 		}
 
 		require_once $autoloadPath;
 
 		// Initialize Sentry if telemetry is enabled
 		$environment = $config->getSystemValue('environment', 'production');
-		if ($config->getSystemValue('telemetry.enabled', false)) {
+		$defaultValue = false;
+		if ($config->getSystemValue('telemetry.enabled', $defaultValue)) {
 			\Sentry\init([
 				'dsn' => AppConstants::TELEMETRY_URL,
 				'traces_sample_rate' => 1.0, // $environment === 'production' ? 0.2 : 1.0,
@@ -75,7 +80,6 @@ class Application extends App implements IBootstrap, IBackendProvider, IAuthMech
 			]);
 		}
 
-		throw new BaseException('test');
 		$context->injectFn([$this, 'registerEventsScripts']);
 
 		$context->injectFn(function (BackendService $backendService) {
@@ -101,14 +105,18 @@ class Application extends App implements IBootstrap, IBackendProvider, IAuthMech
 		$this->getAuthMechanisms();
 	}
 
-	public function registerEventsScripts(IEventDispatcher $dispatcher) {}
+	public function registerEventsScripts(IEventDispatcher $dispatcher)
+	{
+	}
 
-	public function register(IRegistrationContext $context): void {
+	public function register(IRegistrationContext $context): void
+	{
 		// Register AddContentSecurityPolicyEvent for CSPListener class listenser here
 		$context->registerNotifierService(Notifier::class);
 	}
 
-	public function getAuthMechanisms() {
+	public function getAuthMechanisms()
+	{
 		$container = $this->getContainer();
 
 		return [
