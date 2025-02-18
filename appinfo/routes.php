@@ -24,7 +24,7 @@ return [
 	'routes' => [
 		[
 			'name' => 'Settings#save',
-			'url' => '/settings',
+			'url' => '/save',
 			'verb' => 'POST',
 		],
 		[
