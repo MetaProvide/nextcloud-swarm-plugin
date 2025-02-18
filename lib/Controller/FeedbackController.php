@@ -6,6 +6,9 @@ namespace OCA\Files_External_Ethswarm\Controller;
 
 use Exception;
 use GuzzleHttp\Client;
+use OCA\Files_External_Ethswarm\AppInfo\AppConstants;
+use OCA\Files_External_Ethswarm\Utils\Curl;
+use OCA\Files_External_Ethswarm\Utils\Env;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\IRequest;
@@ -38,21 +41,17 @@ class FeedbackController extends Controller {
 	 */
 	public function submit(): JSONResponse {
 		$feedbackData = $this->request->getParams();
-
-		// Get current user email
-		$user = $this->userSession->getUser();
-		$userEmail = $user ? $user->getEMailAddress() : '';
-
-		// Add email to feedback data
-		$feedbackData['email'] = $userEmail;
+		$feedbackData['type'] = $feedbackData['feedbackType'];
+		$feedbackData['email'] = $this->userSession->getUser()?->getEMailAddress();
+		$feedbackEndpoint = (Env::get('API_URL') ?? AppConstants::API_URL).'/api/feedback';
 
 		try {
-			$response = $this->client->post('https://test.hejbit.com/api/feedback', [
-				'json' => $feedbackData,
-				'headers' => [
-					'Content-Type' => 'application/json',
-				],
-			]);
+			$request = new Curl($feedbackEndpoint);
+			$request->post($feedbackData);
+
+			if (!$request->isResponseSuccessful()) {
+				throw new Exception('Failed to submit feedback');
+			}
 
 			return new JSONResponse([
 				'status' => 'success',
