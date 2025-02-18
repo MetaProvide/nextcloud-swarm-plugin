@@ -7,6 +7,7 @@ namespace OCA\Files_External_Ethswarm\Controller;
 use Exception;
 use GuzzleHttp\Client;
 use OCA\Files_External_Ethswarm\AppInfo\AppConstants;
+use OCA\Files_External_Ethswarm\Exception\HejBitException;
 use OCA\Files_External_Ethswarm\Utils\Curl;
 use OCA\Files_External_Ethswarm\Utils\Env;
 use OCP\AppFramework\Controller;
@@ -50,7 +51,7 @@ class FeedbackController extends Controller {
 			$request->post($feedbackData);
 
 			if (!$request->isResponseSuccessful()) {
-				throw new Exception('Failed to submit feedback');
+				throw new HejBitException('Failed to submit feedback');
 			}
 
 			return new JSONResponse([
