@@ -10,9 +10,9 @@ cert_directory=$(HOME)/.nextcloud/certificates
 
 all: dev-setup lint build-js-production
 
-release: npm-init build-js-production build-tarball
+release: composer npm-init build-js-production build-tarball
 
-appstore: npm-init build-js-production build-appstore-tarball
+appstore: composer npm-init build-js-production build-appstore-tarball
 
 dev-setup: clean-dev composer npm-init
 

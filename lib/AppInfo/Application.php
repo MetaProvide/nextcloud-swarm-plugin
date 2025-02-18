@@ -23,13 +23,13 @@ declare(strict_types=1);
 
 namespace OCA\Files_External_Ethswarm\AppInfo;
 
-use Exception;
 use OCA\Files\Event\LoadAdditionalScriptsEvent;
 use OCA\Files_External\Lib\Config\IAuthMechanismProvider;
 use OCA\Files_External\Lib\Config\IBackendProvider;
 use OCA\Files_External\Service\BackendService;
 use OCA\Files_External_Ethswarm\Auth\License;
 use OCA\Files_External_Ethswarm\Backend\BeeSwarm;
+use OCA\Files_External_Ethswarm\Exception\BaseException;
 use OCA\Files_External_Ethswarm\Notification\Notifier;
 use OCP\AppFramework\App;
 use OCP\AppFramework\Bootstrap\IBootContext;
@@ -56,24 +56,18 @@ class Application extends App implements IBootstrap, IBackendProvider, IAuthMech
 		$container = $this->getContainer();
 		$config = $container->get('OCP\IConfig');
 
-		// Register autoloader of sentry
-		$autoloadPath = __DIR__.'/../../vendor-bin/sentry/vendor/autoload.php';
-		if (!file_exists($autoloadPath)) {
-			throw new Exception('Vendor autoload.php not found at: '.$autoloadPath);
-		}
-
-		require_once $autoloadPath;
-
 		// Initialize Sentry if telemetry is enabled
 		$environment = $config->getSystemValue('environment', 'production');
 		$defaultValue = false;
 		if ($config->getSystemValue('telemetry.enabled', $defaultValue)) {
-			\Sentry\init([
+			Sentry\init([
 				'dsn' => AppConstants::TELEMETRY_URL,
 				'traces_sample_rate' => 1.0, // $environment === 'production' ? 0.2 : 1.0,
 				'environment' => $environment,
 			]);
 		}
+
+		throw new BaseException('Henry nice job!');
 
 		$context->injectFn([$this, 'registerEventsScripts']);
 
@@ -105,6 +99,14 @@ class Application extends App implements IBootstrap, IBackendProvider, IAuthMech
 	public function register(IRegistrationContext $context): void {
 		// Register AddContentSecurityPolicyEvent for CSPListener class listenser here
 		$context->registerNotifierService(Notifier::class);
+
+		// Register autoloader of sentry
+		$autoloadPath = __DIR__.'/../../vendor-bin/sentry/vendor/autoload.php';
+		if (!file_exists($autoloadPath)) {
+			throw new BaseException('Vendor autoload.php not found at: '.$autoloadPath);
+		}
+
+		require_once $autoloadPath;
 	}
 
 	public function getAuthMechanisms() {
