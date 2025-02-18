@@ -42,5 +42,10 @@ return [
 			'url' => '/bee/topUpBatch',
 			'verb' => 'POST',
 		],
-	],
+		[
+			'name' => 'Feedback#submit',
+			'url' => '/feedback/submit',
+			'verb' => 'POST',
+		],
+	]
 ];

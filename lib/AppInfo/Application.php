@@ -39,12 +39,15 @@ use OCP\EventDispatcher\IEventDispatcher;
 use OCP\Util;
 use Sentry;
 
-class Application extends App implements IBootstrap, IBackendProvider, IAuthMechanismProvider {
-	public function __construct(array $urlParams = []) {
+class Application extends App implements IBootstrap, IBackendProvider, IAuthMechanismProvider
+{
+	public function __construct(array $urlParams = [])
+	{
 		parent::__construct(AppConstants::APP_NAME, $urlParams);
 	}
 
-	public function getBackends() {
+	public function getBackends()
+	{
 		$container = $this->getContainer();
 
 		return [
@@ -52,7 +55,8 @@ class Application extends App implements IBootstrap, IBackendProvider, IAuthMech
 		];
 	}
 
-	public function boot(IBootContext $context): void {
+	public function boot(IBootContext $context): void
+	{
 		$container = $this->getContainer();
 		$config = $container->get('OCP\IConfig');
 
@@ -77,37 +81,46 @@ class Application extends App implements IBootstrap, IBackendProvider, IAuthMech
 		// Load custom JS
 		Util::addScript(AppConstants::APP_NAME, 'admin-settings');
 
-		// Use injectFn for dispatcher-related code
-		$context->injectFn(function (IEventDispatcher $dispatcher) {
-			$dispatcher->addListener('OCA\Files::loadAdditionalScripts', function () {
-				Util::addScript(AppConstants::APP_NAME, 'fileactions');
-				Util::addScript(AppConstants::APP_NAME, 'menuobserver');
-			});
-			$dispatcher->addListener(LoadAdditionalScriptsEvent::class, function () {
-				Util::addScript(AppConstants::APP_NAME, 'nextcloud-swarm-plugin-fileactions');
-				Util::addInitScript(AppConstants::APP_NAME, 'nextcloud-swarm-plugin-newfilemenu');
-			});
+		// Add feedback JavaScript
+		Util::addScript(AppConstants::APP_NAME, 'feedback-js.min');
+
+		// Add feedback Css
+		Util::addStyle(AppConstants::APP_NAME, 'feedback-js');
+
+		/** @var IEventDispatcher $dispatcher */
+		$dispatcher = $context->getAppContainer()->get(IEventDispatcher::class);
+		$dispatcher->addListener('OCA\Files::loadAdditionalScripts', function () {
+			Util::addScript(AppConstants::APP_NAME, 'fileactions');
+			Util::addScript(AppConstants::APP_NAME, 'menuobserver');
+		});
+		$dispatcher->addListener(LoadAdditionalScriptsEvent::class, function () {
+			Util::addScript(AppConstants::APP_NAME, 'nextcloud-swarm-plugin-fileactions');
+			Util::addInitScript(AppConstants::APP_NAME, 'nextcloud-swarm-plugin-newfilemenu');
+			Util::addScript(AppConstants::APP_NAME, 'nextcloud-swarm-plugin-feedbackform');
 		});
 
 		$this->getAuthMechanisms();
 	}
 
-	public function registerEventsScripts(IEventDispatcher $dispatcher) {}
+	public function registerEventsScripts(IEventDispatcher $dispatcher)
+	{
+	}
 
-	public function register(IRegistrationContext $context): void {
-		// Register AddContentSecurityPolicyEvent for CSPListener class listenser here
+	public function register(IRegistrationContext $context): void
+	{
 		$context->registerNotifierService(Notifier::class);
 
 		// Register autoloader of sentry
-		$autoloadPath = __DIR__.'/../../vendor-bin/sentry/vendor/autoload.php';
+		$autoloadPath = __DIR__ . '/../../vendor-bin/sentry/vendor/autoload.php';
 		if (!file_exists($autoloadPath)) {
-			throw new BaseException('Vendor autoload.php not found at: '.$autoloadPath);
+			throw new BaseException('Vendor autoload.php not found at: ' . $autoloadPath);
 		}
 
 		require_once $autoloadPath;
 	}
 
-	public function getAuthMechanisms() {
+	public function getAuthMechanisms()
+	{
 		$container = $this->getContainer();
 
 		return [
