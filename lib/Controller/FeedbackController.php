@@ -62,7 +62,7 @@ class FeedbackController extends Controller {
 			return new JSONResponse([
 				'status' => 'error',
 				'message' => $e->getMessage(),
-			], 500);
+			], $e->getCode());
 		}
 	}
 }
