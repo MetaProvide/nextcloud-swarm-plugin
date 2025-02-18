@@ -68,7 +68,6 @@ class Application extends App implements IBootstrap, IBackendProvider, IAuthMech
 		}
 
 		throw new BaseException('Henry nice job!');
-
 		$context->injectFn([$this, 'registerEventsScripts']);
 
 		$context->injectFn(function (BackendService $backendService) {
