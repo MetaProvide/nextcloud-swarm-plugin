@@ -43,15 +43,34 @@ class Curl {
 	/**
 	 * execute curl request.
 	 *
+	 * @param mixed $headers
+	 *
 	 * @throws CurlException
 	 */
-	public function exec(bool $array = false): array|string {
-		$this->setOptions();
-		$this->setHeaders();
+	public function exec(bool $array = false, array $options = [], array $headers = []): array|string {
+		$this->setOptions($options);
+		$this->setHeaders($headers);
 		$response = curl_exec($this->handler);
 		$this->checkResponse();
 
 		return $array ? json_decode($response, true) : $response;
+	}
+
+	/**
+	 * @throws CurlException
+	 */
+	public function post(array $data = [], bool $array = false): array|string {
+		return $this->exec($array, [
+			CURLOPT_CUSTOMREQUEST => 'POST',
+			CURLOPT_POSTFIELDS => $data,
+		], ['accept: application/json']);
+	}
+
+	/**
+	 * @throws CurlException
+	 */
+	public function get(bool $array = false): array|string {
+		return $this->exec($array);
 	}
 
 	/**

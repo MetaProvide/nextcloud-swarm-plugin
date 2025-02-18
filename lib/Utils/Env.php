@@ -3,8 +3,10 @@
 namespace OCA\Files_External_Ethswarm\Utils;
 
 class Env {
-	public static function get(string $name): string {
-		return getenv($name);
+	public static function get(string $name): ?string {
+		$env = getenv($name);
+
+		return false === $env ? null : $env;
 	}
 
 	public static function set(string $name, string $value): bool {
