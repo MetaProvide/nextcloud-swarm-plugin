@@ -1,70 +1,82 @@
 <template>
-	<AppContent>
-		<div class="section">
-			<div class="header-wrapper">
-				<h2>External Storage: Swarm By Hejbit</h2>
-				<a
-					target="_blank"
-					rel="noreferrer noopener"
-					class="icon-info"
-					title="Open documentation"
-					href="https://github.com/MetaProvide/nextcloud-swarm-plugin/">
-				</a>
-			</div>
+	<Content app-name="files_external_ethswarm">
+		<AppContent>
+			<SettingsSection>
+				<AppContentHeader>
+					<HeaderDetails class="header-details">
+						<h1>External Storage: Swarm By Hejbit</h1>
+						<a
+							target="_blank"
+							rel="noreferrer noopener"
+							class="icon-info"
+							title="Open documentation"
+							href="https://github.com/MetaProvide/nextcloud-swarm-plugin/">
+						</a>
+					</HeaderDetails>
+				</AppContentHeader>
 
-			<h3>Telemetry</h3>
-			<h4>Why Telemetry is Important for Us and for You</h4>
+				<AppSettingsSection title="Telemetry">
+						<strong>Why Telemetry is Important for Us and for You</strong>
+						<p>Our telemetry is designed solely to capture exceptions (errors) that occur while using our Nextcloud plugin. This means it focuses exclusively on identifying and understanding issues that might disrupt your experience. Here's why enabling telemetry can benefit both you and us:</p>
 
-			<p>Our telemetry is designed solely to capture exceptions (errors) that occur while using our Nextcloud plugin. This means it focuses exclusively on identifying and understanding issues that might disrupt your experience. Here's why enabling telemetry can benefit both you and us:</p>
-			<ol>
-				<li>Improving Stability and Reliability: By collecting information about exceptions, we can quickly identify bugs or errors that users encounter. This allows us to fix problems faster and ensure the plugin runs smoothly for everyone.</li>
-				<li>Proactive Problem Solving: Exception data helps us detect patterns in errors, even before users report them. This proactive approach ensures that we can address potential issues early, minimizing disruptions to your workflow.</li>
-				<li>Focusing on What Matters: Since our telemetry is limited to exceptions, it avoids unnecessary data collection and focuses only on what's critical for improving the plugin's performance and reliability.</li>
-				<li>Respecting Your Privacy: We understand the importance of privacy. That's why our telemetry is optional and designed to collect only anonymized data about errors. No personal or sensitive information is ever gathered, ensuring your data remains secure.</li>
-			</ol>
-			<p>By enabling telemetry, you're helping us create a more stable and reliable plugin for you and the entire Nextcloud community. It's a small step that makes a big difference in improving the quality of the tools you rely on every day. Thank you for considering this option!</p>
+						<ul>
+							<li>Improving Stability and Reliability</li>
+							<li>Proactive Problem Solving</li>
+							<li>Focusing on What Matters</li>
+							<li>Respecting Your Privacy</li>
+						</ul>
 
-			<div class="settings-group">
-				<CheckboxRadioSwitch
-					:checked="telemetryEnabled"
-					type="switch"
-					:disabled="isSaving"
-					@update:checked="toggleTelemetry">
-					Enable Telemetry
-				</CheckboxRadioSwitch>
+						<div class="switch-wrapper">
+							<CheckboxRadioSwitch
+								:checked="telemetryEnabled"
+								type="switch"
+								:disabled="isSaving"
+								@update:checked="toggleTelemetry">
+								Enable Telemetry
+							</CheckboxRadioSwitch>
+						</div>
 
-				<button
-					class="primary"
-					:disabled="!hasChanges"
-					@click="saveSettings">
-					{{ isSaving ? 'Saving...' : 'Save' }}
-				</button>
+						<Button
+							type="primary"
+							:disabled="!hasChanges"
+							:loading="isSaving"
+							@click="saveSettings">
+							{{ isSaving ? 'Saving...' : 'Save' }}
+						</Button>
 
-				<span v-if="saveMessage" :class="{'success': saveSuccess, 'error': !saveSuccess}">
-					{{ saveMessage }}
-				</span>
-			</div>
+						<EmptyContent v-if="saveMessage" :title="saveMessage" :type="saveSuccess ? 'success' : 'error'" />
+					</AppSettingsSection>
+						<AppSettingsSection title="Service Status">
+						<RichText>
+							<strong>Check the Status of the HejBit Application and Bee Node Services</strong>
+							<p>To ensure seamless access to your decentralized data, it is essential that at least one Bee node service is operational alongside the HejBit Application. Check out the status page for more information.</p>
+							<p><a href="https://monitoring.metaprovide.org/status/hejbit" class="service-link" target="_blank" rel="noreferrer">HejBit Status</a></p>
+						</RichText>
 
-			<h3>Check the Status of the HejBit Application and Bee Node Services</h3>
-
-			<p>To ensure seamless access to your decentralized data, it is essential that at least one Bee node service is operational alongside the HejBit Application. To help you stay informed, we've created a status monitoring page where you can check the current operational status of these services.</p>
-			<p>You can view the status here: <a href="https://monitoring.metaprovide.org/status/hejbit" target="_blank" rel="noreferrer">HejBit Application Status</a></p>
-			<p>This page provides real-time updates on the availability and performance of the HejBit Application and the Bee node services. By checking this link, you can quickly verify if everything is running smoothly or if there are any disruptions that might affect your access to HejBit decentralized data.</p>
-		</div>
-	</AppContent>
+				</AppSettingsSection>
+			</SettingsSection>
+		</AppContent>
+	</Content>
 </template>
 
 <script>
-import AppContent from "@nextcloud/vue/dist/Components/AppContent";
-import CheckboxRadioSwitch from "@nextcloud/vue/dist/Components/CheckboxRadioSwitch";
-import axios from "axios";
-import { generateUrl } from "@nextcloud/router";
+import { Content, AppContent, AppContentHeader, HeaderDetails, AppSettingsSection, SettingsSection, CheckboxRadioSwitch, EmptyContent, RichText } from '@nextcloud/vue';
+
+import axios from '@nextcloud/axios';
+import { generateUrl } from '@nextcloud/router';
 
 export default {
-	name: "App",
+	name: 'App',
 	components: {
+		Content,
 		AppContent,
+		AppContentHeader,
+		HeaderDetails,
+		AppSettingsSection,
+		SettingsSection,
 		CheckboxRadioSwitch,
+		EmptyContent,
+		RichText,
 	},
 	props: {
 		settings: {
@@ -121,11 +133,57 @@ export default {
 </script>
 
 <style scoped>
-.settings-group {
-	margin-top: 20px;
+.header-details {
+	display: flex;
+	align-items: center;
+}
+
+.header-details h1 {
+	font-size: 2rem;
+}
+
+ul {
+    list-style-type: disc;
+    margin-left: 20px;
+    margin-bottom: 20px;
+}
+
+li {
+    margin: 8px 0;
+}
+
+.switch-wrapper {
+    margin: 24px 0;
 }
 
 button {
-	margin-top: 10px;
+    margin: 24px 0;
+}
+
+p {
+    margin: 12px 0;
+    line-height: 1.5;
+}
+
+strong {
+    display: block;
+    margin-bottom: 16px;
+    font-size: 1.1em;
+}
+
+.service-link {
+    display: inline-block;
+    margin: 12px 0;
+    padding: 8px 16px;
+    background-color: var(--color-primary);
+    color: var(--color-primary-text);
+    border-radius: var(--border-radius);
+    text-decoration: none;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.service-link:hover {
+    background-color: var(--color-primary-element-light);
 }
 </style>
