@@ -49,4 +49,24 @@ return [
 			'verb' => 'POST',
 		],
 	],
-];
+	[
+		'name' => 'Bee#createPostageBatch',
+		'url' => '/bee/createPostageBatch',
+		'verb' => 'POST',
+	],
+	[
+		'name' => 'Bee#verifyBeeNodeAccess',
+		'url' => '/bee/verifyBeeNodeAccess',
+		'verb' => 'POST',
+	],
+	[
+		'name' => 'Bee#topUpBatch',
+		'url' => '/bee/topUpBatch',
+		'verb' => 'POST',
+	],
+	[
+		'name' => 'Feedback#submit',
+		'url' => '/feedback/submit',
+		'verb' => 'POST',
+	],
+]];

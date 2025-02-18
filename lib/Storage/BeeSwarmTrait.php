@@ -77,10 +77,12 @@ trait BeeSwarmTrait {
 	 */
 	private function getLink(string $endpoint): LinkDto {
 		$endpoint = $this->api_url.$endpoint;
-		$curl = new Curl($endpoint, authorization: $this->access_key);
-		$response = $curl->exec(true);
+		$request = new Curl($endpoint, headers: [
+			'accept: application/json',
+		], authorization: $this->access_key);
+		$response = $request->get(true);
 
-		if (!$curl->isResponseSuccessful()) {
+		if (!$request->isResponseSuccessful()) {
 			throw new HejBitException('Failed to access HejBit: '.$response['message']);
 		}
 
@@ -96,16 +98,13 @@ trait BeeSwarmTrait {
 		}
 
 		$link = $this->getLink('/api/upload');
-		$curl = new Curl($link->url, [
-			CURLOPT_CUSTOMREQUEST => 'POST',
-			CURLOPT_POSTFIELDS => [
-				'file' => new CURLFile($tempFile, $mimetype, basename($path)),
-				'name' => basename($path),
-			],
-		], authorization: $link->token);
-		$response = $curl->exec(true);
+		$request = new Curl($link->url, authorization: $link->token);
+		$response = $request->post([
+			'file' => new CURLFile($tempFile, $mimetype, basename($path)),
+			'name' => basename($path),
+		], true);
 
-		if (!$curl->isResponseSuccessful() || !isset($response['reference'])) {
+		if (!$request->isResponseSuccessful() || !isset($response['reference'])) {
 			throw new HejBitException('Failed to upload file to HejBit: '.$response['message']);
 		}
 
@@ -123,10 +122,10 @@ trait BeeSwarmTrait {
 		}
 
 		$link = $this->getLink('/api/download');
-		$curl = new Curl($link->url."/{$reference}", authorization: $link->token);
-		$response = $curl->exec();
+		$request = new Curl($link->url."/{$reference}", authorization: $link->token);
+		$response = $request->get();
 
-		if (!$curl->isResponseSuccessful()) {
+		if (!$request->isResponseSuccessful()) {
 			throw new HejBitException('Failed to download file from HejBit: '.$response['message']);
 		}
 
@@ -149,11 +148,11 @@ trait BeeSwarmTrait {
 
 		$endpoint = $this->api_url.'/api/readiness';
 
-		$curl = new Curl($endpoint, authorization: $this->access_key);
-		$curl->exec();
-		$statusCode = $curl->getStatusCode();
+		$request = new Curl($endpoint, authorization: $this->access_key);
+		$request->get();
+		$statusCode = $request->getStatusCode();
 
-		if (!$curl->isResponseSuccessful()) {
+		if (!$request->isResponseSuccessful()) {
 			if (401 === $statusCode) {
 				throw new StorageNotAvailableException('Invalid access key');
 			}
@@ -174,11 +173,11 @@ trait BeeSwarmTrait {
 	private function checkConnectionV1(): bool {
 		$endpoint = $this->api_url.DIRECTORY_SEPARATOR.'readiness';
 
-		$curl = new Curl($endpoint);
-		$curl->setAuthorization($this->access_key, CURLAUTH_ANY);
+		$request = new Curl($endpoint);
+		$request->setAuthorization($this->access_key, CURLAUTH_ANY);
 
-		$output = $curl->exec();
-		$statusCode = $curl->getStatusCode();
+		$output = $request->get();
+		$statusCode = $request->getStatusCode();
 
 		return 200 === $statusCode and 'OK' === $output;
 	}
@@ -191,7 +190,7 @@ trait BeeSwarmTrait {
 	private function downloadSwarmV1(string $reference) {
 		$endpoint = $this->api_url.DIRECTORY_SEPARATOR.'bzz'.DIRECTORY_SEPARATOR.$reference.DIRECTORY_SEPARATOR;
 
-		$curl = new Curl($endpoint, [
+		$request = new Curl($endpoint, [
 			CURLOPT_FOLLOWLOCATION => true,
 			CURLOPT_RETURNTRANSFER => true,
 			CURLOPT_MAXREDIRS => 10,
@@ -199,10 +198,10 @@ trait BeeSwarmTrait {
 		], [
 			'content-type: application/octet-stream',
 		]);
-		$curl->setAuthorization($this->access_key, CURLAUTH_ANY);
-		$response = $curl->exec();
+		$request->setAuthorization($this->access_key, CURLAUTH_ANY);
+		$response = $request->get();
 
-		$httpCode = $curl->getInfo(CURLINFO_HTTP_CODE);
+		$httpCode = $request->getInfo(CURLINFO_HTTP_CODE);
 		if (200 !== $httpCode) {
 			throw new HejBitException('Failed to download file from HejBit');
 		}
@@ -221,7 +220,7 @@ trait BeeSwarmTrait {
 		$endpoint = $this->api_url.DIRECTORY_SEPARATOR.'bzz';
 		$params = '?name='.urlencode(basename($path));
 
-		$curl = new Curl($endpoint.$params, [
+		$request = new Curl($endpoint.$params, [
 			CURLOPT_PUT => true,
 			CURLOPT_CUSTOMREQUEST => 'POST',
 			CURLOPT_POST => true,
@@ -233,9 +232,9 @@ trait BeeSwarmTrait {
 			'swarm-pin: true',
 			'swarm-redundancy-level: 2',
 		]);
-		$curl->setAuthorization($this->access_key, CURLAUTH_ANY);
+		$request->setAuthorization($this->access_key, CURLAUTH_ANY);
 
-		$result = $curl->exec(true);
+		$result = $request->exec(true);
 		$reference = ($result['reference'] ?? null);
 
 		if (!isset($reference)) {
