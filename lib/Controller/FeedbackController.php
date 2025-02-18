@@ -51,7 +51,7 @@ class FeedbackController extends Controller {
 			$request->post($feedbackData);
 
 			if (!$request->isResponseSuccessful()) {
-				throw new HejBitException('Failed to submit feedback');
+				throw new HejBitException('Failed to submit feedback', $request->getStatusCode());
 			}
 
 			return new JSONResponse([
