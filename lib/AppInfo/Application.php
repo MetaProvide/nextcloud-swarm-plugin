@@ -58,7 +58,7 @@ class Application extends App implements IBootstrap, IBackendProvider, IAuthMech
 
 		// Initialize Sentry if telemetry is enabled
 		$environment = $config->getSystemValue('environment', 'production');
-		$defaultValue = false;
+		$defaultValue = true;
 		if ($config->getSystemValue('telemetry.enabled', $defaultValue)) {
 			Sentry\init([
 				'dsn' => AppConstants::TELEMETRY_URL,
