@@ -77,7 +77,9 @@ trait BeeSwarmTrait {
 	 */
 	private function getLink(string $endpoint): LinkDto {
 		$endpoint = $this->api_url.$endpoint;
-		$request = new Curl($endpoint, authorization: $this->access_key);
+		$request = new Curl($endpoint, headers: [
+			'accept: application/json',
+		], authorization: $this->access_key);
 		$response = $request->get(true);
 
 		if (!$request->isResponseSuccessful()) {
@@ -121,7 +123,7 @@ trait BeeSwarmTrait {
 
 		$link = $this->getLink('/api/download');
 		$request = new Curl($link->url."/{$reference}", authorization: $link->token);
-		$response = $request->exec();
+		$response = $request->get();
 
 		if (!$request->isResponseSuccessful()) {
 			throw new HejBitException('Failed to download file from HejBit: '.$response['message']);
