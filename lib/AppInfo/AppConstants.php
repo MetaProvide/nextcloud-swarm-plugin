@@ -26,5 +26,5 @@ namespace OCA\Files_External_Ethswarm\AppInfo;
 class AppConstants {
 	// Application-wide constants go here
 	public const APP_NAME = 'files_external_ethswarm';
-	public const API_URL = 'https://app.hejbit.com';
+	public const API_URL = 'app.hejbit.com';
 }

@@ -20,6 +20,9 @@ class Curl {
 	protected int $authorizationType = CURLAUTH_NONE;
 
 	public function __construct(string $url, array $options = [], array $headers = [], ?string $authorization = null) {
+		if (!preg_match('/^https?:\/\//', $url)) {
+			$url = 'https://'.$url;
+		}
 		$this->url = $url;
 		$this->options = $options + self::getDefaultOptions();
 		$this->headers = $headers;
