@@ -61,10 +61,7 @@ class Application extends App implements IBootstrap, IBackendProvider, IAuthMech
 		// Load custom JS
 		Util::addScript(AppConstants::APP_NAME, 'admin-settings');
 
-		// Add feedback JavaScript
-		Util::addScript(AppConstants::APP_NAME, 'feedback-js.min');
-
-		// Add feedback Css
+		// Add feedback CSS
 		Util::addStyle(AppConstants::APP_NAME, 'feedback-js');
 
 		/** @var IEventDispatcher $dispatcher */
