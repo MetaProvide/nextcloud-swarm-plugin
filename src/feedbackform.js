@@ -21,6 +21,7 @@
  */
 import { subscribe } from '@nextcloud/event-bus';
 import { registerDavProperty } from '@nextcloud/files';
+import Feedback from '@betahuhn/feedback-js';
 import logo from '../img/hejbit-logo.svg';
 
 registerDavProperty("nc:ethswarm-node");
@@ -90,7 +91,7 @@ subscribe('files:list:updated', (data) => {
 
             try {
                 console.log('Starting Feedback...');
-                const feedback = new window.Feedback(options);
+                const feedback = new Feedback(options);
                 console.log('Feedback:', feedback);
                 feedback.renderButton();
 				feedbackformLoaded = true;
