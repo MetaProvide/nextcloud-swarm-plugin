@@ -24,6 +24,7 @@ COPY --chown=www-data ./hooks /docker-entrypoint-hooks.d
 FROM base AS development
 
 RUN apk add --update --no-cache linux-headers $PHPIZE_DEPS;
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer;
 RUN pecl install xdebug && docker-php-ext-enable xdebug;
 RUN { \
 	echo "xdebug.mode=develop,debug"; \
