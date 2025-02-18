@@ -78,7 +78,7 @@ trait BeeSwarmTrait {
 	private function getLink(string $endpoint): LinkDto {
 		$endpoint = $this->api_url.$endpoint;
 		$curl = new Curl($endpoint, authorization: $this->access_key);
-		$response = $curl->exec(true);
+		$response = $curl->get(true);
 
 		if (!$curl->isResponseSuccessful()) {
 			throw new HejBitException('Failed to access HejBit: '.$response['message']);
@@ -96,14 +96,11 @@ trait BeeSwarmTrait {
 		}
 
 		$link = $this->getLink('/api/upload');
-		$curl = new Curl($link->url, [
-			CURLOPT_CUSTOMREQUEST => 'POST',
-			CURLOPT_POSTFIELDS => [
-				'file' => new CURLFile($tempFile, $mimetype, basename($path)),
-				'name' => basename($path),
-			],
-		], authorization: $link->token);
-		$response = $curl->exec(true);
+		$curl = new Curl($link->url, authorization: $link->token);
+		$response = $curl->post([
+			'file' => new CURLFile($tempFile, $mimetype, basename($path)),
+			'name' => basename($path),
+		], true);
 
 		if (!$curl->isResponseSuccessful() || !isset($response['reference'])) {
 			throw new HejBitException('Failed to upload file to HejBit: '.$response['message']);
@@ -150,7 +147,7 @@ trait BeeSwarmTrait {
 		$endpoint = $this->api_url.'/api/readiness';
 
 		$curl = new Curl($endpoint, authorization: $this->access_key);
-		$curl->exec();
+		$curl->get();
 		$statusCode = $curl->getStatusCode();
 
 		if (!$curl->isResponseSuccessful()) {
@@ -177,7 +174,7 @@ trait BeeSwarmTrait {
 		$curl = new Curl($endpoint);
 		$curl->setAuthorization($this->access_key, CURLAUTH_ANY);
 
-		$output = $curl->exec();
+		$output = $curl->get();
 		$statusCode = $curl->getStatusCode();
 
 		return 200 === $statusCode and 'OK' === $output;
@@ -200,7 +197,7 @@ trait BeeSwarmTrait {
 			'content-type: application/octet-stream',
 		]);
 		$curl->setAuthorization($this->access_key, CURLAUTH_ANY);
-		$response = $curl->exec();
+		$response = $curl->get();
 
 		$httpCode = $curl->getInfo(CURLINFO_HTTP_CODE);
 		if (200 !== $httpCode) {
