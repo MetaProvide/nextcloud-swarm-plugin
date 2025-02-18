@@ -70,6 +70,7 @@
 		"@ethersphere/bee-js": "^3.3.3",
 		"@material-design-icons/svg": "^0.14.13",
 		"@nextcloud/axios": "^2.5.1",
+		"@nextcloud/dialogs": "^3.1.2",
 		"@nextcloud/event-bus": "^3.3.1",
 		"@nextcloud/files": "^3.6.0",
 		"@nextcloud/router": "^2.0.0",
