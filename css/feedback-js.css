@@ -1,9 +1,35 @@
-
-#feedback-root{
-	font-family: system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Arial,Noto Sans,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji;
+:root {
+	--light-text-color: #1a202c;
+	--dark-text-color: #f8fafc;
+	--header-color: #f6c915;
+	--shadow-color: rgba(246, 201, 21, 0.05);
+	--dark-bg: #020617;
+	--light-bg: #f8fafc;
+	--hover-dark-bg: #0f172a;
+	--hover-light-bg: #e2e8f0;
 }
 
-.feedback-wrapper{
+@media (prefers-color-scheme: dark) {
+	:root {
+		--text-color: var(--dark-text-color);
+		--bg-color: var(--dark-bg);
+		--hover-bg: var(--hover-dark-bg);
+	}
+}
+
+@media (prefers-color-scheme: light) {
+	:root {
+		--text-color: var(--light-text-color);
+		--bg-color: var(--light-bg);
+		--hover-bg: var(--hover-light-bg);
+	}
+}
+
+#feedback-root {
+	font-family: system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
+}
+
+.feedback-wrapper {
 	position: fixed;
 	z-index: 1000;
 	bottom: 0;
@@ -13,56 +39,58 @@
 	max-width: 20rem;
 }
 
-.feedback-main{
-	background-color: #fff;
-	color: #000;
+.feedback-main {
+	background-color: var(--hover-bg);
+	color: var(--text-color);
 	border-radius: 0.6rem;
 	text-align: center;
 	overflow: hidden;
-	box-shadow: 0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -2px rgba(0,0,0,.05);
+	box-shadow: 0 10px 15px -3px var(--shadow-color), 0 4px 6px -2px var(--shadow-color);
 }
 
-.feedback-header{
-	color: #fff;
-	background-color: #0d6efd;
+.feedback-header {
+	color: var(--header-color);
+	background-color: var(--bg-color);
 	padding: 0.8rem 1.25rem;
 }
 
-.feedback-header p{
+.feedback-header p {
+	display: flex;
+	justify-content: center;
+	align-items: center;
 	margin: 0;
 	font-weight: 600;
 	font-size: 1.2rem;
 }
 
-.feedback-header a{
-	margin: 0;
+.feedback-header a {
+	margin: 0.5rem 0 0 0;
 	outline: 0;
 	font-size: 1rem;
-	margin-top: 0.5rem;
 	display: block;
-	color: #fff;
-	border: 2px solid #0d6efd;
+	color: var(--header-color);
+	border: 2px solid var(--bg-color);
 	text-decoration: none;
 	padding: 5px 10px
 }
 
-.feedback-header a:hover{
+.feedback-header a:hover {
 	text-decoration: underline;
 }
 
-.feedback-header a:focus{
-	border: 2px solid #fff;
+.feedback-header a:focus {
+	border: 2px solid var(--header-color);
 	border-radius: 5px;
 }
 
-.feedback-content{
+.feedback-content {
 	padding: 0.7rem 1.5rem;
 	display: flex;
 	align-items: center;
 	flex-direction: column;
 }
 
-.feedback-content p{
+.feedback-content p {
 	margin: 0;
 	font-size: 1rem;
 	font-weight: 600;
@@ -70,8 +98,8 @@
 	margin-bottom: 0.6rem;
 }
 
-.feedback-content input{
-	border: 3px solid #fff;
+.feedback-content input {
+	border: 2px solid var(--header-color);
 	filter: brightness(95%);
 	border-radius: 10px;
 	outline: 0;
@@ -80,12 +108,12 @@
 	width: 100%;
 	box-sizing: border-box;
 	font-size: 1rem;
-	font-family: system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Arial,Noto Sans,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji;
+	font-family: system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
 }
 
-.feedback-content textarea{
+.feedback-content textarea {
 	overflow: auto;
-	border: 3px solid #fff;
+	border: 2px solid var(--header-color);
 	filter: brightness(95%);
 	border-radius: 10px;
 	outline: 0;
@@ -94,37 +122,37 @@
 	box-sizing: border-box;
 	resize: none;
 	font-size: 1rem;
-	background-color: white!important;
-	color: #000!important;
-	font-family: system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Arial,Noto Sans,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji;
+	background-color: var(--bg-color) !important;
+	color: var(--text-color) !important;
+	font-family: system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
 }
 
 .feedback-content textarea:focus,
-.feedback-content input:focus{
-	border: 3px solid #0d6efd;
+.feedback-content input:focus {
+	border: 2px solid var(--bg-color);
 }
 
-.feedback-actions{
+.feedback-actions {
 	display: flex;
 	margin-top: 1rem;
 	width: 100%;
 }
 
-.feedback-actions button{
+.feedback-actions button {
 	padding: 0.5rem;
 	border-radius: 10px;
 	cursor: pointer;
 	margin: 0;
 	outline: 0;
-	border: 3px solid rgba(255, 255, 255, 0);
+	border: 2px solid var(--header-color);
 	appearance: none;
-	font-family: system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Arial,Noto Sans,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji;
+	font-family: system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
 	user-select: none;
-	box-shadow: 0 1px 3px 0 rgba(0,0,0,.1);
+	box-shadow: 0 1px 3px 0 var(--shadow-color);
 }
 
 .feedback-actions button:focus {
-	border: 3px solid #0d6efd;
+	border: 2px solid var(--bg-color);
 	filter: brightness(105%);
 }
 
@@ -132,26 +160,31 @@
 	transform: scale(0.95);
 }
 
-#feedback-back{
-	background: #fff;
-	color: rgba(58,71,65);
+#feedback-back {
+	background: var(--header-color);
+	color: var(--bg-color);
 }
 
-#feedback-submit{
+#feedback-submit {
 	margin-left: auto;
-	background: #0d6efd;
-	color: #fff;
+	background: var(--bg-color);
+	color: var(--header-color);
 	font-weight: 700;
 }
 
-#feedback-loading{
+#feedback-submit:hover, #feedback-submit:focus,
+#feedback-back:hover, #feedback-back:focus {
+	border-color: var(--header-color) !important;
+}
+
+#feedback-loading {
 	margin-left: auto;
-	background: #0d6efd;
-	color: #fff;
+	background: var(--bg-color);
+	color: var(--header-color);
 	font-weight: 700;
 }
 
-.feedback-loader{
+.feedback-loader {
 	display: inline-block;
 	position: relative;
 	width: 15px;
@@ -166,10 +199,10 @@
 	width: 20px;
 	height: 20px;
 	margin: 0;
-	border: 3px solid #fff;
+	border: 2px solid var(--header-color);
 	border-radius: 50%;
 	animation: feedback-loader 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
-	border-color: #fff transparent transparent transparent;
+	border-color: var(--header-color) transparent transparent transparent;
 }
 
 .feedback-loader div:nth-child(1) {
@@ -193,9 +226,9 @@
 	}
 }
 
-.feedback-content-list{
+.feedback-content-list {
 	display: flex;
-	flex-direction: column;
+	flex-wrap: wrap;
 	align-items: flex-start;
 	margin-left: auto;
 	margin-right: auto;
@@ -203,10 +236,9 @@
 }
 
 .feedback-item {
-	width: 100%!important;
+	width: 100% !important;
 	cursor: pointer;
-	user-select:none;
-	border:0;
+	user-select: none;
 	outline: 0;
 	background: 0;
 	font-size: 0.9rem;
@@ -214,30 +246,31 @@
 	display: flex;
 	align-items: center;
 	flex-direction: row;
-	color: #000!important;
-	background-color: #fff!important;
-	border: 2px solid #fff!important;
-	border-radius: 10px!important;
-	padding: 10px!important;
+	color: var(--text-color) !important;
+	background-color: var(--bg-color) !important;
+	box-sizing: border-box;
+	border: 2px solid var(--hover-bg) !important;
+	border-radius: 10px !important;
+	padding: 10px !important;
 }
 
-.feedback-item:hover{
-	filter: brightness(95%);
+.feedback-item:hover {
+	border: 2px solid var(--header-color) !important;
 }
 
-.feedback-item:focus{
-	border: 2px solid #0d6efd;
+.feedback-item:focus {
+	border: 2px solid var(--header-color);
 	border-radius: 5px;
 }
 
-.feedback-item span{
+.feedback-item span {
 	width: 1.5rem;
 	margin-right: 0.2rem;
 	display: block;
 	text-align: center;
 }
 
-.feedback-close{
+.feedback-close {
 	margin-top: .75rem;
 	display: flex;
 	align-items: center;
@@ -245,38 +278,41 @@
 	flex-direction: row;
 }
 
-.feedback-close button{
-	box-shadow: 0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -2px rgba(0,0,0,.05);
+.feedback-close button {
+	box-shadow: 0 10px 15px -3px var(--shadow-color), 0 4px 6px -2px var(--shadow-color);
 	cursor: pointer;
-	user-select:none;
-	border:0;
+	user-select: none;
 	outline: 0;
 	border-radius: 9999px;
 	padding: .5rem;
-	background: #fff;
-	color: #000;
-	border: 2px solid #fff;
+	background: var(--bg-color);
+	color: var(--header-color);
+	border: 2px solid var(--bg-color);
 }
 
-.feedback-close button:focus{
-	border: 2px solid #0d6efd;
+.feedback-close button:focus {
+	border: 2px solid var(--header-color);
+	border-color: var(--header-color) !important;
 }
 
-.feedback-close button:hover{
-	filter: brightness(95%);
+.feedback-close button:hover {
+	border-color: var(--header-color) !important;
+	background: var(--hover-bg);
 }
 
 .feedback-close button:active {
+	border-color: var(--header-color) !important;
+	color: var(--header-color) !important;
 	transform: scale(0.95);
 }
 
-.feedback-close svg{
+.feedback-close svg {
 	display: block;
 	width: 1.25rem;
 	height: 1.25rem;
 }
 
-.feedback-btn-wrapper{
+.feedback-btn-wrapper {
 	position: fixed;
 	z-index: 1000;
 	bottom: 0;
@@ -284,23 +320,23 @@
 	margin: 2rem;
 }
 
-#feedback-btn{
+#feedback-btn {
 	height: 30px;
 	display: flex;
 	align-items: center;
 	padding: 1.2rem 0.7rem;
 	border-radius: 0.4rem;
 	cursor: pointer;
-	box-shadow: 0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -2px rgba(0,0,0,.05);
-	user-select:none;
-	border:0;
+	box-shadow: 0 10px 15px -3px var(--shadow-color), 0 4px 6px -2px var(--shadow-color);
+	user-select: none;
 	outline: 0;
-	color: #fff;
-	background-color: #0d6efd;
+	color: var(--header-color);
+	background-color: var(--bg-color);
+	border: 2px solid var(--header-color);
 	transition: filter .4s ease;
 }
 
-#feedback-btn:hover, #feedback-btn:focus{
+#feedback-btn:hover, #feedback-btn:focus {
 	filter: brightness(105%);
 }
 
@@ -308,13 +344,14 @@
 	transform: scale(0.95);
 }
 
-#feedback-btn svg{
-	width: 1.25rem;
-	height: 1.25rem;
+#feedback-btn svg {
+	display: none;
 }
 
-#feedback-btn span{
+#feedback-btn span {
+	display: flex;
+	align-items: center;
+	justify-content: center;
 	font-weight: 700;
 	font-size: 1rem;
-	margin-left: .5rem;
 }

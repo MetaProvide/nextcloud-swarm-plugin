@@ -21,6 +21,7 @@
  */
 import { subscribe } from '@nextcloud/event-bus';
 import { registerDavProperty } from '@nextcloud/files';
+import logo from '../img/hejbit-logo.svg';
 
 registerDavProperty("nc:ethswarm-node");
 
@@ -30,11 +31,10 @@ let previousPathIsSwarm = false;
 let feedbackformLoaded = false;
 console.log('Hejbit-files-feedback-form:previousPathIsSwarm=' + previousPathIsSwarm );
 
-// TODO - Get API Url from beeswarmtrait or another place
-// TODO - Improve layout with css
 // TODO - Remove wiget when not is not in swarm folders
 
-
+// Button with HejBit logo
+const feedbackButton = `<img src="${logo}" alt="Logo" style="height: 20px; vertical-align: middle;"> Feedback`;
 
 
 // Listeners to detect changes in listing.
@@ -64,7 +64,7 @@ subscribe('files:list:updated', (data) => {
                 forceShowButton: false,
                 types: {
                     general: {
-                        text: 'General Feedback',
+                        text: 'General',
                         icon: '📝'
                     },
                     idea: {
@@ -76,22 +76,16 @@ subscribe('files:list:updated', (data) => {
                         icon: '⚠️'
                     }
                 },
-                btnTitle: 'Feedback',
-                title: '<b>💬 HejBit Feedback</b>',
+				btnTitle: feedbackButton,
+				title: feedbackButton,
                 inputPlaceholder: 'We welcome your feedback here.',
-                // emailPlaceholder: 'Email address (optional)',
                 submitText: 'Submit',
                 	backText: 'Back',
-                // contactText: 'Or send an email!',
-                // contactLink: 'mailto:bug@webit.ws',
                 typeMessage: 'How can we improve?',
                 success: 'We Appreciate Your Feedback!',
-                failedTitle: 'Oops, an error ocurred!',
+                failedTitle: 'Oops, an error occurred!',
                 failedMessage: 'Please try again. If this keeps happening, try to send an email to feedback@hejbit.com instead.',
                 position: 'right',
-                primary: '#0d6efd',
-                background: '#fff',
-                color: '#000'
             };
 
             try {
