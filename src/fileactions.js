@@ -27,7 +27,7 @@ Batch option import PQueue from 'p-queue';
 Batch option const queue = new PQueue({ concurrency: 5 });
 */
 
-// TODO - Hide action : Change alert o OC.dialogs.confirm
+// TODO - Hide action : Change alert o OC.dialogs.confirm [this method will be deprecated in nextcloud 31]
 
 // TODO - Hide action : Change emit('files:node:deleted', node) to other like files:list:updated
 
@@ -39,7 +39,7 @@ import HideSource from "@material-design-icons/svg/filled/hide_source.svg";
 import UnhideSource from "@material-design-icons/svg/filled/settings_backup_restore.svg";
 import SwarmSvg from "../img/swarm-logo.svg";
 import HejBitSvg from "../img/hejbit-logo.svg";
-import axios from '@nextcloud/axios';
+import axios from "@nextcloud/axios";
 import Close from "@material-design-icons/svg/filled/close.svg";
 import CloudOff from "@material-design-icons/svg/filled/cloud_off.svg";
 import { showInfo, showSuccess, showWarning } from "@nextcloud/dialogs"; // https://marella.me/material-design-icons/demo/svg/
@@ -79,22 +79,16 @@ registerDavProperty("nc:ethswarm-fileref");
 registerDavProperty("nc:ethswarm-node");
 
 const actionDataEthswarmOverlay = {
-	id: 'EthswarmOverlay',
-
+	id: "EthswarmOverlay",
 
 	displayName() {
-		return '';
+		return "";
 	},
-
 
 	enabled(files, view) {
 		if (files.length !== 1)
 			// We don't support batch actions
 			return false;
-
-	// To fix fileaction navigation bug this action is now available for
-	// files and folders on Swarm storage
-		const attrs = files[0].attributes["ethswarm-node"];
 
 		// To fix fileaction navigation bug this action is now available for
 		// files and folders on Swarm storage
@@ -107,14 +101,12 @@ const actionDataEthswarmOverlay = {
 	},
 
 	iconSvgInline(files, view) {
-		return Buffer.from(HejBitSvg.split(",")[1], 'base64');
+		return Buffer.from(HejBitSvg.split(",")[1], "base64");
 	},
-
 
 	inline(file, view) {
 		return true;
-	  },
-
+	},
 
 	async renderInline(file, view) {
 		// Create the overlay element
@@ -201,149 +193,133 @@ const actionDataEthswarmCopyRef = {
 		return Buffer.from(SwarmSvg.split(",")[1], "base64");
 	},
 
-	  async exec(node, view) {
-		if (node.type === FileType.Folder) {
-			OC.dialogs.info(t('files_external_ethswarm', 'Folder structure is not yet supported on Swarm. This folder is only available on Nextcloud, although all files within it are accessible on Swarm.'), t('files_external_ethswarm', 'Hejbit'));
-		}else if (node.type === FileType.File) {
-			OC.dialogs.info(t('files_external_ethswarm', 'This file is on Swarm Network by Hejbit!'), t('files_external_ethswarm', 'Hejbit'));
-		}
-
-	},
-
-	execBatch(nodes, view) {
-		return Promise.all(nodes.map(node => this.exec(node, view)));
-	}
-};
-
-
-
-const EthswarmOverlay = new FileAction(actionDataEthswarmOverlay);
-
-registerFileAction(EthswarmOverlay);
-
-
-const actionDataEthswarmCopyRef = {
-	id: 'EthswarmCopyRef',
-
-	displayName() {
-		return t('files_external_ethswarm', "Copy Swarm reference to clipboard");
-	},
-
-	altText() {
-		return t('files_external_ethswarm', "Copy Swarm reference to clipboard");
-	},
-
-	enabled(files, view) {
-		if (files.length !== 1) // We don't support batch actions
-			return false;
-
-	// To fix fileaction navigation bug this action is now available for
-	// files and folders on Swarm storage
-		const attrs = files[0].attributes["ethswarm-node"];
-
-		if (attrs === undefined)
-			return false;
-		else if (attrs === "")
-			return false;
-
-		return true;
-	},
-
-	inline(file, view) {
-		// Determine whether to render the inline element
-		// For example, only for PDF files
-		return false;
-	  },
-
-	iconSvgInline(files, view) {
-		return Buffer.from(SwarmSvg.split(",")[1], 'base64');
-	},
-
-
 	async exec(node, view) {
 		const swarmref = node.attributes["ethswarm-fileref"];
 		if (node.type === FileType.Folder) {
-			OC.dialogs.info(t('files_external_ethswarm', 'Folder structure is not yet supported on Swarm. This folder is only available on Nextcloud, although all files within it are accessible on Swarm.'), t('files_external_ethswarm', 'Swarm reference'));
+			showWarning(
+				t(
+					"files_external_ethswarm",
+					"Folder structure is not yet supported on Swarm. This folder is only available on Nextcloud, although all files within it are accessible on Swarm."
+				),
+				t("files_external_ethswarm", "Swarm reference")
+			);
 			return;
 		}
-		navigator.clipboard.writeText(swarmref)
-				 .then(() => {
-					// clipboard successfully set
-					OC.dialogs.info(t('files_external_ethswarm', 'The following Swarm reference has been copied to the clipboard: ') + swarmref, t('files_external_ethswarm', 'Swarm reference'));
-				 }, () => {
-					// clipboard write failed
-					OC.dialogs.info(t('files_external_ethswarm', 'Unable to write to the clipboard, you can manually copy the Swarm reference below: ') + swarmref, t('files_external_ethswarm', 'Swarm reference'));
-				 });
+
+		showInfo(
+			`
+			<div style="margin: 1rem 0; width: 35rem;" data-swram-ref="${swarmref}">
+				<img src="${SwarmSvg}" alt="Swarm" style="height: 20px; vertical-align: middle;">
+				<span>${t(
+					"files_external_ethswarm",
+					"Click on this message to copy the Swarm Reference into your clipboard"
+				)}</span>
+				<pre style="overflow-x: scroll; max-width: 100%;">${swarmref}</pre>
+			</div>`,
+			{
+				isHTML: true,
+				onClick: () => {
+					document
+						.querySelector(`div[data-swram-ref="${swarmref}"]`)
+						.parentElement.remove();
+					navigator.clipboard.writeText(swarmref).then(
+						() => {
+							showSuccess(
+								t(
+									"files_external_ethswarm",
+									"The Swarm reference has been copied to your clipboard"
+								)
+							);
+						},
+						() => {
+							showWarning(
+								`
+								<div style="margin: 1rem 0; width: 35rem;">
+									<span>${t(
+										"files_external_ethswarm",
+										"Unable to write the Swarm Reference into your clipboard. Copy it manually"
+									)}</span>
+									<pre style="overflow-x: scroll; max-width: 100%;">${swarmref}</pre>
+								</div>
+							`,
+								{
+									isHTML: true,
+								}
+							);
+						}
+					);
+				},
+			}
+		);
 	},
 
-	execBatch(nodes,view) {
-		return Promise.all(nodes.map(node => this.exec(node, view)));
-	}
+	execBatch(nodes, view) {
+		return Promise.all(nodes.map((node) => this.exec(node, view)));
+	},
 };
 
 const EthswarmCopyRef = new FileAction(actionDataEthswarmCopyRef);
 
 registerFileAction(EthswarmCopyRef);
 
-
-const actionDataHideFile ={
-    id: 'hideFile',
-    displayName(nodes, view) {
-        /**
-         * If we're in the sharing view, we can only unshare
-         */
-        if (isMixedUnshareAndDelete(nodes)) {
-            return t('files_external_ethswarm', 'Hide and unshare');
-        }
-        /**
-         * If those nodes are all the root node of a
-         * share, we can only unshare them.
-         */
-        if (canUnshareOnly(nodes)) {
-            if (nodes.length === 1) {
-                return t('files_external_ethswarm', 'Leave this share');
-            }
-            return t('files_external_ethswarm', 'Leave these shares');
-        }
-        /**
-         * If those nodes are all the root node of an
-         * external storage, we can only disconnect it.
-         */
-        if (canDisconnectOnly(nodes)) {
-            if (nodes.length === 1) {
-                return t('files_external_ethswarm', 'Disconnect storage');
-            }
-            return t('files_external_ethswarm', 'Disconnect storages');
-        }
-        /**
-         * If we're only selecting files, use proper wording
-         */
-        if (isAllFiles(nodes)) {
-            if (nodes.length === 1) {
-                return t('files_external_ethswarm', 'Hide file');
-            }
-            return t('files_external_ethswarm', 'Hide files');
-        }
-        /**
-         * If we're only selecting folders, use proper wording
-         */
-        if (isAllFolders(nodes)) {
-            if (nodes.length === 1) {
-                return t('files_external_ethswarm', 'Hide folder');
-            }
-            return t('files_external_ethswarm', 'Hide folders');
-        }
-        return t('files_external_ethswarm', 'Hide');
-    },
-    iconSvgInline: (nodes) => {
-        if (canUnshareOnly(nodes)) {
-             return Buffer.from(Close.split(",")[1], 'base64');;
-        }
-        if (canDisconnectOnly(nodes)) {
-            return Buffer.from(CloudOff.split(",")[1], 'base64');
-        }
-        return Buffer.from(HideSource.split(",")[1], 'base64');
-    },
+const actionDataHideFile = {
+	id: "hideFile",
+	displayName(nodes, view) {
+		/**
+		 * If we're in the sharing view, we can only unshare
+		 */
+		if (isMixedUnshareAndDelete(nodes)) {
+			return t("files_external_ethswarm", "Hide and unshare");
+		}
+		/**
+		 * If those nodes are all the root node of a
+		 * share, we can only unshare them.
+		 */
+		if (canUnshareOnly(nodes)) {
+			if (nodes.length === 1) {
+				return t("files_external_ethswarm", "Leave this share");
+			}
+			return t("files_external_ethswarm", "Leave these shares");
+		}
+		/**
+		 * If those nodes are all the root node of an
+		 * external storage, we can only disconnect it.
+		 */
+		if (canDisconnectOnly(nodes)) {
+			if (nodes.length === 1) {
+				return t("files_external_ethswarm", "Disconnect storage");
+			}
+			return t("files_external_ethswarm", "Disconnect storages");
+		}
+		/**
+		 * If we're only selecting files, use proper wording
+		 */
+		if (isAllFiles(nodes)) {
+			if (nodes.length === 1) {
+				return t("files_external_ethswarm", "Hide file");
+			}
+			return t("files_external_ethswarm", "Hide files");
+		}
+		/**
+		 * If we're only selecting folders, use proper wording
+		 */
+		if (isAllFolders(nodes)) {
+			if (nodes.length === 1) {
+				return t("files_external_ethswarm", "Hide folder");
+			}
+			return t("files_external_ethswarm", "Hide folders");
+		}
+		return t("files_external_ethswarm", "Hide");
+	},
+	iconSvgInline: (nodes) => {
+		if (canUnshareOnly(nodes)) {
+			return Buffer.from(Close.split(",")[1], "base64");
+		}
+		if (canDisconnectOnly(nodes)) {
+			return Buffer.from(CloudOff.split(",")[1], "base64");
+		}
+		return Buffer.from(HideSource.split(",")[1], "base64");
+	},
 	enabled(files, view) {
 		if (files.length !== 1)
 			// We don't support batch actions
@@ -351,47 +327,52 @@ const actionDataHideFile ={
 		const attrs = files[0].attributes["ethswarm-node"];
 		const hidden = files[0].attributes.hidden;
 
-		if (attrs === undefined)
-			return false;
-		else if (attrs === "")
-			return false;
-		if (hidden)
-			return false;
+		if (attrs === undefined) return false;
+		else if (attrs === "") return false;
+		if (hidden) return false;
 
 		return attrs;
 	},
-    async exec(node, view, dir) {
-		let message = '';
+	async exec(node, view, dir) {
+		let message = "";
 		if (node.type === FileType.File) {
-			message = t('files_external_ethswarm', 'The file will be set to hide on the folder view. The file will continue to exist on the Swarm network.');
+			message = t(
+				"files_external_ethswarm",
+				"The file will be set to hide on the folder view. The file will continue to exist on the Swarm network."
+			);
 		} else if (node.type === FileType.Folder) {
-			message = t('files_external_ethswarm', 'The folder will be set to hide on the folder view. All the files inside the folder will continue to exist on the Swarm network.');
+			message = t(
+				"files_external_ethswarm",
+				"The folder will be set to hide on the folder view. All the files inside the folder will continue to exist on the Swarm network."
+			);
 		}
 		alert(message);
-        try {
-		   await axios({
-			method: 'post',
-			url: node.encodedSource,
-			headers: {
-			 'Hejbit-Action': 'hide'
-			}
-		  });
+		try {
+			await axios({
+				method: "post",
+				url: node.encodedSource,
+				headers: {
+					"Hejbit-Action": "hide",
+				},
+			});
 
-		  // The right event is emit('files:node:updated', node);
-		  // it triggers the file:list:update, but unfortunately that doesn't
-		  // a reevaluation of the enable funtion of the fileactions.
-		  // To improve UX we should reload only if show_hidden is true
-		  emit('files:node:deleted', node);
-		  // window.location.reload();
-          return true;
-
-        }
-        catch (error) {
-			console.log('Error while hidding a file', { error, source: node.source, node });
-            // TODO: update to this? logger.error('Error while deleting a file', { error, source: node.source, node });
-            return false;
-        }
-    },   /* TODO: Batch option
+			// The right event is emit('files:node:updated', node);
+			// it triggers the file:list:update, but unfortunately that doesn't
+			// a reevaluation of the enable funtion of the fileactions.
+			// To improve UX we should reload only if show_hidden is true
+			emit("files:node:deleted", node);
+			// window.location.reload();
+			return true;
+		} catch (error) {
+			console.log("Error while hidding a file", {
+				error,
+				source: node.source,
+				node,
+			});
+			// TODO: update to this? logger.error('Error while deleting a file', { error, source: node.source, node });
+			return false;
+		}
+	} /* TODO: Batch option
         // Map each node to a promise that resolves with the result of exec(node)
         const promises = nodes.map(node => {
             // Create a promise that resolves with the result of exec(node)
@@ -404,9 +385,9 @@ const actionDataHideFile ={
             return promise;
         });
         return Promise.all(promises);
-    }, */
+    }, */,
 	execBatch(nodes, view) {
-		return Promise.all(nodes.map(node => this.exec(node, view)));
+		return Promise.all(nodes.map((node) => this.exec(node, view)));
 	},
 	order: 150,
 };
@@ -415,79 +396,76 @@ const AddHideAction = new FileAction(actionDataHideFile);
 
 registerFileAction(AddHideAction);
 
-
-
-const actionDataUnhideFile ={
-    id: 'unhideFile',
-    displayName(nodes, view) {
-        /**
-         * If we're only selecting files, use proper wording
-         */
-        if (isAllFiles(nodes)) {
-            if (nodes.length === 1) {
-                return t('files_external_ethswarm', 'Unhide');
-            }
-            return t('files_external_ethswarm', 'Unhide');
-        }
-        /**
-         * If we're only selecting folders, use proper wording
-         */
-        if (isAllFolders(nodes)) {
-            if (nodes.length === 1) {
-                return t('files_external_ethswarm', 'Unhide');
-            }
-            return t('files_external_ethswarm', 'Unhide');
-        }
-        return t('files_external_ethswarm', 'Unhide');
-    },
-    iconSvgInline: (nodes) => {
-        return Buffer.from(UnhideSource.split(",")[1], 'base64');
-    },
+const actionDataUnhideFile = {
+	id: "unhideFile",
+	displayName(nodes, view) {
+		/**
+		 * If we're only selecting files, use proper wording
+		 */
+		if (isAllFiles(nodes)) {
+			if (nodes.length === 1) {
+				return t("files_external_ethswarm", "Unhide");
+			}
+			return t("files_external_ethswarm", "Unhide");
+		}
+		/**
+		 * If we're only selecting folders, use proper wording
+		 */
+		if (isAllFolders(nodes)) {
+			if (nodes.length === 1) {
+				return t("files_external_ethswarm", "Unhide");
+			}
+			return t("files_external_ethswarm", "Unhide");
+		}
+		return t("files_external_ethswarm", "Unhide");
+	},
+	iconSvgInline: (nodes) => {
+		return Buffer.from(UnhideSource.split(",")[1], "base64");
+	},
 	inline(file, view) {
 		return true;
 	},
 
 	enabled(files, view) {
-		if (files.length !== 1) // We don't support batch actions
+		if (files.length !== 1)
+			// We don't support batch actions
 			return false;
 		const attrs = files[0].attributes["ethswarm-node"];
 		const hidden = files[0].attributes.hidden;
 
-		if (attrs === undefined)
-			return false;
-		else if (attrs === "")
-			return false;
-		if (!hidden)
-			return false;
+		if (attrs === undefined) return false;
+		else if (attrs === "") return false;
+		if (!hidden) return false;
 
 		return attrs;
 	},
-    async exec(node, view, dir) {
-        try {
-		   await axios({
-			method: 'post',
-			url: node.encodedSource,
-			headers: {
-			 'Hejbit-Action': 'unhide'
-			}
-		  });
+	async exec(node, view, dir) {
+		try {
+			await axios({
+				method: "post",
+				url: node.encodedSource,
+				headers: {
+					"Hejbit-Action": "unhide",
+				},
+			});
 
-
-		  // the right event is emit('files:node:updated', node);
-		  // it triggers the file:list:update, but unfortunately that doesn't
-		  // a reevaluation of the enable funtion of the fileactions
-		  emit('files:node:deleted', node);
-		  window.location.reload();
-
+			// the right event is emit('files:node:updated', node);
+			// it triggers the file:list:update, but unfortunately that doesn't
+			// a reevaluation of the enable funtion of the fileactions
+			emit("files:node:deleted", node);
+			window.location.reload();
 
 			return true;
-        }
-        catch (error) {
-			console.log('Error while unhidding a file', { error, source: node.source, node });
-            // TODO: update to this? logger.error('Error while deleting a file', { error, source: node.source, node });
-            return false;
-        }
-    },   /* TODO: Batch option
+		} catch (error) {
+			console.log("Error while unhidding a file", {
+				error,
+				source: node.source,
+				node,
+			});
+			// TODO: update to this? logger.error('Error while deleting a file', { error, source: node.source, node });
+			return false;
+		}
+	} /* TODO: Batch option
 	async execBatch(nodes, view, dir) {
         // Map each node to a promise that resolves with the result of exec(node)
         const promises = nodes.map(node => {
@@ -501,33 +479,29 @@ const actionDataUnhideFile ={
             return promise;
         });
         return Promise.all(promises);
-    }, */
+    }, */,
 
 	execBatch(nodes, view) {
-		return Promise.all(nodes.map(node => this.exec(node, view)));
+		return Promise.all(nodes.map((node) => this.exec(node, view)));
 	},
-    order: 150,
+	order: 150,
 };
 
 const AddUnhideAction = new FileAction(actionDataUnhideFile);
 
 registerFileAction(AddUnhideAction);
 
-
-
-
 let previousPathHasSwarm = false;
 
 subscribe("files:list:updated", (data) => {
 	console.log("Hejbit-files:list:updated");
 
-	if (data.folder?.path === '/' && previousPathHasSwarm){
+	if (data.folder?.path === "/" && previousPathHasSwarm) {
 		previousPathHasSwarm = false;
 		window.location.reload();
 	}
 
-	if (data.folder?.attributes["ethswarm-node"]){
+	if (data.folder?.attributes["ethswarm-node"]) {
 		previousPathHasSwarm = true;
 	}
-
 });
