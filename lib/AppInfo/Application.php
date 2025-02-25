@@ -31,6 +31,7 @@ use OCA\Files_External_Ethswarm\Auth\License;
 use OCA\Files_External_Ethswarm\Backend\BeeSwarm;
 use OCA\Files_External_Ethswarm\Exception\BaseException;
 use OCA\Files_External_Ethswarm\Notification\Notifier;
+use OCA\Files_External_Ethswarm\Utils\Env;
 use OCP\AppFramework\App;
 use OCP\AppFramework\Bootstrap\IBootContext;
 use OCP\AppFramework\Bootstrap\IBootstrap;
@@ -61,7 +62,7 @@ class Application extends App implements IBootstrap, IBackendProvider, IAuthMech
 		$config = $container->get('OCP\IConfig');
 
 		// Initialize Sentry if telemetry is enabled
-		$environment = $config->getSystemValue('debug', false) ? 'development' : 'production';
+		$environment = Env::get('ENV') ?? 'production';
 		$defaultValue = true;
 		if ($config->getSystemValue('telemetry.enabled', $defaultValue)) {
 			Sentry\init([
