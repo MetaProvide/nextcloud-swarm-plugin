@@ -40,15 +40,12 @@ use OCP\EventDispatcher\IEventDispatcher;
 use OCP\Util;
 use Sentry;
 
-class Application extends App implements IBootstrap, IBackendProvider, IAuthMechanismProvider
-{
-	public function __construct(array $urlParams = [])
-	{
+class Application extends App implements IBootstrap, IBackendProvider, IAuthMechanismProvider {
+	public function __construct(array $urlParams = []) {
 		parent::__construct(AppConstants::APP_NAME, $urlParams);
 	}
 
-	public function getBackends()
-	{
+	public function getBackends() {
 		$container = $this->getContainer();
 
 		return [
@@ -56,8 +53,7 @@ class Application extends App implements IBootstrap, IBackendProvider, IAuthMech
 		];
 	}
 
-	public function boot(IBootContext $context): void
-	{
+	public function boot(IBootContext $context): void {
 		$container = $this->getContainer();
 		$config = $container->get('OCP\IConfig');
 
@@ -100,24 +96,21 @@ class Application extends App implements IBootstrap, IBackendProvider, IAuthMech
 		$this->getAuthMechanisms();
 	}
 
-	public function registerEventsScripts(IEventDispatcher $dispatcher)
-	{
-	}
+	public function registerEventsScripts(IEventDispatcher $dispatcher) {}
 
 	public function register(IRegistrationContext $context): void {
 		$context->registerNotifierService(Notifier::class);
 
 		// Register autoloader of sentry
-		$autoloadPath = __DIR__ . '/../../vendor-bin/sentry/vendor/autoload.php';
+		$autoloadPath = __DIR__.'/../../vendor-bin/sentry/vendor/autoload.php';
 		if (!file_exists($autoloadPath)) {
-			throw new BaseException('Vendor autoload.php not found at: ' . $autoloadPath);
+			throw new BaseException('Vendor autoload.php not found at: '.$autoloadPath);
 		}
 
 		require_once $autoloadPath;
 	}
 
-	public function getAuthMechanisms()
-	{
+	public function getAuthMechanisms() {
 		$container = $this->getContainer();
 
 		return [
