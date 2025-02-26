@@ -95,7 +95,6 @@ class Application extends App implements IBootstrap, IBackendProvider, IAuthMech
 			Util::addScript(AppConstants::APP_NAME, 'nextcloud-swarm-plugin-fileactions');
 			Util::addInitScript(AppConstants::APP_NAME, 'nextcloud-swarm-plugin-newfilemenu');
 			Util::addScript(AppConstants::APP_NAME, 'nextcloud-swarm-plugin-feedbackform');
-			Util::addScript(AppConstants::APP_NAME, 'nextcloud-swarm-plugin-feedbackform');
 		});
 
 		$this->getAuthMechanisms();
@@ -105,8 +104,7 @@ class Application extends App implements IBootstrap, IBackendProvider, IAuthMech
 	{
 	}
 
-	public function register(IRegistrationContext $context): void
-	{
+	public function register(IRegistrationContext $context): void {
 		$context->registerNotifierService(Notifier::class);
 
 		// Register autoloader of sentry
