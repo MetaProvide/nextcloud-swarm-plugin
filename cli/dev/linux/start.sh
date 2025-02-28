@@ -8,4 +8,3 @@ docker compose --profile dev up -d --force-recreate --remove-orphans --build
 # done
 echo "started the dev environment"
 echo "visit https://localhost"
-echo "Make sure config.php has 'debug' => 'true'"
