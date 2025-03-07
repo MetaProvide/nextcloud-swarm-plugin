@@ -19,7 +19,7 @@ services:
       context: ./docker/nextcloud
       dockerfile: Dockerfile
       args:
-        NC_VERSION: ${NC_VERSION:-28}
+        NC_VERSION: ${NC_VERSION:-29}
       target: ${ENV:-development}
     restart: unless-stopped
     depends_on:
@@ -28,7 +28,7 @@ services:
       redis:
         condition: service_healthy
     env_file:
-      - .env
+      - .\.env
     environment:
       MYSQL_HOST: mariadb:3306
       REDIS_HOST: redis
@@ -45,7 +45,7 @@ services:
       - ./:/var/www/html/custom_apps/files_external_ethswarm
 
   cron:
-    image: nextcloud:${NC_VERSION:-28}-fpm-alpine
+    image: nextcloud:${NC_VERSION:-29}-fpm-alpine
     restart: always
     volumes:
       - nc-app:/var/www/html:z

@@ -56,8 +56,12 @@ class BeeSwarm extends Backend {
 			->setStorageClass('\OCA\Files_External_Ethswarm\Storage\BeeSwarm')
 			->setText($l->t('HejBit-Swarm'))
 			->addParameters([
-				(new DefinitionParameter(self::OPTION_HOST_URL, $l->t('Server URL')))
-					->setTooltip($l->t('License Server URL')),
+				(new DefinitionParameter(
+					self::OPTION_HOST_URL,
+					$l->t('Access Server'),
+					'app.hejbit.com'
+				))
+					->setTooltip($l->t('Access Server')),
 			])->addAuthScheme(License::SCHEME_ACCESS_KEY)
 		;
 	}
