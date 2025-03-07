@@ -4,7 +4,7 @@ namespace OCA\Files_External_Ethswarm\Exception;
 
 use Exception;
 
-class HejBitException extends BaseException
+class HejBitException extends Exception
 {
 	public function __construct($message, $code = 0, ?Exception $previous = null)
 	{
