@@ -91,8 +91,8 @@ build-tarball:
 	--exclude="dev-environment" \
 	--exclude="docker" \
 	--exclude="node_modules" \
-	--exclude="src" \
-	--exclude="vendor" \
+	--exclude="./src" \
+	--exclude="./vendor" \
 	--exclude=".editorconfig" \
 	--exclude=".eslintrc.js" \
 	--exclude=".gitignore" \
@@ -126,8 +126,8 @@ build-appstore-tarball:
 	--exclude="dev-environment" \
 	--exclude="docker" \
 	--exclude="node_modules" \
-	--exclude="src" \
-	--exclude="vendor" \
+	--exclude="./src" \
+	--exclude="./vendor" \
 	--exclude=".editorconfig" \
 	--exclude=".eslintrc.js" \
 	--exclude=".gitignore" \
