@@ -106,6 +106,9 @@ class Application extends App implements IBootstrap, IBackendProvider, IAuthMech
 		// Add feedback CSS
 		Util::addStyle(AppConstants::APP_NAME, 'feedback-js');
 
+		// Add feedback CSS
+		Util::addStyle(AppConstants::APP_NAME, 'feedback-js');
+
 		/** @var IEventDispatcher $dispatcher */
 		$dispatcher = $context->getAppContainer()->get(IEventDispatcher::class);
 		$dispatcher->addListener('OCA\Files::loadAdditionalScripts', function () {
@@ -115,6 +118,7 @@ class Application extends App implements IBootstrap, IBackendProvider, IAuthMech
 		$dispatcher->addListener(LoadAdditionalScriptsEvent::class, function () {
 			Util::addScript(AppConstants::APP_NAME, 'nextcloud-swarm-plugin-fileactions');
 			Util::addInitScript(AppConstants::APP_NAME, 'nextcloud-swarm-plugin-newfilemenu');
+			Util::addScript(AppConstants::APP_NAME, 'nextcloud-swarm-plugin-feedbackform');
 			Util::addScript(AppConstants::APP_NAME, 'nextcloud-swarm-plugin-feedbackform');
 		});
 
