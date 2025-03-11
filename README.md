@@ -21,7 +21,7 @@ This plugin integrates [Swarm](https://www.ethswarm.org/) (a decentralized, bloc
 
 Before using the plugin, ensure you have the following:
 
--   An active Nextcloud instance (version 27,28 or 29)
+-   An active Nextcloud instance (version 29,30 or 31)
 -   A valid license and URL to activate the service
     -   [Request Your Free Nextcloud Swarm Plugin Trial License](https://metaprovide.org/hejbit/start)
 
