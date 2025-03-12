@@ -109,6 +109,7 @@ build-tarball:
 	--exclude="package.json" \
 	--exclude="stylelint.config.js" \
 	--exclude="webpack.config.js" \
+	--exclude="CHANGELOG.md" \
 	../$(app_name)/ $(temp_build_directory)/$(app_id)
 	tar czf $(build_directory)/$(app_name).tar.gz \
 		-C $(temp_build_directory) $(app_id)
@@ -144,6 +145,7 @@ build-appstore-tarball:
 	--exclude="package.json" \
 	--exclude="stylelint.config.js" \
 	--exclude="webpack.config.js" \
+	--exclude="CHANGELOG.md" \
 	../$(app_id)/ $(temp_build_directory)/$(app_id)
 	@if [ -f $(cert_directory)/$(app_id).key ]; then \
 		echo "Signing app files…"; \
