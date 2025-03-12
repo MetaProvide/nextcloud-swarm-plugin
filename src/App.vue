@@ -114,7 +114,7 @@ export default {
 
 			try {
 				await axios.post(generateUrl('/apps/files_external_ethswarm/settings'), {
-					telemetry: this.telemetryEnabled ? '1' : '0'
+					telemetry: this.telemetryEnabled
 				});
 
 				this.saveSuccess = true;
