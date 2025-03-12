@@ -48,5 +48,5 @@ return [
 			'url' => '/feedback/submit',
 			'verb' => 'POST',
 		],
-	]
+	],
 ];
