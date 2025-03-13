@@ -20,11 +20,12 @@ declare(strict_types=1);
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 return [
 	'routes' => [
 		[
 			'name' => 'Settings#save',
-			'url' => '/save',
+			'url' => '/settings',
 			'verb' => 'POST',
 		],
 		[
@@ -47,5 +48,5 @@ return [
 			'url' => '/feedback/submit',
 			'verb' => 'POST',
 		],
-	]
+	],
 ];
