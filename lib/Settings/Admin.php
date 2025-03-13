@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * @copyright Copyright (c) 2022, MetaProvide Holding EKF
  * @author Ron Trevor <ecoron@proton.me>
@@ -21,59 +19,52 @@ declare(strict_types=1);
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace OCA\Files_External_Ethswarm\Controller;
+namespace OCA\Files_External_Ethswarm\Settings;
 
-use OCP\AppFramework\Controller;
+use OCA\Files_External\Service\GlobalStoragesService;
+use OCP\AppFramework\Http\TemplateResponse;
 use OCP\IConfig;
-use OCP\IRequest;
+use OCP\Settings\ISettings;
+use OCP\Util;
 
-class SettingsController extends Controller {
+class Admin implements ISettings {
 	/** @var string */
 	protected $appName;
 
 	/** @var IConfig */
 	private $config;
 
+	/** @var GlobalStoragesService */
+	private $globalStoragesService;
+
 	public function __construct(
-		string $appName,
+		$appName,
 		IConfig $config,
-		IRequest $request,
+		GlobalStoragesService $globalStoragesService
 	) {
-		parent::__construct($appName, $request);
+		$this->appName = $appName;
 		$this->config = $config;
+		$this->globalStoragesService = $globalStoragesService;
 	}
 
-	/**
-	 * Set the storage config settings.
-	 */
-	public function admin(): void {
-		// Handle telemetry setting
-		$telemetry = $this->request->getParam('telemetry');
-		if (null !== $telemetry) {
-			$this->config->setSystemValue('telemetry.enabled', (bool) $telemetry);
-		}
-	}
-
-	/**
-	 * Get the current settings.
-	 */
-	public function getSettings(): array {
-		return [
+	public function getForm(): TemplateResponse {
+		$parameters = [
 			'telemetry_enabled' => $this->config->getSystemValue('telemetry.enabled', false),
 		];
+
+		Util::addScript($this->appName, 'nextcloud-swarm-plugin-main');
+
+		return new TemplateResponse($this->appName, 'vue-admin-settings', ['params' => $parameters]);
 	}
 
 	/**
-	 * @NoCSRFRequired
-	 *
-	 * @NoAdminRequired
-	 * Save the storage config settings
+	 * @return string the section ID, e.g. 'sharing'
 	 */
-	public function save(): void {
-		// Handle telemetry setting
-		$telemetry = $this->request->getParam('telemetry');
-		if (null !== $telemetry) {
-			$this->config->setSystemValue('telemetry.enabled', (bool) $telemetry);
-		}
+	public function getSection(): string {
+		return $this->appName;
+	}
+
+	public function getPriority(): int {
+		return 5;
 	}
 }
