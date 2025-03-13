@@ -6,7 +6,7 @@ use BaseException;
 
 class HejBitException extends BaseException
 {
-	public function __construct($message, $code = 0, ?BaseException $previous = null)
+	public function __construct($message, $code = 0, ?Exception $previous = null)
 	{
 		parent::__construct($message, $code, $previous);
 	}
