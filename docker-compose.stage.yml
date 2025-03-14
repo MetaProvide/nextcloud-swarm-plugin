@@ -1,0 +1,114 @@
+services:
+
+  web:
+    build: ./docker/web
+    restart: unless-stopped
+    volumes_from:
+      - nextcloud
+    depends_on:
+      - nextcloud
+    labels:
+      caddy: ${APP_URL}
+      caddy.reverse_proxy: '{{upstreams 80}}'
+    networks:
+      - frontend
+      - proxy
+
+  nextcloud:
+    build:
+      context: ./docker/nextcloud
+      dockerfile: Dockerfile
+      args:
+        NC_VERSION: ${NC_VERSION:-31}
+      target: ${ENV:-development}
+    restart: unless-stopped
+    depends_on:
+      mariadb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      MYSQL_HOST: mariadb:3306
+      REDIS_HOST: redis
+    networks:
+      - frontend
+      - backend
+    extra_hosts:
+      - host.docker.internal:host-gateway
+      - onlyoffice.local:host-gateway
+      - hejbit.local:host-gateway
+      - api.hejbit.local:host-gateway
+    volumes:
+      - nc-app:/var/www/html
+      - ./:/var/www/html/custom_apps/files_external_ethswarm
+
+  cron:
+    image: nextcloud:${NC_VERSION:-31}-fpm-alpine
+    restart: always
+    volumes:
+      - nc-app:/var/www/html:z
+    entrypoint: /cron.sh
+    networks:
+      - backend
+    depends_on:
+      nextcloud:
+        condition: service_started
+      mariadb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  redis:
+    image: redis:alpine
+    restart: unless-stopped
+    environment:
+      REDIS_HOST_PASSWORD: ${REDIS_HOST_PASSWORD:-secret}
+    command: redis-server --requirepass ${REDIS_HOST_PASSWORD:-secret}
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      start_period: 3s
+      timeout: 5s
+      interval: 30s
+    networks:
+      - backend
+
+  mariadb:
+    image: mariadb:latest
+    # set transaction isolation: https://docs.nextcloud.com/server/stable/admin_manual/configuration_database/linux_database_configuration.html
+    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW --innodb-file-per-table=1 --skip-innodb-read-only-compressed
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-nextcloud}
+      MYSQL_USER: ${MYSQL_USER:-nextcloud}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-secret}
+    volumes:
+      - nc-db:/var/lib/mysql
+    healthcheck:
+      test: [ "CMD", "healthcheck.sh", "--su-mysql", "--connect", "--innodb_initialized" ]
+      start_period: 3s
+      timeout: 5s
+      interval: 30s
+    networks:
+      - backend
+
+volumes:
+  nc-app:
+  nc-db:
+
+networks:
+  frontend:
+    ipam:
+        config:
+          - subnet: 172.${NC_VERSION:-31}.10.0/24
+            gateway: 172.${NC_VERSION:-31}.10.1
+  backend:
+    ipam:
+        config:
+          - subnet: 172.${NC_VERSION:-31}.20.0/24
+            gateway: 172.${NC_VERSION:-31}.20.1
+  proxy:
+    name: hejbit-network
+    external: true
