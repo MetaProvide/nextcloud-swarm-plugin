@@ -8,7 +8,7 @@ services:
     depends_on:
       - nextcloud
     labels:
-      caddy: ${APP_URL:-localhost}, nextcloud.local
+      caddy: ${APP_URL}
       caddy.reverse_proxy: '{{upstreams 80}}'
     networks:
       - frontend
@@ -19,7 +19,7 @@ services:
       context: ./docker/nextcloud
       dockerfile: Dockerfile
       args:
-        NC_VERSION: ${NC_VERSION:-29}
+        NC_VERSION: ${NC_VERSION:-31}
       target: ${ENV:-development}
     restart: unless-stopped
     depends_on:
@@ -37,19 +37,18 @@ services:
       - backend
     extra_hosts:
       - host.docker.internal:host-gateway
-      - onlyoffice.local:host-gateway
-      - hejbit.local:host-gateway
-      - api.hejbit.local:host-gateway
     volumes:
       - nc-app:/var/www/html
       - ./:/var/www/html/custom_apps/files_external_ethswarm
 
   cron:
-    image: nextcloud:${NC_VERSION:-29}-fpm-alpine
+    image: nextcloud:${NC_VERSION:-31}-fpm-alpine
     restart: always
     volumes:
       - nc-app:/var/www/html:z
     entrypoint: /cron.sh
+    networks:
+      - backend
     depends_on:
       nextcloud:
         condition: service_started
@@ -92,91 +91,21 @@ services:
     networks:
       - backend
 
-  adminer:
-    image: adminer:latest
-    restart: unless-stopped
-    networks:
-      - backend
-    ports:
-      - '8080:8080'
-    depends_on:
-      - mariadb
-    environment:
-      ADMINER_DEFAULT_SERVER: mariadb
-
-  rsync:
-    build:
-      context: ./docker/rsync
-      dockerfile: Dockerfile
-    restart: unless-stopped
-    cpu_shares: 512
-    mem_limit: 256m
-    volumes:
-      - nc-app:/app:ro
-      - ./dev-environment/nextcloud_source:/source
-    environment:
-      - RSYNC_CRONTAB=crontab
-    depends_on:
-      - nextcloud
-    networks:
-      - backend
-
-  onlyoffice:
-    image: onlyoffice/documentserver
-    environment:
-      JWT_ENABLED: true
-      JWT_SECRET: secret
-      JWT_HEADER: AuthorizationJwt
-      JWT_IN_BODY: true
-      USE_UNAUTHORIZED_STORAGE: true
-    restart: unless-stopped
-    volumes:
-      - onlyoffice_data:/var/www/onlyoffice/Data
-      - onlyoffice_db:/var/lib/postgresql
-      - onlyoffice_lib:/var/lib/onlyoffice
-      - onlyoffice_logs:/var/log/onlyoffice
-    extra_hosts:
-      - nextcloud.local:host-gateway
-    networks:
-      - backend
-      - proxy
-    labels:
-      caddy: onlyoffice.local
-      caddy.reverse_proxy: '{{upstreams 80}}'
-
-  proxy:
-    image: lucaslorentz/caddy-docker-proxy:alpine
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-      - "443:443/udp"
-    volumes:
-      - caddy_data:/data
-      - caddy_config:/config
-      - /var/run/docker.sock:/var/run/docker.sock
-    environment:
-      CADDY_INGRESS_NETWORKS: hejbit-network
-    networks:
-      - proxy
-    healthcheck:
-      test: [ "CMD", "curl", "--fail", "http://localhost:2019/reverse_proxy/upstreams" ]
-      timeout: 30s
-      retries: 3
-      start_period: 10s
-
 volumes:
   nc-app:
   nc-db:
-  caddy_data:
-  caddy_config:
-  onlyoffice_data:
-  onlyoffice_db:
-  onlyoffice_lib:
-  onlyoffice_logs:
 
 networks:
   frontend:
+    ipam:
+        config:
+          - subnet: 172.${NC_VERSION:-31}.10.0/24
+            gateway: 172.${NC_VERSION:-31}.10.1
   backend:
+    ipam:
+        config:
+          - subnet: 172.${NC_VERSION:-31}.20.0/24
+            gateway: 172.${NC_VERSION:-31}.20.1
   proxy:
     name: hejbit-network
+    external: true
