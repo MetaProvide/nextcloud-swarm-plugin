@@ -290,8 +290,8 @@ class BeeSwarm extends Common {
 		];
 	}
 
-	public function getETag($path): ?string {
-		return null;
+	public function getETag($path): false|string {
+		return false;
 	}
 
 	public function needsPartFile(): bool {
@@ -387,7 +387,7 @@ class BeeSwarm extends Common {
 		return $this->mountOptions[$name] ?? $default;
 	}
 
-	public function verifyPath($path, $fileName) {}
+	public function verifyPath($path, $fileName): void {}
 
 	public function isCreatable($path): bool {
 		return true;
@@ -451,16 +451,6 @@ class BeeSwarm extends Common {
 		$reference = $swarmFile->getSwarmReference();
 
 		return stream_get_contents($this->downloadSwarm($reference));
-	}
-
-	public function file_put_contents($path, $data): false|float|int {
-		// TODO: Implement file_put_contents() method.
-		return parent::file_put_contents($path, $data);
-	}
-
-	public function getDirectDownload($path): array|bool {
-		// TODO: Implement getDirectDownload() method.
-		return parent::getDirectDownload($path);
 	}
 
 	/* Enabling this function causes a fatal exception "Call to a member function getId() on null /var/www/html/lib/private/Files/Mount/MountPoint.php - line 276: OC\Files\Cache\Wrapper\CacheWrapper->getId("")
