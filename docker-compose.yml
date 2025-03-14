@@ -103,8 +103,6 @@ services:
       - mariadb
     environment:
       ADMINER_DEFAULT_SERVER: mariadb
-    profiles:
-      - dev
 
   rsync:
     build:
@@ -122,8 +120,6 @@ services:
       - nextcloud
     networks:
       - backend
-    profiles:
-      - dev
 
   onlyoffice:
     image: onlyoffice/documentserver
@@ -147,8 +143,6 @@ services:
     labels:
       caddy: onlyoffice.local
       caddy.reverse_proxy: '{{upstreams 80}}'
-    profiles:
-      - dev
 
   proxy:
     image: lucaslorentz/caddy-docker-proxy:alpine
@@ -170,8 +164,6 @@ services:
       timeout: 30s
       retries: 3
       start_period: 10s
-    profiles:
-      - dev
 
 volumes:
   nc-app:
