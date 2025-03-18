@@ -2,7 +2,7 @@
 
 namespace OCA\Files_External_Ethswarm\Exception;
 
-use BaseException;
+use Exception;
 
 class HejBitException extends BaseException
 {
