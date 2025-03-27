@@ -38,6 +38,7 @@ use OCP\AppFramework\Bootstrap\IBootstrap;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use OCP\EventDispatcher\IEventDispatcher;
 use OCP\IConfig;
+use OCP\App\IAppManager;
 use OCP\Util;
 use Psr\Log\LoggerInterface;
 use Sentry;
@@ -63,6 +64,10 @@ class Application extends App implements IBootstrap, IBackendProvider, IAuthMech
 		$container = $this->getContainer();
 		$config = $container->get(IConfig::class);
 
+		if (!$this->hasDependencies()) {
+			return;
+		}
+
 		// Initialize Sentry if telemetry is enabled and the nextcloud version is supported
 		$environment = Env::get('ENV') ?? 'production';
 		$logger = $container->get(LoggerInterface::class);
@@ -83,7 +88,7 @@ class Application extends App implements IBootstrap, IBackendProvider, IAuthMech
 			Sentry\init([
 				'dsn' => AppConstants::TELEMETRY_URL,
 				'traces_sample_rate' => 1.0,
-				'environment' => $environment,
+				'environment' => $environment
 			]);
 
 			$logger->info('Telemetry is enabled and the nextcloud version is supported');
@@ -127,6 +132,25 @@ class Application extends App implements IBootstrap, IBackendProvider, IAuthMech
 
 	public function registerEventsScripts(IEventDispatcher $dispatcher)
 	{
+	}
+
+	private function hasDependencies()
+	{
+		$appManager = $this->getContainer()->get(IAppManager::class);
+
+		// Check for external storage app is installed
+		if (!$appManager->isInstalled('files_external')) {
+			// Notify the user that the files_external app is not installed
+			return false;
+		}
+
+		// Check for external storage app is enabled
+		if (!$appManager->isEnabledForUser('files_external')) {
+			// Notify the user that the files_external app is not enabled
+			return false;
+		}
+
+		return true;
 	}
 
 	public function register(IRegistrationContext $context): void
