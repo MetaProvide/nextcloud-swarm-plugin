@@ -5,4 +5,4 @@ composer.lock
 package-lock.json
 dev-environment
 js/*
-!js/beeswarmfilelist.js
+
