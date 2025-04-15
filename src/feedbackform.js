@@ -19,10 +19,11 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  */
-import { subscribe } from '@nextcloud/event-bus';
-import { registerDavProperty } from '@nextcloud/files';
-import Feedback from '@betahuhn/feedback-js';
-import logo from '../img/hejbit-logo.svg';
+import { subscribe } from "@nextcloud/event-bus";
+import { registerDavProperty } from "@nextcloud/files";
+import Feedback from "@betahuhn/feedback-js";
+import logo from "../img/hejbit-logo.svg";
+import axios from "@nextcloud/axios";
 
 registerDavProperty("nc:ethswarm-node");
 
@@ -36,7 +37,6 @@ console.log('Hejbit-files-feedback-form:previousPathIsSwarm=' + previousPathIsSw
 
 // Button with HejBit logo
 const feedbackButton = `<img src="${logo}" alt="Logo" style="height: 20px; vertical-align: middle;"> Feedback`;
-
 
 // Listeners to detect changes in listing.
 subscribe('files:list:updated', (data) => {
@@ -56,48 +56,61 @@ subscribe('files:list:updated', (data) => {
 	if ((currentPathIsSwarm && !previousPathIsSwarm) || (currentPathIsSwarm && previousPathIsSwarm) && !feedbackformLoaded) {
 		console.log("Swarm entry - Show feedback form");
 
+		const options = {
+			id: 'feedback',
+			endpoint: OC.generateUrl('/apps/files_external_ethswarm/feedback/submit'),
+			emailField: false,
+			events: false,
+			forceShowButton: false,
+			types: {
+				general: {
+					text: 'General',
+					icon: '📝'
+				},
+				idea: {
+					text: 'Idea',
+					icon: '💡'
+				},
+				bug: {
+					text: 'Issue',
+					icon: '⚠️'
+				}
+			},
+			btnTitle: feedbackButton,
+			title: feedbackButton,
+			inputPlaceholder: 'We welcome your feedback here.',
+			submitText: 'Submit',
+				backText: 'Back',
+			typeMessage: 'How can we improve?',
+			success: 'We Appreciate Your Feedback!',
+			failedTitle: 'Oops, an error occurred!',
+			failedMessage: 'Please try again. If this keeps happening, try to send an email to feedback@hejbit.com instead.',
+			position: 'right',
+		};
 
-            const options = {
-                id: 'feedback',
-                endpoint: OC.generateUrl('/apps/files_external_ethswarm/feedback/submit'),
-                emailField: false,
-                events: false,
-                forceShowButton: false,
-                types: {
-                    general: {
-                        text: 'General',
-                        icon: '📝'
-                    },
-                    idea: {
-                        text: 'Idea',
-                        icon: '💡'
-                    },
-                    bug: {
-                        text: 'Issue',
-                        icon: '⚠️'
-                    }
-                },
-				btnTitle: feedbackButton,
-				title: feedbackButton,
-                inputPlaceholder: 'We welcome your feedback here.',
-                submitText: 'Submit',
-                	backText: 'Back',
-                typeMessage: 'How can we improve?',
-                success: 'We Appreciate Your Feedback!',
-                failedTitle: 'Oops, an error occurred!',
-                failedMessage: 'Please try again. If this keeps happening, try to send an email to feedback@hejbit.com instead.',
-                position: 'right',
-            };
-
-            try {
-                console.log('Starting Feedback...');
-                const feedback = new Feedback(options);
-                console.log('Feedback:', feedback);
-                feedback.renderButton();
-				feedbackformLoaded = true;
-            } catch (error) {
-                console.error('Error:', error);
-            }
+		axios
+			.get(
+				OC.generateUrl(
+					"ocs/v2.php/cloud/users/" + OC.getCurrentUser().uid
+				)
+			)
+			.then((response) => {
+				options.emailPlaceholder = response.data.ocs.data.email;
+			})
+			.catch((error) => {
+				console.error("Error fetching user email:", error);
+			})
+			.finally(() => {
+				try {
+					console.log("Starting Feedback...");
+					const feedback = new Feedback(options);
+					console.log("Feedback:", feedback);
+					feedback.renderButton();
+					feedbackformLoaded = true;
+				} catch (error) {
+					console.error("Error:", error);
+				}
+			});
 	} else if (!currentPathIsSwarm && !previousPathIsSwarm) {
 		console.log("Default entry - Don't Show feedback form");
 	}
