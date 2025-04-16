@@ -43,7 +43,8 @@ class FeedbackController extends Controller {
 	public function submit(): JSONResponse {
 		$feedbackData = $this->request->getParams();
 		$feedbackData['type'] = $feedbackData['feedbackType'];
-		$feedbackData['email'] ??= $this->userSession->getUser()?->getEMailAddress();
+		$email = $feedbackData['email'];
+		$feedbackData['email'] = empty($email) ? $this->userSession->getUser()?->getEMailAddress() : $email;
 		$feedbackEndpoint = (Env::get('API_URL') ?? AppConstants::API_URL).'/api/feedback';
 
 		try {
