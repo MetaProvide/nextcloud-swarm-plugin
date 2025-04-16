@@ -59,7 +59,7 @@ subscribe('files:list:updated', (data) => {
 		const options = {
 			id: 'feedback',
 			endpoint: OC.generateUrl('/apps/files_external_ethswarm/feedback/submit'),
-			emailField: false,
+			emailField: true,
 			events: false,
 			forceShowButton: false,
 			types: {
