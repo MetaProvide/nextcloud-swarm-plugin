@@ -42,15 +42,12 @@ use OCP\Util;
 use Psr\Log\LoggerInterface;
 use Sentry;
 
-class Application extends App implements IBootstrap, IBackendProvider, IAuthMechanismProvider
-{
-	public function __construct(array $urlParams = [])
-	{
+class Application extends App implements IBootstrap, IBackendProvider, IAuthMechanismProvider {
+	public function __construct(array $urlParams = []) {
 		parent::__construct(AppConstants::APP_NAME, $urlParams);
 	}
 
-	public function getBackends()
-	{
+	public function getBackends() {
 		$container = $this->getContainer();
 
 		return [
@@ -58,8 +55,7 @@ class Application extends App implements IBootstrap, IBackendProvider, IAuthMech
 		];
 	}
 
-	public function boot(IBootContext $context): void
-	{
+	public function boot(IBootContext $context): void {
 		$container = $this->getContainer();
 		$config = $container->get(IConfig::class);
 
@@ -71,10 +67,9 @@ class Application extends App implements IBootstrap, IBackendProvider, IAuthMech
 		$currentNextcloudVersion = $config->getSystemValue('version');
 		$isSupported = version_compare($currentNextcloudVersion, AppConstants::TELEMETRY_MINIMUM_SUPPORTED_NEXTCLOUD_VERSION, '>=');
 
-
 		// if telemetry is not set, set it to true
 		// but if it is set to false, don't override it
-		if ($config->getSystemValue('telemetry.enabled') === '' && $isSupported) {
+		if ('' === $config->getSystemValue('telemetry.enabled') && $isSupported) {
 			$config->setSystemValue('telemetry.enabled', true);
 			$logger->info('Telemetry option has not been set, setting it to true');
 		}
@@ -88,7 +83,7 @@ class Application extends App implements IBootstrap, IBackendProvider, IAuthMech
 
 			$logger->info('Telemetry is enabled and the nextcloud version is supported');
 		} elseif ($config->getSystemValue('telemetry.enabled') && !$isSupported) {
-			$logger->info('Telemetry is enabled but the nextcloud version ' . $currentNextcloudVersion . ' is not supported');
+			$logger->info('Telemetry is enabled but the nextcloud version '.$currentNextcloudVersion.' is not supported');
 		} elseif (false === $config->getSystemValue('telemetry.enabled')) {
 			$logger->info('Telemetry is disabled');
 		}
@@ -125,25 +120,21 @@ class Application extends App implements IBootstrap, IBackendProvider, IAuthMech
 		$this->getAuthMechanisms();
 	}
 
-	public function registerEventsScripts(IEventDispatcher $dispatcher)
-	{
-	}
+	public function registerEventsScripts(IEventDispatcher $dispatcher) {}
 
-	public function register(IRegistrationContext $context): void
-	{
+	public function register(IRegistrationContext $context): void {
 		$context->registerNotifierService(Notifier::class);
 
 		// Register autoloader of sentry
-		$autoloadPath = __DIR__ . '/../../vendor-bin/sentry/vendor/autoload.php';
+		$autoloadPath = __DIR__.'/../../vendor-bin/sentry/vendor/autoload.php';
 		if (!file_exists($autoloadPath)) {
-			throw new BaseException('Vendor autoload.php not found at: ' . $autoloadPath);
+			throw new BaseException('Vendor autoload.php not found at: '.$autoloadPath);
 		}
 
 		require_once $autoloadPath;
 	}
 
-	public function getAuthMechanisms()
-	{
+	public function getAuthMechanisms() {
 		$container = $this->getContainer();
 
 		return [
