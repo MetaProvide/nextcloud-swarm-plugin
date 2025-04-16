@@ -124,20 +124,27 @@ subscribe("files:list:updated", (data) => {
 				const observer = new MutationObserver((mutations) => {
 					for (const mutation of mutations) {
 						if (mutation.addedNodes.length) {
-							const emailField = document.querySelector('input#feedback-email');
+							const emailField = document.querySelector(
+								"input#feedback-email"
+							);
 							if (emailField) {
 								emailField.value = email;
-								emailField.dispatchEvent(new Event('input', { bubbles: true }));
+								emailField.dispatchEvent(
+									new Event("input", { bubbles: true })
+								);
 								observer.disconnect();
-								console.log('Email field found and filled with:', email);
+								console.log(
+									"Email field found and filled with:",
+									email
+								);
 								break;
 							}
 						}
 					}
 				});
-				observer.observe(document.body, {
+				observer.observe(document.querySelector("div#feedback-root"), {
 					childList: true,
-					subtree: true
+					subtree: true,
 				});
 			})
 			.catch((error) => {
