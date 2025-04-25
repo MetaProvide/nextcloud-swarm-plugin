@@ -3,15 +3,13 @@
 namespace OCA\Files_External_Ethswarm\Utils;
 
 use CurlHandle;
-use Safe\Exceptions\CurlException;
+use OCA\Files_External_Ethswarm\Exception\CurlException;
 
 class Curl {
 	private const DEFAULT_OPTIONS = [
 		CURLOPT_MAXREDIRS => 10,
 		CURLOPT_FOLLOWLOCATION => true,
 		CURLOPT_RETURNTRANSFER => true,
-		CURLOPT_SSL_VERIFYHOST => true,
-		CURLOPT_SSL_VERIFYPEER => true,
 	];
 
 	protected CurlHandle $handler;
@@ -22,6 +20,9 @@ class Curl {
 	protected int $authorizationType = CURLAUTH_NONE;
 
 	public function __construct(string $url, array $options = [], array $headers = [], ?string $authorization = null) {
+		if (!preg_match('/^https?:\/\//', $url)) {
+			$url = 'https://'.$url;
+		}
 		$this->url = $url;
 		$this->options = $options + self::getDefaultOptions();
 		$this->headers = $headers;
@@ -45,15 +46,34 @@ class Curl {
 	/**
 	 * execute curl request.
 	 *
+	 * @param mixed $headers
+	 *
 	 * @throws CurlException
 	 */
-	public function exec(bool $array = false): array|string {
-		$this->setOptions();
-		$this->setHeaders();
+	public function exec(bool $array = false, array $options = [], array $headers = []): array|string {
+		$this->setOptions($options);
+		$this->setHeaders($headers);
 		$response = curl_exec($this->handler);
 		$this->checkResponse();
 
 		return $array ? json_decode($response, true) : $response;
+	}
+
+	/**
+	 * @throws CurlException
+	 */
+	public function post(array $data = [], bool $array = false): array|string {
+		return $this->exec($array, [
+			CURLOPT_CUSTOMREQUEST => 'POST',
+			CURLOPT_POSTFIELDS => $data,
+		], ['accept: application/json']);
+	}
+
+	/**
+	 * @throws CurlException
+	 */
+	public function get(bool $array = false): array|string {
+		return $this->exec($array);
 	}
 
 	/**
@@ -67,11 +87,15 @@ class Curl {
 	 * @throws CurlException
 	 */
 	public function isResponseSuccessful(): bool {
-		if (0 === $this->getInfo(CURLINFO_HTTP_CODE)) {
+		if (0 === $this->getStatusCode()) {
 			throw new CurlException('Curl handler has not been executed');
 		}
 
-		return 200 === $this->getInfo(CURLINFO_HTTP_CODE) || 201 === $this->getInfo(CURLINFO_HTTP_CODE);
+		return $this->getStatusCode() < 400;
+	}
+
+	public function getStatusCode(): int {
+		return $this->getInfo(CURLINFO_HTTP_CODE);
 	}
 
 	private static function getDefaultOptions(): array {
@@ -82,10 +106,10 @@ class Curl {
 	 * @return bool[]
 	 */
 	private static function checkSSLOption(): array {
-		return [
-			CURLOPT_SSL_VERIFYHOST => !Env::isDevelopment(),
-			CURLOPT_SSL_VERIFYPEER => !Env::isDevelopment(),
-		];
+		return Env::isDevelopment() ? [
+			CURLOPT_SSL_VERIFYHOST => false,
+			CURLOPT_SSL_VERIFYPEER => false,
+		] : [];
 	}
 
 	/**
