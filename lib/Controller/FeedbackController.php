@@ -6,7 +6,7 @@ namespace OCA\Files_External_Ethswarm\Controller;
 
 use Exception;
 use GuzzleHttp\Client;
-use OCA\Files_External_Ethswarm\AppInfo\AppConstants;
+use OCA\Files_External_Ethswarm\AppInfo\Application;
 use OCA\Files_External_Ethswarm\Exception\HejBitException;
 use OCA\Files_External_Ethswarm\Utils\Curl;
 use OCA\Files_External_Ethswarm\Utils\Env;
@@ -46,7 +46,7 @@ class FeedbackController extends Controller {
 		if (empty($feedbackData['email'])) {
 			unset($feedbackData['email']);
 		}
-		$feedbackEndpoint = (Env::get('API_URL') ?? AppConstants::API_URL).'/api/feedback';
+		$feedbackEndpoint = (Env::get('API_URL') ?? Application::API_URL).'/api/feedback';
 
 		try {
 			$request = new Curl($feedbackEndpoint);

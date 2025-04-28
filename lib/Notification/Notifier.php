@@ -24,7 +24,7 @@ declare(strict_types=1);
 namespace OCA\Files_External_Ethswarm\Notification;
 
 use InvalidArgumentException;
-use OCA\Files_External_Ethswarm\AppInfo\AppConstants;
+use OCA\Files_External_Ethswarm\AppInfo\Application;
 use OCP\IURLGenerator;
 use OCP\L10N\IFactory;
 use OCP\Notification\INotification;
@@ -46,27 +46,27 @@ class Notifier implements INotifier {
 	 * Identifier of the notifier, only use [a-z0-9_].
 	 */
 	public function getID(): string {
-		return AppConstants::APP_NAME;
+		return Application::NAME;
 	}
 
 	/**
 	 * Human-readable name describing the notifier.
 	 */
 	public function getName(): string {
-		return $this->factory->get(AppConstants::APP_NAME)->t('Hejbit External Storage');
+		return $this->factory->get(Application::NAME)->t('Hejbit External Storage');
 	}
 
 	/**
 	 * @param string $languageCode The code of the language that should be used to prepare the notification
 	 */
 	public function prepare(INotification $notification, string $languageCode): INotification {
-		if (AppConstants::APP_NAME !== $notification->getApp()) {
+		if (Application::NAME !== $notification->getApp()) {
 			// Not my app => throw
 			throw new InvalidArgumentException();
 		}
 
 		// Read the language from the notification
-		$l = $this->factory->get(AppConstants::APP_NAME, $languageCode);
+		$l = $this->factory->get(Application::NAME, $languageCode);
 
 		// Deal with known subjects
 		switch ($notification->getSubject()) {
