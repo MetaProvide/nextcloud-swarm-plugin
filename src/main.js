@@ -1,5 +1,5 @@
-/*
- * @copyright Copyright (c) 2022 Henry Bergström <metahenry@metaprovide.org>
+/**
+ * @copyright Copyright (c) 2025, MetaProvide Holding EKF
  *
  * @author Henry Bergström <metahenry@metaprovide.org>
  *
@@ -22,7 +22,7 @@
 import { generateFilePath } from "@nextcloud/router";
 
 import Vue from "vue";
-import App from "./App";
+import Setting from "./pages/Setting";
 
 const appName = "files_external_ethswarm";
 
@@ -39,11 +39,9 @@ export default new Vue({
 		// Importing params from backend
 		const dataset = document.querySelector("#app").dataset;
 		this.settings = JSON.parse(dataset.params);
-
-		// TODO - add swarm access key to settings
 	},
 	render(h) {
 		// Render with settings passed as props to App component
-		return h(App, { props: { settings: this.settings } });
+		return h(Setting, { props: { settings: this.settings } });
 	},
 });
