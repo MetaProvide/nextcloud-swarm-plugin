@@ -66,7 +66,7 @@ import axios from '@nextcloud/axios';
 import { generateUrl } from '@nextcloud/router';
 
 export default {
-	name: 'App',
+	name: 'Setting',
 	components: {
 		Content,
 		AppContent,
