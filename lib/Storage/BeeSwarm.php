@@ -78,8 +78,6 @@ class BeeSwarm extends Common {
 
 	private LoggerInterface $logger;
 
-	private IEventDispatcher $eventDispatcher;
-
 	/**
 	 * @param mixed $params
 	 *
@@ -102,7 +100,6 @@ class BeeSwarm extends Common {
 		$this->logger = OC::$server->get(LoggerInterface::class);
 		$this->config = OC::$server->get(IConfig::class);
 		$mountHandler = OC::$server->get(IUserMountCache::class);
-		$this->eventDispatcher = OC::$server->get(IEventDispatcher::class);
 
 		$this->cacheHandler = new Cache($this);
 		$this->fileMapper = new SwarmFileMapper($this->dbConnection);
