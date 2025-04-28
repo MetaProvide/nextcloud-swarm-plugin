@@ -28,17 +28,17 @@ use OCP\IL10N;
 /**
  * Basic Http Authentication.
  */
-class License extends AuthMechanism {
+class AccessKey extends AuthMechanism {
 	/** @const string */
-	public const SCHEME_ACCESS_KEY = 'access_key';
+	public const SCHEME = 'access_key';
 
 	public function __construct(IL10N $l) {
 		$this
 			->setIdentifier('access:key')
-			->setScheme(self::SCHEME_ACCESS_KEY)
+			->setScheme(self::SCHEME)
 			->setText($l->t('Access Key'))
 			->addParameters([
-				(new DefinitionParameter(self::SCHEME_ACCESS_KEY, $l->t('Access Key')))
+				(new DefinitionParameter(self::SCHEME, $l->t('Access Key')))
 					->setTooltip($l->t('Access Key'))
 					->setType(DefinitionParameter::VALUE_PASSWORD),
 			])
