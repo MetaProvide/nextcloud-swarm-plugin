@@ -1,0 +1,25 @@
+.hejbit-overlay {
+	position: absolute;
+	top: 30px;
+	left: 75px;
+	width: 16px;
+	height: 16px;
+	pointer-events: none;
+}
+
+.hejbit-overlay svg {
+	width: 16px;
+	height: 16px;
+}
+
+.hejbit-archive svg {
+	filter: grayscale(100%);
+	border: 1px dashed #f6c915;
+	border-radius: 0.25rem;
+}
+
+[data-section-id="files_external_ethswarm"] img {
+	filter: none;
+
+}
+
