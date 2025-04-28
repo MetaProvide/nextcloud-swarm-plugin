@@ -173,8 +173,6 @@ class SwarmFileMapper extends QBMapper {
 
 	/**
 	 * @return SwarmFile[]
-	 *
-	 * @throws Exception
 	 */
 	public function findAllWithToken(string $token): array {
 		$qb = $this->db->getQueryBuilder();
@@ -185,7 +183,11 @@ class SwarmFileMapper extends QBMapper {
 			->where($qb->expr()->eq('token', $qb->createNamedParameter($token)))
 		;
 
-		return $this->findEntities($select);
+		try {
+			return $this->findEntities($select);
+		} catch (Exception $e) {
+			return [];
+		}
 	}
 
 	/**
