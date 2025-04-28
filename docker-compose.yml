@@ -4,6 +4,7 @@
 #  127.0.0.1 hejbit.local
 #  127.0.0.1 api.hejbit.local
 #  127.0.0.1 adminer.hejbit.local
+#  127.0.0.1 features.hejbit.local
 
 services:
 
@@ -50,6 +51,7 @@ services:
       - onlyoffice.local:host-gateway
       - hejbit.local:host-gateway
       - api.hejbit.local:host-gateway
+      - features.hejbit.local:host-gateway
     volumes:
       - nc-app:/var/www/html
       - ./:/var/www/html/custom_apps/files_external_ethswarm
@@ -139,6 +141,25 @@ services:
       - nextcloud
     networks:
       - backend
+
+  flagd:
+    image: ghcr.io/open-feature/flagd:latest
+    restart: unless-stopped
+    command: 'start --uri file:/etc/flagd/hejbit.flagd.json --cors-origin *'
+    #    ports:
+    #      - '8013:8013'
+    volumes:
+      - './docker/flagd/hejbit.flagd.json:/etc/flagd/hejbit.flagd.json'
+    networks:
+      - proxy
+    labels:
+      caddy: features.hejbit.local
+      caddy.reverse_proxy: '{{upstreams 8013}}'
+    depends_on:
+      proxy:
+        condition: service_healthy
+    profiles:
+      - feature
 
   onlyoffice:
     image: onlyoffice/documentserver
