@@ -120,7 +120,7 @@ class Application extends App implements IBootstrap {
 
 	private function loadAssets($context): void {
 		// Load CSS
-		Util::addStyle(Application::NAME, 'feedback-js');
+		Util::addStyle(Application::NAME, 'feedback');
 		Util::addStyle(Application::NAME, 'app');
 
 		// Load JS
