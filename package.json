@@ -7,6 +7,35 @@
 		"type": "git",
 		"url": "https://github.com/MetaProvide/nextcloud-swarm-plugin.git"
 	},
+	"engines": {
+		"node": "^20.0.0",
+		"npm": "^10.0.0"
+	},
+	"scripts": {
+		"build": "webpack --node-env production --progress",
+		"dev": "webpack --node-env development --progress",
+		"watch": "webpack --node-env development --progress --watch",
+		"serve": "webpack --node-env development serve --progress",
+		"eslint": "eslint --ext .js,.vue src",
+		"eslint:fix": "eslint --ext .js,.vue src --fix",
+		"prettier": "prettier --check .",
+		"prettier:fix": "prettier --write .",
+		"stylelint": "stylelint css/*.css css/*.scss src/**/*.scss src/**/*.vue",
+		"stylelint:fix": "stylelint css/*.css css/*.scss src/**/*.scss src/**/*.vue --fix"
+	},
+	"dependencies": {
+		"@betahuhn/feedback-js": "^2.1.25",
+		"@material-design-icons/svg": "^0.14.15",
+		"@nextcloud/axios": "^2.5.1",
+		"@nextcloud/dialogs": "^6.1.1",
+		"@nextcloud/event-bus": "^3.3.1",
+		"@nextcloud/files": "^3.6.0",
+		"@nextcloud/router": "^2.0.0",
+		"@nextcloud/vue": "^8.25.1",
+		"@openfeature/flagd-web-provider": "^0.7.3",
+		"@openfeature/web-sdk": "^1.5.0",
+		"vue": "^2.7.16"
+	},
 	"devDependencies": {
 		"@babel/core": "^7.17.7",
 		"@babel/eslint-parser": "^7.17.0",
@@ -49,34 +78,5 @@
 		"webpack": "^5.99.6",
 		"webpack-cli": "^5.0.2",
 		"webpack-dev-server": "^4.15.2"
-	},
-	"engines": {
-		"node": "^20.0.0",
-		"npm": "^10.0.0"
-	},
-	"scripts": {
-		"build": "webpack --node-env production --progress",
-		"dev": "webpack --node-env development --progress",
-		"watch": "webpack --node-env development --progress --watch",
-		"serve": "webpack --node-env development serve --progress",
-		"eslint": "eslint --ext .js,.vue src",
-		"eslint:fix": "eslint --ext .js,.vue src --fix",
-		"prettier": "prettier --check .",
-		"prettier:fix": "prettier --write .",
-		"stylelint": "stylelint css/*.css css/*.scss src/**/*.scss src/**/*.vue",
-		"stylelint:fix": "stylelint css/*.css css/*.scss src/**/*.scss src/**/*.vue --fix"
-	},
-	"dependencies": {
-		"@betahuhn/feedback-js": "^2.1.25",
-		"@material-design-icons/svg": "^0.14.15",
-		"@nextcloud/axios": "^2.5.1",
-		"@nextcloud/dialogs": "^6.1.1",
-		"@nextcloud/event-bus": "^3.3.1",
-		"@nextcloud/files": "^3.6.0",
-		"@nextcloud/router": "^2.0.0",
-		"@nextcloud/vue": "^8.25.1",
-		"@openfeature/flagd-web-provider": "^0.7.3",
-		"@openfeature/web-sdk": "^1.5.0",
-		"vue": "^2.7.16"
 	}
 }
