@@ -336,6 +336,10 @@
 	transition: filter .4s ease;
 }
 
+#feedback-btn img {
+	margin-right: 0.5em;
+}
+
 #feedback-btn:hover, #feedback-btn:focus {
 	filter: brightness(105%);
 }
