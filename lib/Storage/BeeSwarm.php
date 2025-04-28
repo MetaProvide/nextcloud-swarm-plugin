@@ -27,7 +27,7 @@ use OC;
 use OC\Files\Cache\Cache;
 use OC\Files\Storage\Common;
 use OC_Helper;
-use OCA\Files_External_Ethswarm\AppInfo\AppConstants;
+use OCA\Files_External_Ethswarm\AppInfo\Application;
 use OCA\Files_External_Ethswarm\Db\SwarmFile;
 use OCA\Files_External_Ethswarm\Db\SwarmFileMapper;
 use OCA\Files_External_Ethswarm\Service\NotificationService;
@@ -60,8 +60,6 @@ class BeeSwarm extends Common {
 
 	protected string $id;
 
-	private bool $isEncrypted; // TODO: remove
-
 	private SwarmFileMapper $fileMapper;
 
 	private IConfig $config;
@@ -79,6 +77,8 @@ class BeeSwarm extends Common {
 	private string $token;
 
 	private LoggerInterface $logger;
+
+	private IEventDispatcher $eventDispatcher;
 
 	/**
 	 * @param mixed $params
@@ -98,18 +98,18 @@ class BeeSwarm extends Common {
 		$this->tempManager = OC::$server->get(ITempManager::class);
 		$this->dbConnection = OC::$server->get(IDBConnection::class);
 		$this->mimeTypeHandler = OC::$server->get(IMimeTypeLoader::class);
-		$this->dbConnection = OC::$server->get(IDBConnection::class);
-		$this->mimeTypeHandler = OC::$server->get(IMimeTypeLoader::class);
 		$this->mimeTypeDetector = OC::$server->get(IMimeTypeDetector::class);
 		$this->logger = OC::$server->get(LoggerInterface::class);
+		$this->config = OC::$server->get(IConfig::class);
 		$mountHandler = OC::$server->get(IUserMountCache::class);
-		$storageMounts = $mountHandler->getMountsForStorageId($this->storageId);
+		$this->eventDispatcher = OC::$server->get(IEventDispatcher::class);
 
+		$this->cacheHandler = new Cache($this);
 		$this->fileMapper = new SwarmFileMapper($this->dbConnection);
 
 		/** @var IL10NFactory $l10nFactory */
 		$l10nFactory = OC::$server->get(IL10NFactory::class);
-		$this->l10n = $l10nFactory->get(AppConstants::APP_NAME);
+		$this->l10n = $l10nFactory->get(Application::NAME);
 
 		$this->notificationService = new NotificationService(
 			OC::$server->get(IManager::class),
@@ -117,23 +117,17 @@ class BeeSwarm extends Common {
 			OC::$server->get(IUserSession::class)
 		);
 
-		if (is_array($storageMounts) && isset($storageMounts[0])) {
-			// Parse array for config of requested storage
-			$storageMount = $storageMounts[0];
-			$mountId = $storageMount->getMountId();
-
-			$this->config = OC::$server->get(IConfig::class);
-			$configSettings = $this->config->getAppValue(AppConstants::APP_NAME, 'storageconfig');
-			$mounts = json_decode($configSettings, true);
-			if (is_array($mounts)) {
-				$mountIds = array_column($mounts, 'mount_id');
-				$key = array_search($mountId, $mountIds);
-				if (!empty($key) || 0 === $key) {
-					$this->isEncrypted = '1' === $mounts[$key]['encrypt'];
-				}
-			}
+		if (empty($mountHandler->getMountsForStorageId($this->storageId)) and !$this->cacheHandler->get('')) {
+			$this->prepareStorage();
 		}
-		$this->cacheHandler = new Cache($this);
+	}
+
+	public function restoreByToken(): void {
+		$this->fileMapper->updateStorageIds($this->token, $this->storageId);
+		$files = $this->fileMapper->findAllWithToken($this->token);
+		foreach ($files as $file) {
+			$this->addCache($file);
+		}
 	}
 
 	public function getId(): string {
@@ -144,15 +138,7 @@ class BeeSwarm extends Common {
 	 * @throws Exception
 	 */
 	public function test(): bool {
-		if (!$this->checkConnection()) {
-			return false;
-		}
-
-		$this->fileMapper->updateStorageIds($this->token, $this->storageId);
-		$this->add_root_folder_cache();
-		$this->add_token_files_cache();
-
-		return true;
+		return $this->checkConnection();
 	}
 
 	/**
@@ -168,7 +154,7 @@ class BeeSwarm extends Common {
 			if (!$sourceFile->getFileId()) {
 				$this->logger->error(
 					'copy failed: source file not found in mapper '.$source,
-					['app' => AppConstants::APP_NAME]
+					['app' => Application::NAME]
 				);
 
 				return false;
@@ -191,7 +177,7 @@ class BeeSwarm extends Common {
 			if (!$newFile->getFileId()) {
 				$this->logger->error(
 					'copy failed: failed to create new file in mapper '.$target,
-					['app' => AppConstants::APP_NAME]
+					['app' => Application::NAME]
 				);
 
 				return false;
@@ -200,58 +186,6 @@ class BeeSwarm extends Common {
 			return true;
 		} catch (Exception $e) {
 			throw new Exception($e->getMessage());
-		}
-	}
-
-	public function add_root_folder_cache(): void {
-		$fileData = [
-			'storage' => $this->storageId,
-			'path' => '',
-			'path_hash' => md5(''),
-			'name' => '',
-			'mimetype' => 'httpd/unix-directory',
-			'size' => 1,
-			'etag' => uniqid(),
-			'storage_mtime' => time(),
-			// 2024-11-14 - We still don't support edit, so file is never updated.
-			'mtime' => time(),
-			'permissions' => (Constants::PERMISSION_ALL - Constants::PERMISSION_DELETE),
-			'parent' => -1,
-		];
-		$this->cacheHandler->put($fileData['path'], $fileData);
-	}
-
-	public function add_file_cache(SwarmFile $file): bool {
-		$fileData = [
-			'storage' => $file->getStorage(),
-			'path' => $file->getName(),
-			'path_hash' => md5($file->getName()),
-			'name' => basename($file->getName()),
-			'mimetype' => $this->mimeTypeHandler->getMimetypeById($file->getMimetype()),
-			'size' => $file->getSize(),
-			'etag' => uniqid(),
-			'storage_mtime' => $file->getStorageMtime(),
-			// 2024-11-14 - We still don't support edit, so file is never updated.
-			'mtime' => $file->getStorageMtime(),
-		];
-
-		if ($file->getMimetype() == $this->mimeTypeHandler->getId('httpd/unix-directory')) {
-			$fileData['permissions'] = (Constants::PERMISSION_ALL - Constants::PERMISSION_DELETE);
-		} else {
-			$fileData['permissions'] = (Constants::PERMISSION_ALL - Constants::PERMISSION_DELETE - Constants::PERMISSION_UPDATE);
-		}
-
-		$this->cacheHandler->put($fileData['path'], $fileData);
-
-		return true;
-	}
-
-	/**
-	 * @throws Exception
-	 */
-	public function add_token_files_cache(): void {
-		foreach ($this->fileMapper->findAllWithToken($this->token) as $file) {
-			$this->add_file_cache($file);
 		}
 	}
 
@@ -571,5 +505,59 @@ class BeeSwarm extends Common {
 		fclose($target);
 
 		return $tmpFile;
+	}
+
+	private function addCache(SwarmFile $file, ?int $permission = null): int {
+		$fileData = [
+			'storage' => $file->getStorage(),
+			'path' => $file->getName(),
+			'path_hash' => md5($file->getName()),
+			'name' => basename($file->getName()),
+			'mimetype' => $this->mimeTypeHandler->getMimetypeById($file->getMimetype()),
+			'size' => $file->getSize(),
+			'etag' => uniqid(),
+			'storage_mtime' => $file->getStorageMtime(),
+			// 2024-11-14 - We still don't support edit, so file is never updated.
+			'mtime' => $file->getStorageMtime(),
+		];
+
+		$fileData['permissions'] = $permission ?? match (true) {
+			$this->is_file($file->getName()) => (Constants::PERMISSION_ALL - Constants::PERMISSION_DELETE - Constants::PERMISSION_UPDATE),
+			default => (Constants::PERMISSION_ALL - Constants::PERMISSION_DELETE),
+		};
+
+		return $this->cacheHandler->put($fileData['path'], $fileData);
+	}
+
+	private function prepareStorage(): void {
+		$this->prepareRoot();
+		$this->restoreByToken();
+		$this->prepareArchive();
+	}
+
+	private function prepareArchive(): void {
+		$exists = $this->fileMapper->findExists('Archive', $this->storageId);
+		if (0 === $exists) {
+			$archiveFolder = $this->fileMapper->createDirectory('Archive', $this->storageId, $this->token);
+			$this->addCache($archiveFolder, Constants::PERMISSION_ALL - Constants::PERMISSION_DELETE - Constants::PERMISSION_UPDATE - Constants::PERMISSION_CREATE);
+		}
+	}
+
+	private function prepareRoot(): void {
+		$fileData = [
+			'storage' => $this->storageId,
+			'path' => '',
+			'path_hash' => md5(''),
+			'name' => '',
+			'mimetype' => 'httpd/unix-directory',
+			'size' => 1,
+			'etag' => uniqid(),
+			'storage_mtime' => time(),
+			// 2024-11-14 - We still don't support edit, so file is never updated.
+			'mtime' => time(),
+			'permissions' => (Constants::PERMISSION_ALL - Constants::PERMISSION_DELETE),
+			'parent' => -1,
+		];
+		$this->cacheHandler->put($fileData['path'], $fileData);
 	}
 }
