@@ -119,16 +119,14 @@ class Application extends App implements IBootstrap {
 	}
 
 	private function loadAssets($context): void {
-		// Load CSS
-		Util::addStyle(Application::NAME, 'feedback');
-		Util::addStyle(Application::NAME, 'app');
 
-		// Load JS
+		Util::addStyle(Application::NAME, 'app');
 		Util::addScript(Application::NAME, 'nextcloud-swarm-plugin-settings');
 
 		/** @var IEventDispatcher $dispatcher */
 		$dispatcher = $context->getAppContainer()->get(IEventDispatcher::class);
 		$dispatcher->addListener(LoadAdditionalScriptsEvent::class, function () {
+			Util::addStyle(Application::NAME, 'feedback');
 			Util::addInitScript(Application::NAME, 'nextcloud-swarm-plugin-app');
 		});
 	}

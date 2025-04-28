@@ -19,7 +19,6 @@
 }
 
 [data-section-id="files_external_ethswarm"] img {
-	filter: none;
-
+	filter: none !important;
 }
 
