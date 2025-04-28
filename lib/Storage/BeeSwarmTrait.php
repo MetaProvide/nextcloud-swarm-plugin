@@ -22,7 +22,7 @@
 namespace OCA\Files_External_Ethswarm\Storage;
 
 use CURLFile;
-use OCA\Files_External_Ethswarm\Auth\License;
+use OCA\Files_External_Ethswarm\Auth\AccessKey;
 use OCA\Files_External_Ethswarm\Backend\BeeSwarm;
 use OCA\Files_External_Ethswarm\Dto\LinkDto;
 use OCA\Files_External_Ethswarm\Exception\CurlException;
@@ -54,14 +54,14 @@ trait BeeSwarmTrait {
 		$this->validateParams($params);
 
 		$this->api_url = $params[BeeSwarm::OPTION_HOST_URL];
-		$this->access_key = $params[License::SCHEME_ACCESS_KEY];
+		$this->access_key = $params[AccessKey::SCHEME];
 	}
 
 	/**
 	 * @throws StorageBadConfigException
 	 */
 	private function validateParams(array &$params): void {
-		if (!$params[BeeSwarm::OPTION_HOST_URL] || !$params[License::SCHEME_ACCESS_KEY]) {
+		if (!$params[BeeSwarm::OPTION_HOST_URL] || !$params[AccessKey::SCHEME]) {
 			throw new StorageBadConfigException('Creating '.self::class.' storage failed, required parameters not set');
 		}
 		if (!preg_match('/^https?:\/\//i', $params[BeeSwarm::OPTION_HOST_URL])) {
