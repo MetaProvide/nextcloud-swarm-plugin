@@ -30,8 +30,10 @@ use OC_Helper;
 use OCA\Files_External_Ethswarm\AppInfo\Application;
 use OCA\Files_External_Ethswarm\Db\SwarmFile;
 use OCA\Files_External_Ethswarm\Db\SwarmFileMapper;
+use OCA\Files_External_Ethswarm\Event\FileUploadedEvent;
 use OCA\Files_External_Ethswarm\Service\NotificationService;
 use OCP\Constants;
+use OCP\EventDispatcher\IEventDispatcher;
 use OCP\Files\Config\IUserMountCache;
 use OCP\Files\FileInfo;
 use OCP\Files\IMimeTypeDetector;
@@ -78,6 +80,8 @@ class BeeSwarm extends Common {
 
 	private LoggerInterface $logger;
 
+	private IEventDispatcher $eventDispatcher;
+
 	/**
 	 * @param mixed $params
 	 *
@@ -100,6 +104,7 @@ class BeeSwarm extends Common {
 		$this->logger = OC::$server->get(LoggerInterface::class);
 		$this->config = OC::$server->get(IConfig::class);
 		$mountHandler = OC::$server->get(IUserMountCache::class);
+		$this->eventDispatcher = OC::$server->get(IEventDispatcher::class);
 
 		$this->cacheHandler = new Cache($this);
 		$this->fileMapper = new SwarmFileMapper($this->dbConnection);
@@ -485,10 +490,20 @@ class BeeSwarm extends Common {
 		];
 		$this->fileMapper->createFile($uploadFiles);
 
-		$this->notificationService->sendTemporaryNotification('swarm-fileupload', $path);
+		$this->dispatchFileUploadedEvent($path, $mimetype);
 
 		// TODO: Read back from swarm to return filesize?
 		return $tmpFileSize;
+	}
+
+	/**
+	 * Dispatches a file uploaded event for the frontend to show toast notifications.
+	 */
+	protected function dispatchFileUploadedEvent(string $path, string $mimetype): void {
+		$filename = basename($path);
+		$event = new FileUploadedEvent($filename, $mimetype, $path);
+		$this->eventDispatcher->dispatchTyped($event);
+		$this->logger->debug('Dispatched file uploaded event for '.$filename, ['app' => Application::NAME]);
 	}
 
 	/**
