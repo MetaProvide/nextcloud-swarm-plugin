@@ -12,29 +12,28 @@ use OCA\Files_External_Ethswarm\Backend\BeeSwarm;
 use OCP\AppFramework\Bootstrap\IBootContext;
 use Psr\Container\ContainerInterface;
 
-class ExternalStorage implements IBackendProvider, IAuthMechanismProvider
-{
-    public function __construct(protected ContainerInterface $container, protected IBootContext $context)
-    {
-        $context->injectFn(function (BackendService $backendService) {
-            $backendService->registerBackendProvider($this);
-            $backendService->registerAuthMechanismProvider($this);
-        });
-    }
+class ExternalStorage implements IBackendProvider, IAuthMechanismProvider {
+	public function __construct(
+		protected ContainerInterface $container,
+		protected IBootContext $context
+	) {
+		$context->injectFn(function (BackendService $backendService) {
+			$backendService->registerBackendProvider($this);
+			$backendService->registerAuthMechanismProvider($this);
+		});
+	}
 
-    /**
-     * @return Backend[]
-     */
-    public function getBackends(): array
-    {
-        return [$this->container->get(BeeSwarm::class)];
-    }
+	/**
+	 * @return Backend[]
+	 */
+	public function getBackends(): array {
+		return [$this->container->get(BeeSwarm::class)];
+	}
 
-    /**
-     * @return AuthMechanism[]
-     */
-    public function getAuthMechanisms(): array
-    {
-        return [$this->container->get(AccessKey::class)];
-    }
+	/**
+	 * @return AuthMechanism[]
+	 */
+	public function getAuthMechanisms(): array {
+		return [$this->container->get(AccessKey::class)];
+	}
 }

@@ -36,8 +36,7 @@ use Sabre\DAV\ServerPlugin;
 use Sabre\HTTP\RequestInterface;
 use Sabre\HTTP\ResponseInterface;
 
-class WebDavPlugin extends ServerPlugin
-{
+class WebDavPlugin extends ServerPlugin {
 	public const ETHSWARM_FILEREF = '{http://nextcloud.org/ns}ethswarm-fileref';
 	public const ETHSWARM_NODE = '{http://nextcloud.org/ns}ethswarm-node';
 	public const ETHSWARM_HIDDEN = '{http://nextcloud.org/ns}hidden';
@@ -48,21 +47,18 @@ class WebDavPlugin extends ServerPlugin
 	/** @var EthswarmService */
 	private $EthswarmService;
 
-	public function __construct(EthswarmService $service)
-	{
+	public function __construct(EthswarmService $service) {
 		$this->EthswarmService = $service;
 	}
 
-	public function initialize(Server $server): void
-	{
+	public function initialize(Server $server): void {
 		$this->server = $server;
 		$this->server->on('method:POST', [$this, 'httpPost']);
 		$this->server->on('method:MOVE', [$this, 'httpMove']);
 		$this->server->on('propFind', [$this, 'propFind']);
 	}
 
-	public function propFind(PropFind $propFind, INode $node): void
-	{
+	public function propFind(PropFind $propFind, INode $node): void {
 		$fileInfo = $node->getFileInfo();
 		$storageId = $fileInfo->getStorage()->getCache()->getNumericStorageId();
 		$mountPoint = $fileInfo->getMountPoint()->getStorageId();
@@ -92,8 +88,7 @@ class WebDavPlugin extends ServerPlugin
 		);
 	}
 
-	public function httpPost(RequestInterface $request, ResponseInterface $response): bool
-	{
+	public function httpPost(RequestInterface $request, ResponseInterface $response): bool {
 		$action = $request->getRawServerValue('HTTP_HEJBIT_ACTION');
 
 		if (!$action) {
@@ -180,8 +175,7 @@ class WebDavPlugin extends ServerPlugin
 		return false;
 	}
 
-	public function httpMove(RequestInterface $request, ResponseInterface $response): bool
-	{
+	public function httpMove(RequestInterface $request, ResponseInterface $response): bool {
 		$path = $request->getPath();
 		$node = $this->server->tree->getNodeForPath($path);
 		$nodeInfo = $node->getFileInfo();
