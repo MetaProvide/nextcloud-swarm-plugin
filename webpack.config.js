@@ -7,5 +7,6 @@ webpackConfig.resolve.alias = {
 webpackConfig.entry = {
 	...webpackConfig.entry,
 	app: path.join(__dirname, "src", "app.js"),
+	settings: path.join(__dirname, "src", "settings.js"),
 };
 module.exports = webpackConfig;

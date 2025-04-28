@@ -124,6 +124,7 @@ class Application extends App implements IBootstrap {
 		Util::addStyle(Application::NAME, 'app');
 
 		// Load JS
+		Util::addScript(Application::NAME, 'nextcloud-swarm-plugin-settings');
 		/** @var IEventDispatcher $dispatcher */
 		$dispatcher = $context->getAppContainer()->get(IEventDispatcher::class);
 		$dispatcher->addListener(LoadAdditionalScriptsEvent::class, function () {
