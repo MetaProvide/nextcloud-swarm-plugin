@@ -119,7 +119,6 @@ class Application extends App implements IBootstrap {
 	}
 
 	private function loadAssets($context): void {
-
 		Util::addStyle(Application::NAME, 'app');
 		Util::addScript(Application::NAME, 'nextcloud-swarm-plugin-settings');
 
