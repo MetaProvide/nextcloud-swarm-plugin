@@ -1,7 +1,8 @@
 import { FileAction, FileType, registerFileAction } from "@nextcloud/files";
-import SwarmSvg from "@/../img/swarm-logo.svg";
 import { showInfo, showSuccess, showWarning } from "@nextcloud/dialogs";
+import SwarmSvg from "@/../img/swarm-logo.svg";
 import SvgHelper from "@/util/SvgHelper";
+import FilesHelper from "@/util/FilesHelper";
 
 registerFileAction(
 	new FileAction({
@@ -15,19 +16,12 @@ registerFileAction(
 			return t("files_external_ethswarm", "Swarm Reference");
 		},
 
-		enabled(files, view) {
-			if (files.length !== 1)
-				// We don't support batch actions
-				return false;
-
-			// To fix fileaction navigation bug this action is now available for
-			// files and folders on Swarm storage
-			const attrs = files[0].attributes["ethswarm-node"];
-
-			if (attrs === undefined) return false;
-			else if (attrs === "") return false;
-
-			return true;
+		enabled(files) {
+			return (
+				FilesHelper.isSwarmNode(files) &&
+				!FilesHelper.isRoot(files) &&
+				!FilesHelper.isArchiveFolder(files)
+			);
 		},
 
 		inline() {
@@ -39,7 +33,7 @@ registerFileAction(
 		},
 
 		async exec(node, view) {
-			const swarmref = node.attributes["ethswarm-fileref"];
+			const swarmref = FilesHelper.getSwarmRef(node);
 			if (node.type === FileType.Folder) {
 				showWarning(
 					t(
@@ -96,10 +90,6 @@ registerFileAction(
 					},
 				}
 			);
-		},
-
-		execBatch(nodes, view) {
-			return Promise.all(nodes.map((node) => this.exec(node, view)));
 		},
 	})
 );

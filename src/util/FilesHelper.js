@@ -4,6 +4,9 @@ import { basename, dirname } from "path";
 import SvgHelper from "@/util/SvgHelper";
 
 const FilesHelper = {
+	isSwarmNode: (nodes) => getMainNode(nodes).attributes["ethswarm-node"] !== undefined,
+	getSwarmRef: (nodes) => getSwarmRef(nodes),
+	hasSwarmRef: (nodes) => getSwarmRef(nodes) !== undefined,
 	canUnshareOnly: (nodes) => {
 		return nodes.every(
 			(node) =>
@@ -83,11 +86,18 @@ const FilesHelper = {
 			.setMultiSelect(false)
 			.disableNavigation(true)
 			.startAt(
-				dirname(node.path).substring(0, dirname(node.path).lastIndexOf("/"))
+				dirname(node.path).substring(
+					0,
+					dirname(node.path).lastIndexOf("/")
+				)
 			)
 			.build()
 			.pick(),
 };
+
+function getSwarmRef(nodes) {
+	return getMainNode(nodes).attributes["ethswarm-fileref"];
+}
 
 function getMainNode(nodes) {
 	if (Array.isArray(nodes)) {
