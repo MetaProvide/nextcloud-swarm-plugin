@@ -71,14 +71,13 @@ const FilesHelper = {
 			})
 			.allowDirectories(true)
 			.setFilter((n) => {
-				const isFolder = FilesHelper.isFolder(n);
 				const isNotArchiveFolder = !FilesHelper.isArchiveFolder(n);
 				console.log("node:" + FilesHelper.getStoragePath(n));
 				console.log("file:" + FilesHelper.getStoragePath(node));
 				const isSameStorage =
 					FilesHelper.getStoragePath(n) ===
 					FilesHelper.getStoragePath(node);
-				return isFolder && isNotArchiveFolder && isSameStorage;
+				return isNotArchiveFolder && isSameStorage;
 			})
 			.setMimeTypeFilter([])
 			.setMultiSelect(false)

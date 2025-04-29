@@ -53,9 +53,9 @@ class WebDavPlugin extends ServerPlugin {
 
 	public function initialize(Server $server): void {
 		$this->server = $server;
+		$this->server->on('propFind', [$this, 'propFind']);
 		$this->server->on('method:POST', [$this, 'httpPost']);
 		$this->server->on('method:MOVE', [$this, 'httpMove']);
-		$this->server->on('propFind', [$this, 'propFind']);
 	}
 
 	public function propFind(PropFind $propFind, INode $node): void {
@@ -162,7 +162,7 @@ class WebDavPlugin extends ServerPlugin {
 				'status' => true,
 				'message' => 'success',
 			]));
-		} catch (Exception $ex) {
+		} catch (\Exception $ex) {
 			$response->setBody(json_encode([
 				'status' => false,
 				'message' => $ex->getMessage(),

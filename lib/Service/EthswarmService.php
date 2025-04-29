@@ -88,7 +88,7 @@ class EthswarmService {
 		$newPath = 'Archive/'.basename($fileName);
 
 		if ($storage->getCache()->get($newPath)) {
-			throw new StorageNotAvailableException($this->l10n->t('Name already exists in Archive folder. You can rename it before archiving.'));
+			throw new StorageNotAvailableException($this->l10n->t('Name already exists in Archive folder. You have to rename before archiving.'));
 		}
 
 		try {
@@ -111,7 +111,7 @@ class EthswarmService {
 		$newPath = $destination ? "{$destination}/{$fileBaseName}" : $fileBaseName;
 
 		if ($storage->getCache()->get($newPath)) {
-			throw new StorageNotAvailableException($this->l10n->t('Name already exists in storage folder. You can rename it before restoring.'));
+			throw new StorageNotAvailableException($this->l10n->t('Name already exists in destination folder. You have to rename before re-trying.'));
 		}
 
 		try {
