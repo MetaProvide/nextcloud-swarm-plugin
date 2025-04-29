@@ -52,13 +52,15 @@ use Traversable;
 class BeeSwarm extends Common {
 	use BeeSwarmTrait;
 
-	protected int $storageId;
-
 	protected IDBConnection $dbConnection;
 
 	protected IL10N $l10n;
 
+	protected int $storageId;
+
 	protected string $id;
+
+	private string $token;
 
 	private SwarmFileMapper $fileMapper;
 
@@ -74,9 +76,9 @@ class BeeSwarm extends Common {
 
 	private NotificationService $notificationService;
 
-	private string $token;
-
 	private LoggerInterface $logger;
+
+	private IUserMountCache $mountCache;
 
 	/**
 	 * @param mixed $params
@@ -99,8 +101,7 @@ class BeeSwarm extends Common {
 		$this->mimeTypeDetector = OC::$server->get(IMimeTypeDetector::class);
 		$this->logger = OC::$server->get(LoggerInterface::class);
 		$this->config = OC::$server->get(IConfig::class);
-		$mountHandler = OC::$server->get(IUserMountCache::class);
-
+		$this->mountCache = OC::$server->get(IUserMountCache::class);
 		$this->cacheHandler = new Cache($this);
 		$this->fileMapper = new SwarmFileMapper($this->dbConnection);
 
@@ -114,9 +115,7 @@ class BeeSwarm extends Common {
 			OC::$server->get(IUserSession::class)
 		);
 
-		if (empty($mountHandler->getMountsForStorageId($this->storageId)) and !$this->cacheHandler->get('')) {
-			$this->prepareStorage();
-		}
+		$this->isNewStorage() && $this->prepareStorage();
 	}
 
 	public function restoreByToken(): void {
@@ -524,6 +523,10 @@ class BeeSwarm extends Common {
 		};
 
 		return $this->cacheHandler->put($fileData['path'], $fileData);
+	}
+
+	private function isNewStorage(): bool {
+		return empty($this->mountCache->getMountsForStorageId($this->storageId)) and !$this->cacheHandler->get('');
 	}
 
 	private function prepareStorage(): void {
