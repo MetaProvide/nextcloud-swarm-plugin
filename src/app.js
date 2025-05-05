@@ -1,7 +1,10 @@
 /**
  * @copyright Copyright (c) 2025, MetaProvide Holding EKF
  *
+ * @author Mahyar Iranibazaz <mahiarirani@pm.me>
  * @author Henry Bergström <metahenry@metaprovide.org>
+ * @author Ron Trevor <ecoron@proton.me>
+ * @author Joao Raposo <joaosraposo@gmail.com>
  *
  * @license GNU AGPL version 3 or any later version
  *
@@ -19,29 +22,11 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  */
+
 import { generateFilePath } from "@nextcloud/router";
 
-import Vue from "vue";
-import Setting from "./pages/Setting";
-
-const appName = "files_external_ethswarm";
-
 // eslint-disable-next-line
-__webpack_public_path__ = generateFilePath(appName, "", "js/");
+__webpack_public_path__ = generateFilePath("files_external_ethswarm", "", "js/");
 
-export default new Vue({
-	el: "#app",
-	data() {
-		// State varible to hold settings coming from backend
-		return { settings: {} };
-	},
-	beforeMount() {
-		// Importing params from backend
-		const dataset = document.querySelector("#app").dataset;
-		this.settings = JSON.parse(dataset.params);
-	},
-	render(h) {
-		// Render with settings passed as props to App component
-		return h(Setting, { props: { settings: this.settings } });
-	},
-});
+const requireContext = require.context('./app', true, /\.js$/);
+requireContext.keys().forEach(requireContext);
