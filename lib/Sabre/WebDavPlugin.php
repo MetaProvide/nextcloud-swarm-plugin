@@ -35,6 +35,7 @@ use Sabre\DAV\Server;
 use Sabre\DAV\ServerPlugin;
 use Sabre\HTTP\RequestInterface;
 use Sabre\HTTP\ResponseInterface;
+use function Sabre\Event\Loop\instance;
 
 class WebDavPlugin extends ServerPlugin {
 	public const ETHSWARM_FILEREF = '{http://nextcloud.org/ns}ethswarm-fileref';
@@ -59,6 +60,10 @@ class WebDavPlugin extends ServerPlugin {
 	}
 
 	public function propFind(PropFind $propFind, INode $node): void {
+		if (!$node instanceof Directory && !$node instanceof File) {
+			return;
+		}
+
 		$fileInfo = $node->getFileInfo();
 		$storageId = $fileInfo->getStorage()->getCache()->getNumericStorageId();
 		$mountPoint = $fileInfo->getMountPoint()->getStorageId();
