@@ -106,8 +106,7 @@ Experience the future of data storage with 5GB of free, decentralized storage on
 	</settings>
 	<sabre>
 		<plugins>
-			<plugin>OCA\Files_External_Ethswarm\Sabre\PropfindPlugin</plugin>
-			<plugin>OCA\Files_External_Ethswarm\Sabre\PostPlugin</plugin>
+			<plugin>OCA\Files_External_Ethswarm\Sabre\WebDavPlugin</plugin>
 		</plugins>
 	</sabre>
 </info>

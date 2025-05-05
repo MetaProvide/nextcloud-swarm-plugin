@@ -25,8 +25,8 @@ use OCA\Files_External\Lib\Backend\Backend;
 use OCA\Files_External\Lib\DefinitionParameter;
 use OCA\Files_External\Lib\StorageConfig;
 use OCA\Files_External\Service\GlobalStoragesService;
-use OCA\Files_External_Ethswarm\AppInfo\AppConstants;
-use OCA\Files_External_Ethswarm\Auth\License;
+use OCA\Files_External_Ethswarm\AppInfo\Application;
+use OCA\Files_External_Ethswarm\Auth\AccessKey;
 use OCP\IConfig;
 use OCP\IL10N;
 use Psr\Log\LoggerInterface;
@@ -51,7 +51,7 @@ class BeeSwarm extends Backend {
 		$this->logger = $logger;
 		$this->globalStoragesService = $globalStoragesService;
 		$this
-			->setIdentifier(AppConstants::APP_NAME)
+			->setIdentifier(Application::NAME)
 			->addIdentifierAlias('\OC\Files\External_Storage\BeeSwarm') // legacy compat
 			->setStorageClass('\OCA\Files_External_Ethswarm\Storage\BeeSwarm')
 			->setText($l->t('HejBit-Swarm'))
@@ -62,7 +62,7 @@ class BeeSwarm extends Backend {
 					'app.hejbit.com'
 				))
 					->setTooltip($l->t('Access Server')),
-			])->addAuthScheme(License::SCHEME_ACCESS_KEY)
+			])->addAuthScheme(AccessKey::SCHEME)
 		;
 	}
 
@@ -70,7 +70,7 @@ class BeeSwarm extends Backend {
 		$result = true;
 
 		// access key
-		if (!$storage->getBackendOption(License::SCHEME_ACCESS_KEY)) {
+		if (!$storage->getBackendOption(AccessKey::SCHEME)) {
 			$this->logger->warning('access key not set');
 			$result = false;
 		}

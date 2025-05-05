@@ -2,7 +2,6 @@
 
 namespace OCA\Files_External_Ethswarm\Tests\Unit;
 
-use OCA\Files_External_Ethswarm\AppInfo\AppConstants;
 use OCA\Files_External_Ethswarm\AppInfo\Application;
 use OCA\Files_External_Ethswarm\Exception\BaseException;
 use OCP\IConfig;
@@ -70,7 +69,7 @@ class SentryTest extends TestCase {
 
 		// Initialize Sentry
 		$client = ClientBuilder::create([
-			'dsn' => AppConstants::TELEMETRY_URL,
+			'dsn' => Application::TELEMETRY_URL,
 			'traces_sample_rate' => 1.0,
 			'environment' => 'testing',
 		])->getClient();
@@ -94,7 +93,7 @@ class SentryTest extends TestCase {
 		$client = null;
 		if ($this->config->getSystemValue('telemetry.enabled', false)) {
 			$client = ClientBuilder::create([
-				'dsn' => AppConstants::TELEMETRY_URL,
+				'dsn' => Application::TELEMETRY_URL,
 				'traces_sample_rate' => 1.0,
 				'environment' => 'testing',
 			])->getClient();

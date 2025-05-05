@@ -24,7 +24,7 @@ declare(strict_types=1);
 namespace OCA\Files_External_Ethswarm\Service;
 
 use DateTime;
-use OCA\Files_External_Ethswarm\AppInfo\AppConstants;
+use OCA\Files_External_Ethswarm\AppInfo\Application;
 use OCP\IUserManager;
 use OCP\IUserSession;
 use OCP\Notification\IManager;
@@ -43,7 +43,7 @@ class NotificationService {
 	public function sendTemporaryNotification($subject, $path) {
 		// Create a notification
 		$notification = $this->notificationManager->createNotification();
-		$notification->setApp(AppConstants::APP_NAME);
+		$notification->setApp(Application::NAME);
 		$userId = $this->userSession->getUser()->getUID();
 		$notification->setUser($userId);
 		$notification->setSubject($subject, ['path' => $path]);

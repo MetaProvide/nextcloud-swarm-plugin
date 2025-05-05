@@ -24,8 +24,10 @@
 
 namespace OCA\Files_External_Ethswarm\Service;
 
+use Exception;
 use OC;
 use OCA\Files_External_Ethswarm\Db\SwarmFileMapper;
+use OCP\Files\Storage\IStorage;
 use OCP\Files\StorageNotAvailableException;
 use OCP\IDBConnection;
 use OCP\IL10N;
@@ -51,26 +53,93 @@ class EthswarmService {
 	 *
 	 * @throws StorageNotAvailableException
 	 */
-	public function getSwarmRef(string $filename, int $storageid) {
-		$swarmFile = $this->filemapper->find($filename, $storageid);
+	public function getSwarmRef(string $fileName, int $storageid) {
+		$swarmFile = $this->filemapper->find($fileName, $storageid);
 
 		return $swarmFile->getSwarmReference();
 	}
 
-	public function getVisiblity(string $filename, int $storageid) {
-		$swarmFile = $this->filemapper->find($filename, $storageid);
+	public function getVisibility(string $fileName, int $storageid): bool {
+		$swarmFile = $this->filemapper->find($fileName, $storageid);
 
-		return $swarmFile->getVisibility();
+		return 1 == $swarmFile->getVisibility();
 	}
 
-	public function setVisiblity(string $filename, int $storageid, int $visibility) {
-		$swarmFile = $this->filemapper->find($filename, $storageid);
+	public function setVisibility(string $fileName, int $storageid, int $visibility) {
+		$swarmFile = $this->filemapper->find($fileName, $storageid);
 		$swarmFile->setVisibility($visibility);
 
 		return $this->filemapper->update($swarmFile);
 	}
 
-	public function findExists(string $filename, int $storageid) {
-		return $this->filemapper->findExists($filename, $storageid);
+	public function getToken(int $storageid) {
+		$swarmFile = $this->filemapper->findAllWithToken($storageid);
+
+		return $swarmFile->getToken();
+	}
+
+	public function archiveNode(string $fileName, IStorage $storage): void {
+		$storageId = $storage->getCache()->getNumericStorageId();
+		$file = $this->filemapper->find($fileName, $storageId);
+		if (!$file->getId()) {
+			throw new StorageNotAvailableException($this->l10n->t('File not found'));
+		}
+
+		$newPath = 'Archive/'.basename($fileName);
+
+		if ($storage->getCache()->get($newPath)) {
+			throw new StorageNotAvailableException($this->l10n->t('Name already exists in Archive folder. You have to rename before archiving.'));
+		}
+
+		try {
+			$storage->getCache()->move($fileName, $newPath);
+			$storage->rename($fileName, $newPath);
+			$this->filemapper->updatePath($fileName, $newPath, $storageId);
+		} catch (Exception $e) {
+			throw new StorageNotAvailableException($this->l10n->t('Failed to move to Archive folder'));
+		}
+	}
+
+	public function moveNode(string $fileName, IStorage $storage, string $destination): void {
+		$storageId = $storage->getCache()->getNumericStorageId();
+		$file = $this->filemapper->find($fileName, $storageId);
+		if (!$file->getId()) {
+			throw new StorageNotAvailableException($this->l10n->t('File not found'));
+		}
+
+		$fileBaseName = basename($fileName);
+		$newPath = $destination ? "{$destination}/{$fileBaseName}" : $fileBaseName;
+
+		if ($storage->getCache()->get($newPath)) {
+			throw new StorageNotAvailableException($this->l10n->t('Name already exists in destination folder. You have to rename before re-trying.'));
+		}
+
+		try {
+			$storage->getCache()->move($fileName, $newPath);
+			$storage->rename($fileName, $newPath);
+			$this->filemapper->updatePath($fileName, $newPath, $storageId);
+		} catch (Exception $e) {
+			throw new StorageNotAvailableException($this->l10n->t("Could not restore file to {$destination}"));
+		}
+	}
+
+	public function rename(string $fileName, string $newName, IStorage $storage): void {
+		$storageId = $storage->getCache()->getNumericStorageId();
+		$file = $this->filemapper->find($fileName, $storageId);
+		if (!$file->getId()) {
+			throw new StorageNotAvailableException($this->l10n->t('File not found'));
+		}
+
+		$directory = dirname($fileName);
+		$directory = '.' === $directory ? '' : "{$directory}/";
+		$newPath = $directory.$newName;
+
+		try {
+			$storage->getCache()->move($fileName, $newPath);
+			$storage->rename($fileName, $newPath);
+			$this->filemapper->updatePath($fileName, $newPath, $storageId);
+		} catch (Exception $e) {
+			throw new StorageNotAvailableException($this->l10n->t('Failed to rename'));
+		}
 	}
 }
