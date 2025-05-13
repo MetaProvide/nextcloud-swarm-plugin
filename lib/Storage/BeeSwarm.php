@@ -127,8 +127,13 @@ class BeeSwarm extends Common implements IBeeSwarm {
 	public function restoreByToken(): void {
 		$this->fileMapper->updateStorageIds($this->token, $this->storageId);
 		$files = $this->fileMapper->findAllWithToken($this->token);
+		usort($files, fn ($a, $b) => strlen($a->getName()) <=> strlen($b->getName()));
 		foreach ($files as $file) {
-			$this->addCache($file);
+			if (self::ARCHIVE_FOLDER === $file->getName()) {
+				$this->addCache($file, Constants::PERMISSION_ALL - Constants::PERMISSION_DELETE - Constants::PERMISSION_UPDATE - Constants::PERMISSION_CREATE);
+			} else {
+				$this->addCache($file);
+			}
 		}
 	}
 
