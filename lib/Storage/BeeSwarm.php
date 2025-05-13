@@ -49,8 +49,10 @@ use Psr\Log\LoggerInterface;
 use Sabre\DAV\Exception\BadRequest;
 use Traversable;
 
-class BeeSwarm extends Common {
+class BeeSwarm extends Common implements IBeeSwarm {
 	use BeeSwarmTrait;
+
+	public const string ARCHIVE_FOLDER = 'Archive - HejBit';
 
 	protected IDBConnection $dbConnection;
 
@@ -118,11 +120,20 @@ class BeeSwarm extends Common {
 		$this->isNewStorage() && $this->prepareStorage();
 	}
 
+	public function isSwarm(): true {
+		return true;
+	}
+
 	public function restoreByToken(): void {
 		$this->fileMapper->updateStorageIds($this->token, $this->storageId);
 		$files = $this->fileMapper->findAllWithToken($this->token);
+		usort($files, fn ($a, $b) => strlen($a->getName()) <=> strlen($b->getName()));
 		foreach ($files as $file) {
-			$this->addCache($file);
+			if (self::ARCHIVE_FOLDER === $file->getName()) {
+				$this->addCache($file, Constants::PERMISSION_ALL - Constants::PERMISSION_DELETE - Constants::PERMISSION_UPDATE - Constants::PERMISSION_CREATE);
+			} else {
+				$this->addCache($file);
+			}
 		}
 	}
 
@@ -490,6 +501,12 @@ class BeeSwarm extends Common {
 		return $tmpFileSize;
 	}
 
+	public function addPathToArchive(string $fileName): string {
+		$this->prepareArchive();
+
+		return self::ARCHIVE_FOLDER.DIRECTORY_SEPARATOR.basename($fileName);
+	}
+
 	/**
 	 * @param resource $stream
 	 */
@@ -532,13 +549,12 @@ class BeeSwarm extends Common {
 	private function prepareStorage(): void {
 		$this->prepareRoot();
 		$this->restoreByToken();
-		$this->prepareArchive();
 	}
 
 	private function prepareArchive(): void {
-		$exists = $this->fileMapper->findExists('Archive', $this->storageId);
+		$exists = $this->fileMapper->findExists(self::ARCHIVE_FOLDER, $this->storageId);
 		if (0 === $exists) {
-			$archiveFolder = $this->fileMapper->createDirectory('Archive', $this->storageId, $this->token);
+			$archiveFolder = $this->fileMapper->createDirectory(self::ARCHIVE_FOLDER, $this->storageId, $this->token);
 			$this->addCache($archiveFolder, Constants::PERMISSION_ALL - Constants::PERMISSION_DELETE - Constants::PERMISSION_UPDATE - Constants::PERMISSION_CREATE);
 		}
 	}

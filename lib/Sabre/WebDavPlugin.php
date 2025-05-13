@@ -28,6 +28,7 @@ namespace OCA\Files_External_Ethswarm\Sabre;
 use OCA\DAV\Connector\Sabre\Directory;
 use OCA\DAV\Connector\Sabre\File;
 use OCA\Files_External_Ethswarm\Service\EthswarmService;
+use OCA\Files_External_Ethswarm\Utils\Storage;
 use Sabre\DAV\Exception\NotImplemented;
 use Sabre\DAV\INode;
 use Sabre\DAV\PropFind;
@@ -187,15 +188,18 @@ class WebDavPlugin extends ServerPlugin {
 		$destination = $request->getHeader('Destination');
 		$newName = urldecode(basename($destination));
 		$storage = $nodeInfo->getMountPoint()->getStorage();
+		if (Storage::isSwarm($storage)) {
+			try {
+				$this->EthswarmService->rename($fileName, $newName, $storage);
+				$response->setStatus(200);
+			} catch (Exception $ex) {
+				$response->setStatus(500);
+			}
+			$response->setHeader('Content-Length', '0');
 
-		try {
-			$this->EthswarmService->rename($fileName, $newName, $storage);
-			$response->setStatus(200);
-		} catch (Exception $ex) {
-			$response->setStatus(500);
+			return false;
 		}
-		$response->setHeader('Content-Length', '0');
 
-		return false;
+		return true;
 	}
 }

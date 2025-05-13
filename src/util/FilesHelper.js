@@ -128,7 +128,7 @@ function getStoragePath(path) {
 }
 
 function isArchive(nodes) {
-	return getPathParts(nodes)[1] === "Archive";
+	return getPathParts(nodes)[1] === "Archive - HejBit";
 }
 
 export default FilesHelper;
