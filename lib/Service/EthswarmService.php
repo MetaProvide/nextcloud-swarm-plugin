@@ -72,10 +72,13 @@ class EthswarmService {
 		return $this->fileMapper->update($swarmFile);
 	}
 
-	public function getToken(int $storageid) {
-		$swarmFile = $this->filemapper->findAllWithToken($storageid);
+	public function getToken(int $storageId): string {
+		$swarmFile = $this->fileMapper->findAll();
+		if (0 === count($swarmFile)) {
+			throw new StorageNotAvailableException($this->l10n->t('No token found'));
+		}
 
-		return $swarmFile->getToken();
+		return $swarmFile[0]->getToken();
 	}
 
 	public function archiveNode(string $fileName, IStorage $storage): void {
