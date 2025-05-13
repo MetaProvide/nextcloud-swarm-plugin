@@ -52,7 +52,7 @@ use Traversable;
 class BeeSwarm extends Common implements IBeeSwarm {
 	use BeeSwarmTrait;
 
-	public const string ARCHIVE_FOLDER = 'Archive - HejBit';
+	public const ARCHIVE_FOLDER = 'Archive - HejBit';
 
 	protected IDBConnection $dbConnection;
 
