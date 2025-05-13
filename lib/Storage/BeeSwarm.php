@@ -49,8 +49,10 @@ use Psr\Log\LoggerInterface;
 use Sabre\DAV\Exception\BadRequest;
 use Traversable;
 
-class BeeSwarm extends Common {
+class BeeSwarm extends Common implements IBeeSwarm {
 	use BeeSwarmTrait;
+
+	public const string ARCHIVE_FOLDER = 'Archive - HejBit';
 
 	protected IDBConnection $dbConnection;
 
@@ -116,6 +118,10 @@ class BeeSwarm extends Common {
 		);
 
 		$this->isNewStorage() && $this->prepareStorage();
+	}
+
+	public function isSwarm(): true {
+		return true;
 	}
 
 	public function restoreByToken(): void {
