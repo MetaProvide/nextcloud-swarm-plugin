@@ -1,5 +1,5 @@
 import { FileAction, FileType, registerFileAction } from "@nextcloud/files";
-import { showInfo } from "@nextcloud/dialogs";
+import { showError, showInfo } from "@nextcloud/dialogs";
 import axios from "@nextcloud/axios";
 import { emit } from "@nextcloud/event-bus";
 import Close from "@material-design-icons/svg/filled/close.svg";
@@ -63,38 +63,19 @@ registerFileAction(
 					},
 				});
 
-				// the right event is emit('files:node:updated', node);
-				// it triggers the file:list:update, but unfortunately that doesn't
-				// a reevaluation of the enable funtion of the fileactions
-				emit("files:node:deleted", node);
-				// window.location.reload();
+				emit('files:config:updated');
 
 				return true;
 			} catch (error) {
+				showError("Error while unhidding file");
 				console.log("Error while unhidding a file", {
 					error,
 					source: node.source,
 					node,
 				});
-				// TODO: update to this? logger.error('Error while deleting a file', { error, source: node.source, node });
 				return false;
 			}
-		} /* TODO: Batch option
-	async execBatch(nodes, view, dir) {
-        // Map each node to a promise that resolves with the result of exec(node)
-        const promises = nodes.map(node => {
-            // Create a promise that resolves with the result of exec(node)
-            const promise = new Promise(resolve => {
-                queue.add(async () => {
-                    const result = await this.exec(node, view, dir);
-                    resolve(result !== null ? result : false);
-                });
-            });
-            return promise;
-        });
-        return Promise.all(promises);
-    }, */,
-
+		},
 		execBatch(nodes, view) {
 			return Promise.all(nodes.map((node) => this.exec(node, view)));
 		},
@@ -197,36 +178,18 @@ registerFileAction(
 					},
 				});
 
-				// The right event is emit('files:node:updated', node);
-				// it triggers the file:list:update, but unfortunately that doesn't
-				// a reevaluation of the enable funtion of the fileactions.
-				// To improve UX we should reload only if show_hidden is true
-				emit("files:node:deleted", node);
-				// window.location.reload();
+				emit('files:config:updated');
 				return true;
 			} catch (error) {
+				showError("Error while hiding file");
 				console.log("Error while hidding a file", {
 					error,
 					source: node.source,
 					node,
 				});
-				// TODO: update to this? logger.error('Error while deleting a file', { error, source: node.source, node });
 				return false;
 			}
-		} /* TODO: Batch option
-        // Map each node to a promise that resolves with the result of exec(node)
-        const promises = nodes.map(node => {
-            // Create a promise that resolves with the result of exec(node)
-            const promise = new Promise(resolve => {
-                queue.add(async () => {
-                    const result = await this.exec(node, view, dir);
-                    resolve(result !== null ? result : false);
-                });
-            });
-            return promise;
-        });
-        return Promise.all(promises);
-    }, */,
+		},
 		execBatch(nodes, view) {
 			return Promise.all(nodes.map((node) => this.exec(node, view)));
 		},
