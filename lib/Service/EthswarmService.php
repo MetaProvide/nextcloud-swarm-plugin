@@ -88,7 +88,7 @@ class EthswarmService {
 			throw new StorageNotAvailableException($this->l10n->t('File not found'));
 		}
 
-		$newPath = 'Archive/'.basename($fileName);
+		$newPath = $storage->addPathToArchive($fileName);
 
 		if ($storage->getCache()->get($newPath)) {
 			throw new StorageNotAvailableException($this->l10n->t('Name already exists in Archive folder. You have to rename before archiving.'));

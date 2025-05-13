@@ -496,6 +496,12 @@ class BeeSwarm extends Common implements IBeeSwarm {
 		return $tmpFileSize;
 	}
 
+	public function addPathToArchive(string $fileName): string {
+		$this->prepareArchive();
+
+		return self::ARCHIVE_FOLDER.DIRECTORY_SEPARATOR.basename($fileName);
+	}
+
 	/**
 	 * @param resource $stream
 	 */
@@ -538,13 +544,12 @@ class BeeSwarm extends Common implements IBeeSwarm {
 	private function prepareStorage(): void {
 		$this->prepareRoot();
 		$this->restoreByToken();
-		$this->prepareArchive();
 	}
 
 	private function prepareArchive(): void {
-		$exists = $this->fileMapper->findExists('Archive', $this->storageId);
+		$exists = $this->fileMapper->findExists(self::ARCHIVE_FOLDER, $this->storageId);
 		if (0 === $exists) {
-			$archiveFolder = $this->fileMapper->createDirectory('Archive', $this->storageId, $this->token);
+			$archiveFolder = $this->fileMapper->createDirectory(self::ARCHIVE_FOLDER, $this->storageId, $this->token);
 			$this->addCache($archiveFolder, Constants::PERMISSION_ALL - Constants::PERMISSION_DELETE - Constants::PERMISSION_UPDATE - Constants::PERMISSION_CREATE);
 		}
 	}

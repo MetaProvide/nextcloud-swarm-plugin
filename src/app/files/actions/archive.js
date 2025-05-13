@@ -69,6 +69,9 @@ registerFileAction(
 					if (response.data.status === true) {
 						emit("files:node:deleted", node);
 						showSuccess("Archived successfully");
+						if (FilesHelper.isRootLevel(node)) {
+							emit('files:config:updated');
+						}
 					} else {
 						console.error("Error while archiving file", response);
 						showError(response.data.message);
