@@ -23,128 +23,149 @@ declare(strict_types=1);
 
 namespace OCA\Files_External_Ethswarm\AppInfo;
 
+use OC\Security\CSP\ContentSecurityPolicy;
 use OCA\Files\Event\LoadAdditionalScriptsEvent;
-use OCA\Files_External\Lib\Config\IAuthMechanismProvider;
-use OCA\Files_External\Lib\Config\IBackendProvider;
-use OCA\Files_External\Service\BackendService;
-use OCA\Files_External_Ethswarm\Auth\License;
-use OCA\Files_External_Ethswarm\Backend\BeeSwarm;
 use OCA\Files_External_Ethswarm\Exception\BaseException;
-use OCA\Files_External_Ethswarm\Notification\Notifier;
 use OCA\Files_External_Ethswarm\Utils\Env;
+use OCP\App\AppPathNotFoundException;
+use OCP\App\IAppManager;
 use OCP\AppFramework\App;
 use OCP\AppFramework\Bootstrap\IBootContext;
 use OCP\AppFramework\Bootstrap\IBootstrap;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use OCP\EventDispatcher\IEventDispatcher;
+use OCP\Exceptions\AppConfigException;
 use OCP\IConfig;
+use OCP\Security\CSP\AddContentSecurityPolicyEvent;
 use OCP\Util;
+use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 use Sentry;
 
-class Application extends App implements IBootstrap, IBackendProvider, IAuthMechanismProvider
-{
-	public function __construct(array $urlParams = [])
-	{
-		parent::__construct(AppConstants::APP_NAME, $urlParams);
+class Application extends App implements IBootstrap {
+	public const NAME = 'files_external_ethswarm';
+	public const API_URL = 'app.hejbit.com';
+	public const TELEMETRY_URL = 'https://c46a60056f22db1db257c1d99fa99e5f@sentry.metaprovide.org/2';
+	public const TELEMETRY_MINIMUM_SUPPORTED_NEXTCLOUD_VERSION = '30.0.0';
+	public ContainerInterface $container;
+
+	private readonly IEventDispatcher $dispatcher;
+	private LoggerInterface $logger;
+	private IConfig $config;
+
+	/**
+	 * @throws AppConfigException
+	 */
+	public function __construct() {
+		parent::__construct(Application::NAME);
+		$this->logger = $this->getContainer()->get(LoggerInterface::class);
+		$this->config = $this->getContainer()->get(IConfig::class);
+		$this->dispatcher = $this->getContainer()->getServer()->get(IEventDispatcher::class);
+
+		$this->enableFilesExternalApp();
 	}
 
-	public function getBackends()
-	{
-		$container = $this->getContainer();
+	public function boot(IBootContext $context): void {
+		new ExternalStorage($this->getContainer(), $context);
 
-		return [
-			$container->query(BeeSwarm::class),
-		];
+		$this->loadAssets($context);
+		$this->configureTelemetry();
 	}
 
-	public function boot(IBootContext $context): void
-	{
-		$container = $this->getContainer();
-		$config = $container->get(IConfig::class);
+	public function register(IRegistrationContext $context): void {
+		$this->loadTelemetry();
 
-		// Initialize Sentry if telemetry is enabled and the nextcloud version is supported
-		$environment = Env::get('ENV') ?? 'production';
-		$logger = $container->get(LoggerInterface::class);
+		$this->dispatcher->addListener(
+			AddContentSecurityPolicyEvent::class,
+			function (AddContentSecurityPolicyEvent $event): void {
+				$policy = new ContentSecurityPolicy();
+				$policy->addAllowedConnectDomain('https://*.hejbit.com');
+				if (Env::isDevelopment()) {
+					$policy->addAllowedConnectDomain('http://*.hejbit.local');
+				}
+				$event->addPolicy($policy);
+			}
+		);
+	}
 
-		// Get telemetry enabled status and current nextcloud version
-		$currentNextcloudVersion = $config->getSystemValue('version');
-		$isSupported = version_compare($currentNextcloudVersion, AppConstants::TELEMETRY_MINIMUM_SUPPORTED_NEXTCLOUD_VERSION, '>=');
+	/**
+	 * @throws AppConfigException
+	 */
+	private function enableFilesExternalApp(): void {
+		/** @var IAppManager $appManager */
+		$appManager = $this->getContainer()->get(IAppManager::class);
+		if (!$appManager->isInstalled('files_external')) {
+			try {
+				$this->logger->info('External Storage Support app is not enabled, enabling it now');
+				$appManager->enableApp('files_external');
+				if ($appManager->isInstalled('files_external')) {
+					$this->logger->info('External Storage support enabled');
 
+					return;
+				}
+				$this->logger->warning('Try enabling it now by force');
+				$appManager->enableApp('files_external', true);
+				if ($appManager->isInstalled('files_external')) {
+					$this->logger->info('External Storage support enabled');
 
-		// if telemetry is not set, set it to true
-		// but if it is set to false, don't override it
-		if ($config->getSystemValue('telemetry.enabled') === '' && $isSupported) {
-			$config->setSystemValue('telemetry.enabled', true);
-			$logger->info('Telemetry option has not been set, setting it to true');
+					return;
+				}
+				$this->logger->error('Failed to enable External Storage Support app');
+			} catch (AppPathNotFoundException $e) {
+			}
+
+			throw new AppConfigException('External Storage Support app is required be installed and enabled. Please enable it to use this app.');
 		}
+	}
 
-		if ($config->getSystemValue('telemetry.enabled') && $isSupported) {
-			Sentry\init([
-				'dsn' => AppConstants::TELEMETRY_URL,
-				'traces_sample_rate' => 1.0,
-				'environment' => $environment,
-			]);
-
-			$logger->info('Telemetry is enabled and the nextcloud version is supported');
-		} elseif ($config->getSystemValue('telemetry.enabled') && !$isSupported) {
-			$logger->info('Telemetry is enabled but the nextcloud version ' . $currentNextcloudVersion . ' is not supported');
-		} elseif (false === $config->getSystemValue('telemetry.enabled')) {
-			$logger->info('Telemetry is disabled');
-		}
-
-		$context->injectFn([$this, 'registerEventsScripts']);
-
-		$context->injectFn(function (BackendService $backendService) {
-			$backendService->registerBackendProvider($this);
-			$backendService->registerAuthMechanismProvider($this);
-		});
-
-		// Load custom JS
-		Util::addScript(AppConstants::APP_NAME, 'admin-settings');
-
-		// Add feedback CSS
-		Util::addStyle(AppConstants::APP_NAME, 'feedback-js');
+	private function loadAssets($context): void {
+		Util::addStyle(Application::NAME, 'app');
+		Util::addScript(Application::NAME, 'nextcloud-swarm-plugin-settings');
 
 		/** @var IEventDispatcher $dispatcher */
 		$dispatcher = $context->getAppContainer()->get(IEventDispatcher::class);
-		$dispatcher->addListener('OCA\Files::loadAdditionalScripts', function () {
-			Util::addScript(AppConstants::APP_NAME, 'fileactions');
-			Util::addScript(AppConstants::APP_NAME, 'menuobserver');
-		});
 		$dispatcher->addListener(LoadAdditionalScriptsEvent::class, function () {
-			Util::addScript(AppConstants::APP_NAME, 'nextcloud-swarm-plugin-fileactions');
-			Util::addInitScript(AppConstants::APP_NAME, 'nextcloud-swarm-plugin-newfilemenu');
-			Util::addScript(AppConstants::APP_NAME, 'nextcloud-swarm-plugin-feedbackform');
+			Util::addStyle(Application::NAME, 'feedback');
+			Util::addInitScript(Application::NAME, 'nextcloud-swarm-plugin-app');
 		});
-
-		$this->getAuthMechanisms();
 	}
 
-	public function registerEventsScripts(IEventDispatcher $dispatcher)
-	{
-	}
-
-	public function register(IRegistrationContext $context): void
-	{
-		$context->registerNotifierService(Notifier::class);
-
+	private function loadTelemetry(): void {
 		// Register autoloader of sentry
-		$autoloadPath = __DIR__ . '/../../vendor-bin/sentry/vendor/autoload.php';
+		$autoloadPath = __DIR__.'/../../vendor-bin/sentry/vendor/autoload.php';
 		if (!file_exists($autoloadPath)) {
-			throw new BaseException('Vendor autoload.php not found at: ' . $autoloadPath);
+			throw new BaseException('Vendor autoload.php not found at: '.$autoloadPath);
 		}
 
 		require_once $autoloadPath;
 	}
 
-	public function getAuthMechanisms()
-	{
-		$container = $this->getContainer();
+	private function configureTelemetry(): void {
+		// Initialize Sentry if telemetry is enabled and the nextcloud version is supported
+		$environment = Env::get('ENV') ?? 'production';
 
-		return [
-			// AuthMechanism::BASIC HTTP mechanisms
-			$container->get(License::class),
-		];
+		// Get telemetry enabled status and current nextcloud version
+		$currentNextcloudVersion = $this->config->getSystemValue('version');
+		$isSupported = version_compare($currentNextcloudVersion, Application::TELEMETRY_MINIMUM_SUPPORTED_NEXTCLOUD_VERSION, '>=');
+
+		// if telemetry is not set, set it to true
+		// but if it is set to false, don't override it
+		if ('' === $this->config->getSystemValue('telemetry.enabled') && $isSupported) {
+			$this->config->setSystemValue('telemetry.enabled', false);
+			$this->logger->info('Telemetry option has not been set, setting it to true');
+		}
+
+		if ($this->config->getSystemValue('telemetry.enabled') && $isSupported) {
+			Sentry\init([
+				'dsn' => Application::TELEMETRY_URL,
+				'traces_sample_rate' => 1.0,
+				'environment' => $environment,
+			]);
+			$this->logger->info('Telemetry is enabled and the nextcloud version is supported');
+		} elseif ($this->config->getSystemValue('telemetry.enabled') && !$isSupported) {
+			$this->logger->info('Telemetry is enabled but the nextcloud version '.$currentNextcloudVersion.' is not supported');
+		} elseif (false === $this->config->getSystemValue('telemetry.enabled')) {
+			$this->logger->info('Telemetry is disabled');
+		}
 	}
 }

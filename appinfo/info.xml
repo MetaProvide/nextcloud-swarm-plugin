@@ -20,7 +20,12 @@ This plugin integrates [Swarm](https://www.ethswarm.org/) (a decentralized, bloc
   - [Additional Integration with Moodle](https://apps.nextcloud.com/apps/files_external_ethswarm#additional-integration-with-moodle)
 - [Get Hejbit License](https://apps.nextcloud.com/apps/files_external_ethswarm#get-hejbit-license)
 - [License](https://apps.nextcloud.com/apps/files_external_ethswarm#license)
+  - [Using Hejbit Swarm](https://apps.nextcloud.com/apps/files_external_ethswarm#using-hejbit-swarm)
+  - [Additional Integration with Moodle](https://apps.nextcloud.com/apps/files_external_ethswarm#additional-integration-with-moodle)
+- [Get Hejbit License](https://apps.nextcloud.com/apps/files_external_ethswarm#get-hejbit-license)
+- [License](https://apps.nextcloud.com/apps/files_external_ethswarm#license)
 
+[](#dependencies)## **Dependencies**
 [](#dependencies)## **Dependencies**
 
 Before using the plugin, ensure you have the following:
@@ -28,7 +33,9 @@ Before using the plugin, ensure you have the following:
 - An active Nextcloud instance (version 29,30 or 31)
 - A valid license and URL to activate the service
   - [Request Your Free Nextcloud Swarm Plugin Trial License](https://metaprovide.org/hejbit/start)
+  - [Request Your Free Nextcloud Swarm Plugin Trial License](https://metaprovide.org/hejbit/start)
 
+[](#setup-and-installation)## **Setup and Installation**
 [](#setup-and-installation)## **Setup and Installation**
 
 Follow these steps to configure Hejbit Swarm in Nextcloud:
@@ -39,6 +46,7 @@ Follow these steps to configure Hejbit Swarm in Nextcloud:
 4. Create a new external storage with a folder name of your choice and select *'Swarm'* as the storage type. Then, enter the license key and URL configuration.
 
 [](#usage)## **Usage**
+[](#usage)## **Usage**
 
 Once installed, Hejbit integrates Swarm directly with Nextcloud’s "Files" section, allowing seamless file operations:
 
@@ -47,9 +55,11 @@ Once installed, Hejbit integrates Swarm directly with Nextcloud’s "Files" sect
 - **Copy/Move:** Shift files between any external storage and decentralized storage
 
 [](#settings)### **Settings**
+[](#settings)### **Settings**
 
 Users with administrative credentials can configure the plugin through the standard External Storage settings. Here, you can input your license key and URL for Hejbit.
 
+[](#using-hejbit-swarm)### **Using Hejbit Swarm**
 [](#using-hejbit-swarm)### **Using Hejbit Swarm**
 
 Once setup and configured, the Decentralized Storage is ready to use.
@@ -60,18 +70,20 @@ Once setup and configured, the Decentralized Storage is ready to use.
 - Right-click on a Swarm file to copy the Swarm reference (hash) to your clipboard. Alternatively, click the three dots in the Actions menu and select 'Copy Swarm Reference.' The Swarm reference is the unique address of the file on the Swarm network.
 
 [](#additional-integration-with-moodle)### Additional Integration with Moodle
+[](#additional-integration-with-moodle)### Additional Integration with Moodle
 
 You can also enhance your experience by integrating the Hejbit Swarm plugin with the **Moodle Nextcloud plugin**. This integration allows users to access decentralized storage directly within the Moodle environment, providing a seamless experience for educational content management. For more information on how to set up this integration, visit the [Moodle Nextcloud repository documentation](https://docs.moodle.org/405/en/Nextcloud_repository).
 
 For detailed guidance on using the integrated features, please refer to the [Metaprovide Learning Platform](https://learning.metaprovide.org/login/index.php).
 
 [](#get-hejbit-license)## **Get Hejbit Licence**
+[](#get-hejbit-license)## **Get Hejbit Licence**
 
 Experience the future of data storage with 5GB of free, decentralized storage on the Ethereum Swarm network. Our plugin seamlessly integrates with your existing Nextcloud interface, providing true data sovereignty without the complexity.
 
 [Get your free licence here!](https://metaprovide.org/hejbit/start)
     ]]></description>
-    <version>0.5.14</version>
+    <version>0.6.0</version>
     <licence>agpl</licence>
     <author>MetaProvide</author>
     <namespace>Files_External_Ethswarm</namespace>
@@ -94,8 +106,7 @@ Experience the future of data storage with 5GB of free, decentralized storage on
 	</settings>
 	<sabre>
 		<plugins>
-			<plugin>OCA\Files_External_Ethswarm\Sabre\PropfindPlugin</plugin>
-			<plugin>OCA\Files_External_Ethswarm\Sabre\PostPlugin</plugin>
+			<plugin>OCA\Files_External_Ethswarm\Sabre\WebDavPlugin</plugin>
 		</plugins>
 	</sabre>
 </info>
