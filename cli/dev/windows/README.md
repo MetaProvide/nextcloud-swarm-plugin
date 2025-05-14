@@ -26,7 +26,7 @@ After running the \\cli\\dev\\windows\\clean.bat and start.bat files (which remo
 
     -   Note: After any changes to docker-compose, remember to rebuild the docker-compose:
 
-        `docker-compose --profile dev up -d --force-recreate --remove-orphans --build`
+        `docker-compose up -d --force-recreate --remove-orphans --build`
 
 ##### Known issue: Local path containimng NC source code has folder(s) with special character.
 
