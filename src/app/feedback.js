@@ -26,7 +26,7 @@ const feedback = {
 	},
 	render() {
 		try {
-			const feedbackButton = `<img src="${HejBitLogo}" alt="HejBit" style="height: 20px; vertical-align: middle;"> Feedback`;
+			const feedbackButton = `<img src="${HejBitLogo}" alt="HejBit" style="height: 20px; vertical-align: middle;margin-right:10px">HejBit Feedback`;
 			const feedbackInstance = new Feedback({
 				id: "feedback",
 				endpoint: OC.generateUrl(
@@ -54,7 +54,7 @@ const feedback = {
 				inputPlaceholder: "We welcome your feedback here.",
 				submitText: "Submit",
 				backText: "Back",
-				typeMessage: "How can we improve?",
+				typeMessage: "How can we improve HejBit?",
 				success: "We Appreciate Your Feedback!",
 				failedTitle: "Oops, an error occurred!",
 				failedMessage:
