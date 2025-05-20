@@ -14,6 +14,7 @@ class BaseException extends Exception {
 		// Report exception to Sentry if enabled
 		$config = OC::$server->get(IConfig::class);
 		$telemetryEnabled = $config->getSystemValue('telemetry.enabled', false);
+
 		if ($telemetryEnabled) {
 			Sentry\captureException($this);
 		}
