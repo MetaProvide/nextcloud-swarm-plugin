@@ -181,25 +181,30 @@ class WebDavPlugin extends ServerPlugin {
 	}
 
 	public function httpMove(RequestInterface $request, ResponseInterface $response): bool {
-		$path = $request->getPath();
-		$node = $this->server->tree->getNodeForPath($path);
+		$node = $this->server->tree->getNodeForPath($request->getPath());
+
+		if (!$node instanceof File && !$node instanceof Directory) {
+			return true;
+		}
+
 		$nodeInfo = $node->getFileInfo();
 		$fileName = $nodeInfo->getInternalPath();
 		$destination = $request->getHeader('Destination');
 		$newName = urldecode(basename($destination));
 		$storage = $nodeInfo->getMountPoint()->getStorage();
-		if (Storage::isSwarm($storage)) {
-			try {
-				$this->EthswarmService->rename($fileName, $newName, $storage);
-				$response->setStatus(200);
-			} catch (Exception $ex) {
-				$response->setStatus(500);
-			}
-			$response->setHeader('Content-Length', '0');
 
-			return false;
+		if (!Storage::isSwarm($storage)) {
+			return true;
 		}
 
-		return true;
+		try {
+			$this->EthswarmService->rename($fileName, $newName, $storage);
+			$response->setStatus(200);
+		} catch (Exception $ex) {
+			$response->setStatus(500);
+		}
+		$response->setHeader('Content-Length', '0');
+
+		return false;
 	}
 }
