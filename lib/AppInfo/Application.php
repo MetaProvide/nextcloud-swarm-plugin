@@ -36,6 +36,7 @@ use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use OCP\EventDispatcher\IEventDispatcher;
 use OCP\Exceptions\AppConfigException;
 use OCP\IConfig;
+use OCP\IURLGenerator;
 use OCP\Security\CSP\AddContentSecurityPolicyEvent;
 use OCP\Util;
 use Psr\Container\ContainerInterface;
@@ -156,11 +157,29 @@ class Application extends App implements IBootstrap {
 		}
 
 		if ($this->config->getSystemValue('telemetry.enabled') && $isSupported) {
+			/** @var IAppManager $appManager */
+			$appManager = $this->getContainer()->get(IAppManager::class);
+			$appInfo = $appManager->getAppInfo(self::NAME);
+			$pluginVersion = $appInfo['version'] ?? 'unknown';
+
+			/** @var IURLGenerator $urlGenerator */
+			$urlGenerator = $this->getContainer()->get(IURLGenerator::class);
+			$instanceUrl = $urlGenerator->getAbsoluteURL('/');
+
 			Sentry\init([
 				'dsn' => Application::TELEMETRY_URL,
 				'traces_sample_rate' => 1.0,
 				'environment' => $environment,
+				'default_integrations' => false, // Disable default integrations to avoid sending unnecessary data
+				'release' => $pluginVersion,
+				'server_name' => $instanceUrl,
 			]);
+
+			// Set nextcloud version as a Sentry tag
+			Sentry\configureScope(function (Sentry\State\Scope $scope) use ($currentNextcloudVersion): void {
+				$scope->setTag('nextcloud_version', $currentNextcloudVersion);
+			});
+
 			$this->logger->info('Telemetry is enabled and the nextcloud version is supported');
 		} elseif ($this->config->getSystemValue('telemetry.enabled') && !$isSupported) {
 			$this->logger->info('Telemetry is enabled but the nextcloud version '.$currentNextcloudVersion.' is not supported');
