@@ -17,7 +17,7 @@ This plugin integrates [Swarm](https://www.ethswarm.org/) (a decentralized, bloc
     -   [Settings](#settings)
     -   [Using HejBit Swarm](#using-hejbit-swarm)
     -   [Additional Integration with Moodle](#additional-integration-with-moodle)
--   [Get HejBit License](#get-hejbit-license)
+-   [Get HejBit Access Key](#get-hejbit-access-key)
 -   [License](#license)
 
 <a id="dependencies"></a>
@@ -27,8 +27,7 @@ This plugin integrates [Swarm](https://www.ethswarm.org/) (a decentralized, bloc
 Before using the plugin, ensure you have the following:
 
 -   An active Nextcloud instance (version 30 or 31)
--   A valid license and URL to activate the service
-    -   [Request Your Free Nextcloud Swarm Plugin Trial License](https://metaprovide.org/hejbit/start)
+-   A valid [access key](https://metaprovide.org/hejbit/start) to activate the service
 
 <a id="setup-and-installation"></a>
 
@@ -39,7 +38,7 @@ Follow these steps to configure HejBit Swarm in Nextcloud:
 1. Ensure the **External Storage** plugin is enabled.
 2. Install the **External Storage: HejBit Swarm** app from the Nextcloud App Store.
 3. Navigate to External Storage Administration: Profile menu -> Settings -> External Storage.
-4. Create a new external storage with a folder name of your choice and select _'HejBit-Swarm'_ as the storage type. Then, enter the license key and URL configuration.
+4. Create a new external storage with a folder name of your choice and select _'HejBit-Swarm'_ as the storage type. Then, enter the access key and server.
 
 <a id="usage"></a>
 
@@ -55,7 +54,7 @@ Once installed, HejBit integrates Swarm directly with Nextcloud’s "Files" sect
 
 ### Settings
 
-Users with administrative credentials can configure the plugin through the standard External Storage settings. Here, you can input your license key and URL for HejBit.
+Users with administrative credentials can configure the plugin through the standard External Storage settings. Here, you can input your access key and server for HejBit.
 
 <a id="using-hejbit-swarm"></a>
 
@@ -76,13 +75,13 @@ You can also enhance your experience by integrating the HejBit Swarm plugin with
 
 For detailed guidance on using the integrated features, please refer to the [Metaprovide Learning Platform](https://learning.metaprovide.org/login/index.php).
 
-<a id="get-hejbit-license"></a>
+<a id="get-hejbit-access-key"></a>
 
-## Get HejBit Licence
+## Get HejBit Access Key
 
-Experience the future of data storage with 5GB of free, decentralized storage on the Ethereum Swarm network. Our plugin seamlessly integrates with your existing Nextcloud interface, providing true data sovereignty without the complexity.
+Experience the future of data storage with 4GB of free, decentralized storage on the Ethereum Swarm network. Our plugin seamlessly integrates with your existing Nextcloud interface, providing true data sovereignty without the complexity.
 
-[Get your free licence here!](https://metaprovide.org/hejbit/start)
+[Get your free access key here!](https://metaprovide.org/hejbit/start)
 
 <a id="license"></a>
 
