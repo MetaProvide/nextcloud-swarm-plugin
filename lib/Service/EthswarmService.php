@@ -27,6 +27,7 @@ namespace OCA\Files_External_Ethswarm\Service;
 use Exception;
 use OC;
 use OCA\Files_External_Ethswarm\Db\SwarmFileMapper;
+use OCA\Files_External_Ethswarm\Storage\BeeSwarm;
 use OCP\Files\Storage\IStorage;
 use OCP\Files\StorageNotAvailableException;
 use OCP\IDBConnection;
@@ -72,8 +73,8 @@ class EthswarmService {
 		return $this->fileMapper->update($swarmFile);
 	}
 
-	public function getToken(int $storageId): string {
-		$swarmFile = $this->fileMapper->findAll();
+	public function getToken(string $fileId): string {
+		$swarmFile = $this->fileMapper->findAll($fileId);
 		if (0 === count($swarmFile)) {
 			throw new StorageNotAvailableException($this->l10n->t('No token found'));
 		}
@@ -82,6 +83,7 @@ class EthswarmService {
 	}
 
 	public function archiveNode(string $fileName, IStorage $storage): void {
+		/** @var BeeSwarm $storage */
 		$storageId = $storage->getCache()->getNumericStorageId();
 		$file = $this->fileMapper->find($fileName, $storageId);
 		if (!$file->getId()) {
