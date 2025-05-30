@@ -10,9 +10,9 @@ cert_directory=$(HOME)/.nextcloud/certificates
 
 all: dev-setup lint build-js-production
 
-release: npm-init build-js-production build-tarball
+release: composer npm-init build-js-production build-tarball
 
-appstore: npm-init build-js-production build-appstore-tarball
+appstore: composer npm-init build-js-production build-appstore-tarball
 
 dev-setup: clean-dev composer npm-init
 
@@ -91,8 +91,8 @@ build-tarball:
 	--exclude="dev-environment" \
 	--exclude="docker" \
 	--exclude="node_modules" \
-	--exclude="src" \
-	--exclude="vendor" \
+	--exclude="./src" \
+	--exclude="./vendor" \
 	--exclude=".editorconfig" \
 	--exclude=".eslintrc.js" \
 	--exclude=".gitignore" \
@@ -109,6 +109,7 @@ build-tarball:
 	--exclude="package.json" \
 	--exclude="stylelint.config.js" \
 	--exclude="webpack.config.js" \
+	--exclude="CHANGELOG.md" \
 	../$(app_name)/ $(temp_build_directory)/$(app_id)
 	tar czf $(build_directory)/$(app_name).tar.gz \
 		-C $(temp_build_directory) $(app_id)
@@ -126,8 +127,8 @@ build-appstore-tarball:
 	--exclude="dev-environment" \
 	--exclude="docker" \
 	--exclude="node_modules" \
-	--exclude="src" \
-	--exclude="vendor" \
+	--exclude="./src" \
+	--exclude="./vendor" \
 	--exclude=".editorconfig" \
 	--exclude=".eslintrc.js" \
 	--exclude=".gitignore" \
@@ -144,6 +145,7 @@ build-appstore-tarball:
 	--exclude="package.json" \
 	--exclude="stylelint.config.js" \
 	--exclude="webpack.config.js" \
+	--exclude="CHANGELOG.md" \
 	../$(app_id)/ $(temp_build_directory)/$(app_id)
 	@if [ -f $(cert_directory)/$(app_id).key ]; then \
 		echo "Signing app files…"; \

@@ -1,6 +1,6 @@
-# **Hejbit - Nextcloud Swarm Plugin**
+# **HejBit - Nextcloud Swarm Plugin**
 
-_Bring decentralized, sovereign cloud storage to Nextcloud with the Hejbit Swarm plugin!_
+_Bring decentralized, sovereign cloud storage to Nextcloud with the HejBit Swarm plugin!_
 
 This plugin integrates [Swarm](https://www.ethswarm.org/) (a decentralized, blockchain-connected file storage system) directly into your [Nextcloud ](https://nextcloud.com/)instance.
 
@@ -12,31 +12,31 @@ This plugin integrates [Swarm](https://www.ethswarm.org/) (a decentralized, bloc
 -   [Setup and Installation](#setup-and-installation)
 -   [Usage](#usage)
     -   [Settings](#settings)
-    -   [Using Hejbit Swarm](#using-hejbit-swarm)
+    -   [Using HejBit Swarm](#using-hejbit-swarm)
     -   [Additional Integration with Moodle](#additional-integration-with-moodle)
--   [Get Hejbit License](#get-hejbit-license)
+-   [Get HejBit License](#get-hejbit-license)
 -   [License](#license)
 
 ## Dependencies
 
 Before using the plugin, ensure you have the following:
 
--   An active Nextcloud instance (version 27,28 or 29)
+-   An active Nextcloud instance (version 30 or 31)
 -   A valid license and URL to activate the service
     -   [Request Your Free Nextcloud Swarm Plugin Trial License](https://metaprovide.org/hejbit/start)
 
 ## Setup and Installation
 
-Follow these steps to configure Hejbit Swarm in Nextcloud:
+Follow these steps to configure HejBit Swarm in Nextcloud:
 
 1. Ensure the "External Storage" plugin is enabled.
-2. Install the "External Storage: Hejbit Swarm" app from the Nextcloud App Store.
+2. Install the "External Storage: HejBit Swarm" app from the Nextcloud App Store.
 3. Navigate to External Storage Administration: Profile menu -> Settings -> External Storage.
-4. Create a new external storage with a folder name of your choice and select 'hejbit-swarm' as the storage type. Then, enter the license key and URL configuration.
+4. Create a new external storage with a folder name of your choice and select 'HejBit-Swarm' as the storage type. Then, enter the license key and URL configuration.
 
 ## Usage
 
-Once installed, Hejbit Swarm integrates directly with Nextcloud’s "Files" section, allowing seamless file operations:
+Once installed, HejBit Swarm integrates directly with Nextcloud’s "Files" section, allowing seamless file operations:
 
 -   **Upload:** Transfer files to decentralized storage.
 -   **Download:** Retrieve and view files from decentralized storage.
@@ -46,9 +46,9 @@ Once installed, Hejbit Swarm integrates directly with Nextcloud’s "Files" sect
 
 ### Settings
 
-Users with administrative credentials can configure the plugin through the standard External Storage settings. Here, you can input your license key and URL for Hejbit Swarm.
+Users with administrative credentials can configure the plugin through the standard External Storage settings. Here, you can input your license key and URL for HejBit Swarm.
 
-![Basic Hejbit Swarm setup in External Storage in Nextcloud administration](https://github.com/user-attachments/assets/47e0cdda-5c1a-4464-a752-cf1eb5eeb19d)
+![Basic HejBit Swarm setup in External Storage in Nextcloud administration](https://github.com/user-attachments/assets/47e0cdda-5c1a-4464-a752-cf1eb5eeb19d)
 
 ### Usage
 
@@ -73,11 +73,11 @@ Once setup and configured, the Decentralized Storage is ready to use.
 
 ### Additional Integration with Moodle
 
-You can also enhance your experience by integrating the Hejbit Swarm plugin with the **Moodle Nextcloud plugin**. This integration allows users to access decentralized storage directly within the Moodle environment, providing a seamless experience for educational content management. For more information on how to set up this integration, visit the [Moodle Nextcloud repository documentation](https://docs.moodle.org/405/en/Nextcloud_repository).
+You can also enhance your experience by integrating the HejBit Swarm plugin with the **Moodle Nextcloud plugin**. This integration allows users to access decentralized storage directly within the Moodle environment, providing a seamless experience for educational content management. For more information on how to set up this integration, visit the [Moodle Nextcloud repository documentation](https://docs.moodle.org/405/en/Nextcloud_repository).
 
 For detailed guidance on using the integrated features, please refer to the [Metaprovide Learning Platform](https://learning.metaprovide.org/login/index.php).
 
-## Get Hejbit License
+## Get HejBit License
 
 Experience the future of data storage with 5GB of free, decentralized storage on the Ethereum Swarm network. Our plugin seamlessly integrates with your existing Nextcloud interface, providing true data sovereignty without the complexity.
 

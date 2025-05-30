@@ -47,11 +47,20 @@ class SettingsController extends Controller {
 	 * Set the storage config settings.
 	 */
 	public function admin(): void {
-		if ($this->request->getParam('storageconfig')) {
-			$this->config->setAppValue($this->appName, 'storageconfig', $this->request->getParam('storageconfig'));
-		} else {
-			$this->config->setAppValue($this->appName, 'storageconfig', '');
+		// Handle telemetry setting
+		$telemetry = $this->request->getParam('telemetry');
+		if (null !== $telemetry) {
+			$this->config->setSystemValue('telemetry.enabled', (bool) $telemetry);
 		}
+	}
+
+	/**
+	 * Get the current settings.
+	 */
+	public function getSettings(): array {
+		return [
+			'telemetry_enabled' => $this->config->getSystemValue('telemetry.enabled', false),
+		];
 	}
 
 	/**
@@ -61,10 +70,10 @@ class SettingsController extends Controller {
 	 * Save the storage config settings
 	 */
 	public function save(): void {
-		if ($this->request->getParam('storageconfig')) {
-			$this->config->setAppValue($this->appName, 'storageconfig', $this->request->getParam('storageconfig'));
-		} else {
-			$this->config->setAppValue($this->appName, 'storageconfig', '');
+		// Handle telemetry setting
+		$telemetry = $this->request->getParam('telemetry');
+		if (null !== $telemetry) {
+			$this->config->setSystemValue('telemetry.enabled', (bool) $telemetry);
 		}
 	}
 }

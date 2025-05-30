@@ -1,0 +1,109 @@
+services:
+
+  web:
+    build: ./docker/web
+    restart: unless-stopped
+    volumes_from:
+      - nextcloud
+    depends_on:
+      nextcloud:
+        condition: service_started
+      proxy:
+        condition: service_healthy
+    labels:
+      caddy: ${APP_URL}
+      caddy.reverse_proxy: '{{upstreams 80}}'
+    networks:
+      - frontend
+      - proxy
+
+  nextcloud:
+    build:
+      context: ./docker/nextcloud
+      dockerfile: Dockerfile
+      args:
+        NC_VERSION: ${NC_VERSION:-31}
+      target: ${ENV:-development}
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      POSTGRES_HOST: postgres:5432
+      REDIS_HOST: redis
+    networks:
+      - frontend
+      - backend
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    volumes:
+      - nc-app:/var/www/html
+      - ./:/var/www/html/custom_apps/files_external_ethswarm
+
+  cron:
+    image: nextcloud:${NC_VERSION:-31}-fpm-alpine
+    restart: always
+    volumes:
+      - nc-app:/var/www/html
+    entrypoint: /cron.sh
+    environment:
+      POSTGRES_HOST: postgres:5432
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    networks:
+      - backend
+    depends_on:
+      nextcloud:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  redis:
+    image: redis:alpine
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      start_period: 3s
+      timeout: 5s
+      interval: 30s
+    networks:
+      - backend
+
+  postgres:
+    image: postgres:alpine
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - nc-db:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-q", "-d", "${POSTGRES_DB}", "-U", "${POSTGRES_USER}" ]
+      start_period: 3s
+      timeout: 5s
+      interval: 30s
+    networks:
+      - backend
+
+volumes:
+  nc-app:
+  nc-db:
+
+networks:
+  frontend:
+    ipam:
+        config:
+          - subnet: 172.${NC_VERSION:-31}.10.0/24
+            gateway: 172.${NC_VERSION:-31}.10.1
+  backend:
+    ipam:
+        config:
+          - subnet: 172.${NC_VERSION:-31}.20.0/24
+            gateway: 172.${NC_VERSION:-31}.20.1
+  proxy:
+    name: hejbit-network
+    external: true
