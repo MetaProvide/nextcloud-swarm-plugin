@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace OCA\Files_External_Ethswarm\Sabre;
 
+use Exception;
 use OCA\DAV\Connector\Sabre\Directory;
 use OCA\DAV\Connector\Sabre\File;
 use OCA\Files_External_Ethswarm\Service\EthswarmService;
@@ -116,7 +117,7 @@ class WebDavPlugin extends ServerPlugin {
 			switch ($action) {
 				case 'hide':
 				case 'unhide':
-					$hide = $action === 'hide' ? 0 : 1;
+					$hide = 'hide' === $action ? 0 : 1;
 					$this->EthswarmService->setVisibility($filename, $storageid, $hide);
 
 					break;
@@ -141,7 +142,7 @@ class WebDavPlugin extends ServerPlugin {
 				'status' => true,
 				'message' => 'success',
 			]));
-		} catch (\Exception $ex) {
+		} catch (Exception $ex) {
 			$response->setBody(json_encode([
 				'status' => false,
 				'message' => $ex->getMessage(),
@@ -174,7 +175,7 @@ class WebDavPlugin extends ServerPlugin {
 		try {
 			$this->EthswarmService->rename($fileName, $newName, $storage);
 			$response->setStatus(200);
-		} catch (\Exception $ex) {
+		} catch (Exception $ex) {
 			$response->setStatus(500);
 		}
 
