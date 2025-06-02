@@ -134,6 +134,11 @@ class WebDavPlugin extends ServerPlugin {
 
 					break;
 
+				case 'export':
+					$data = $this->EthswarmService->exportReferences($storage);
+
+					break;
+
 				default:
 					throw new NotImplemented('Action not implemented');
 			}
@@ -141,6 +146,7 @@ class WebDavPlugin extends ServerPlugin {
 			$response->setBody(json_encode([
 				'status' => true,
 				'message' => 'success',
+				'data' => $data,
 			]));
 		} catch (Exception $ex) {
 			$response->setBody(json_encode([
