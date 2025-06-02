@@ -26,6 +26,7 @@ namespace OCA\Files_External_Ethswarm\Service;
 
 use Exception;
 use OC;
+use OCA\Files_External_Ethswarm\Db\SwarmFile;
 use OCA\Files_External_Ethswarm\Db\SwarmFileMapper;
 use OCA\Files_External_Ethswarm\Storage\BeeSwarm;
 use OCP\Files\Storage\IStorage;
@@ -74,12 +75,12 @@ class EthswarmService {
 	}
 
 	public function getToken(string $fileId): string {
-		$swarmFile = $this->fileMapper->findAll($fileId);
-		if (0 === count($swarmFile)) {
+		$swarmFile = $this->fileMapper->findByFileId($fileId);
+		if (!$swarmFile) {
 			throw new StorageNotAvailableException($this->l10n->t('No token found'));
 		}
 
-		return $swarmFile[0]->getToken();
+		return $swarmFile->getToken();
 	}
 
 	public function archiveNode(string $fileName, IStorage $storage): void {
@@ -145,6 +146,24 @@ class EthswarmService {
 			$this->fileMapper->updatePath($fileName, $newPath, $storageId);
 		} catch (Exception $e) {
 			throw new StorageNotAvailableException($this->l10n->t('Failed to rename'));
+		}
+	}
+
+	public function exportReferences(IStorage $storage): array {
+		$storageId = $storage->getCache()->getNumericStorageId();
+		$files = $this->fileMapper->findAllByStorageId($storageId);
+
+		try {
+			return array_map(fn (SwarmFile $file) => [
+				'path' => $file->getName(),
+				'reference' => $file->getSwarmReference(),
+				'visibility' => $file->getVisibility(),
+				'token' => $file->getToken(),
+				'mimetype' => $file->getMimetype(),
+				'size' => $file->getSize(),
+			], $files);
+		} catch (Exception $e) {
+			throw new StorageNotAvailableException($this->l10n->t('Failed to export references'));
 		}
 	}
 }
