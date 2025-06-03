@@ -63,7 +63,7 @@ Once setup and configured, the Decentralized Storage is ready to use.
 - Access the Decentralized Storage folder under "All Files" or via the "Files" menu under "External Storage."
 - Once uploaded, it can be viewed internally or downloaded. It can also be copied to another storage.
 - Files from another Nextcloud storage can also be copied/moved to the decentralized storage. Choose the decentralized storage folder as the target Folder.
-- Right-click on a Swarm file to copy the Swarm reference (hash) to your clipboard. Alternatively, click the three dots in the Actions menu and select 'Copy Swarm Reference.' The Swarm reference is the unique address of the file on the Swarm network.
+- To access a file's Swarm reference (its unique swarm network address), you have two options: right-click directly on the file and select the reference option, or use the three-dot Actions menu and choose 'View Swarm Reference.' Both methods will display the hash, which you can then copy to your clipboard for sharing or future access.
 - To effectively organize your files, you can utilize the Archive and Restore features for both folders and individual files, allowing for better management of your storage.
 - For a comprehensive backup of all your Swarm hashes, you can easily export all Swarm references directly from the menu located in the root HejBit Swarm folder.
 
@@ -76,7 +76,7 @@ For detailed guidance on using the integrated features, please refer to the [Met
 
 ## HejBit Free Trial
 
-Experience the future of data storage with 4GB of free, decentralized storage on the Ethereum Swarm network. This offer is available as a 14-day free trial, allowing you to explore the capabilities of our plugin without any commitment. HejBit seamlessly integrates with your existing Nextcloud interface, providing true data sovereignty without the complexity. Enjoy the benefits of decentralized storage and take control of your data today!
+Experience the future of data storage with 5GB of free, decentralized storage on the Ethereum Swarm network. This offer is available as a 14-day free trial, allowing you to explore the capabilities of our plugin without any commitment. HejBit seamlessly integrates with your existing Nextcloud interface, providing true data sovereignty without the complexity. Enjoy the benefits of decentralized storage and take control of your data today!
 [Get your Free Trial here!](https://metaprovide.org/hejbit/start)
 
 ## License

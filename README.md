@@ -6,7 +6,6 @@ This plugin integrates [Swarm](https://www.ethswarm.org/) (a decentralized, bloc
 
 ![File view when using the plugin in Nextcloud](https://github.com/user-attachments/assets/8e773a9f-fb3d-4303-a6be-df2fbe8a25fb)
 
-
 ## Table of Contents
 
 -   [Dependencies](#dependencies)
@@ -50,13 +49,11 @@ Once installed, HejBit Swarm integrates directly with Nextcloud’s "Files" sect
 
 ![View, download, and file view actions in Nextcloud](https://github.com/user-attachments/assets/fcab775b-48ae-40b3-995d-d37fec871436)
 
-
 ### Settings
 
 Users with administrative credentials can configure the plugin through the standard External Storage settings. Here, you can input your Access Key and URL for HejBit Swarm.
 
 ![Basic HejBit Swarm setup in External Storage in Nextcloud administration](https://github.com/user-attachments/assets/a2940684-f840-4198-8299-c01dcd4ba47d)
-
 
 ### Usage
 
@@ -67,31 +64,25 @@ Once setup and configured, the Decentralized Storage is ready to use.
 
 ![Upload file to swarm in Nextcloud](https://github.com/user-attachments/assets/ac3ce8b2-56f4-4729-be05-242cd9bec729)
 
-
 -   Once uploaded, it can be viewed internally or downloaded. It can also be copied to another storage.
 
 ![View, download, and file view actions in Nextcloud](https://github.com/user-attachments/assets/db4746a4-1dcf-4264-82d0-ff869a2b183e)
 
-
--   Files from another Nextcloud storage can also be copied/moved to the decentralized storage. Choose the decentralized storage folder as the target Folder
+-   Files from another Nextcloud storage can also be copied/moved to the decentralized storage. Choose the decentralized storage folder as the target Folder.
 
 ![Copying or moving files to decentralized storage folder](https://github.com/user-attachments/assets/5b9ece14-07e6-4d44-b707-8468c04b26d4)
 
-
--   Right-click on a Swarm file to copy the Swarm reference (hash) to your clipboard. Alternatively, click the three dots in the Actions menu and select 'Copy Swarm Reference.' The Swarm reference is the unique address of the file on the Swarm network.
+-   To access a file's Swarm reference (its unique swarm network address), you have two options: right-click directly on the file and select the reference option, or use the three-dot Actions menu and choose 'View Swarm Reference.' Both methods will display the hash, which you can then copy to your clipboard for sharing or future access.
 
 ![Copy swarm reference to clipboard](https://github.com/user-attachments/assets/3e5de911-cfb0-4d4e-8a46-a2138c2cc254)
-
 
 -   To effectively organize your files, you can utilize the Archive and Restore features for both folders and individual files, allowing for better management of your storage.
 
 ![Archive and restore files in decentralized storage](https://github.com/user-attachments/assets/3b8e2232-7f99-44fa-8589-8f48c473dcc1)
 
-
 -   For a comprehensive backup of all your Swarm hashes, you can easily export all Swarm references directly from the menu located in the root HejBit Swarm folder.
 
 ![Export all swarm references from HejBit Swarm folder](https://github.com/user-attachments/assets/3aa10f33-6caf-4fac-a9a2-fcf9bdb17ae3)
-
 
 ### Additional Integration with Moodle
 
@@ -101,9 +92,9 @@ For detailed guidance on using the integrated features, please refer to the [Met
 
 ## HejBit Free Trial
 
-Experience the future of data storage with 4GB of free, decentralized storage on the Ethereum Swarm network. This offer is available as a 14-day free trial, allowing you to explore the capabilities of our plugin without any commitment. HejBit seamlessly integrates with your existing Nextcloud interface, providing true data sovereignty without the complexity. Enjoy the benefits of decentralized storage and take control of your data today!
+Experience the future of data storage with 5GB of free, decentralized storage on the Ethereum Swarm network. This offer is available as a 14-day free trial, allowing you to explore the capabilities of our plugin without any commitment. HejBit seamlessly integrates with your existing Nextcloud interface, providing true data sovereignty without the complexity. Enjoy the benefits of decentralized storage and take control of your data today!
 
-[Get your Free Trial here!](https://metaprovide.org/hejbit/start) .
+[Get your Free Trial here!](https://metaprovide.org/hejbit/start)
 
 ## License
 
