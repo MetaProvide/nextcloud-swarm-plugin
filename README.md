@@ -49,8 +49,6 @@ Once installed, HejBit Swarm integrates directly with Nextcloud’s "Files" sect
 
 Additionally, we have introduced a HejBit Feedback button that appears in the bottom left corner when you are inside a HejBit folder. This feature allows users to easily send feedback regarding general inquiries, ideas, or issues directly from the plugin.
 
-![View, download, and file view actions in Nextcloud](https://github.com/user-attachments/assets/3ecf2c98-a1ec-4677-b3a2-a9d596dfb11a)
-
 
 ### Settings
 
@@ -90,7 +88,7 @@ Once setup and configured, the Decentralized Storage is ready to use.
 
 -   We encourage you to share your thoughts and experiences with us! A **HejBit Feedback** button is conveniently located in the bottom left corner when you are inside a HejBit folder. This feature allows you to provide feedback on any inquiries, suggestions, or issues you may encounter, helping us enhance your experience and improve the plugin for all users.
 
-![Send Feedback directly from the plug-in](https://github.com/user-attachments/assets/3aa10f33-6caf-4fac-a9a2-fcf9bdb17ae3)
+![Send Feedback directly from the plug-in](https://github.com/user-attachments/assets/3ecf2c98-a1ec-4677-b3a2-a9d596dfb11a)
 
 ### Additional Integration with Moodle
 
