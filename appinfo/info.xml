@@ -12,69 +12,82 @@ This plugin integrates [Swarm](https://www.ethswarm.org/) (a decentralized, bloc
 
 ## Table of Contents
 
-- [Dependencies](https://apps.nextcloud.com/apps/files_external_ethswarm#dependencies)
-- [Setup and Installation](https://apps.nextcloud.com/apps/files_external_ethswarm#setup-and-installation)
-- [Usage](https://apps.nextcloud.com/apps/files_external_ethswarm#usage)
-  - [Settings](https://apps.nextcloud.com/apps/files_external_ethswarm#settings)
-  - [Using HejBit Swarm](https://apps.nextcloud.com/apps/files_external_ethswarm#using-hejbit-swarm)
-  - [Additional Integration with Moodle](https://apps.nextcloud.com/apps/files_external_ethswarm#additional-integration-with-moodle)
-- [Get HejBit License](https://apps.nextcloud.com/apps/files_external_ethswarm#get-hejbit-license)
-- [License](https://apps.nextcloud.com/apps/files_external_ethswarm#license)
-  - [Using HejBit Swarm](https://apps.nextcloud.com/apps/files_external_ethswarm#using-hejbit-swarm)
-  - [Additional Integration with Moodle](https://apps.nextcloud.com/apps/files_external_ethswarm#additional-integration-with-moodle)
-- [Get HejBit License](https://apps.nextcloud.com/apps/files_external_ethswarm#get-hejbit-license)
-- [License](https://apps.nextcloud.com/apps/files_external_ethswarm#license)
+- Dependencies
+- Setup and Installation
+- Usage
+  - Settings
+  - Using HejBit Swarm
+  - Additional Integration with Moodle
+- HejBit Free Trial
+- License
 
 
-## Dependencies <span id="dependencies"></span>
+## Dependencies
 
 Before using the plugin, ensure you have the following:
 
 - An active Nextcloud instance (version 30 or 31)
-- A valid license and URL to activate the service
-  - [Request Your Free Nextcloud Swarm Plugin Trial License](https://metaprovide.org/hejbit/start)
+- A valid Access Key and URL to activate the service
+  - [Get Your Free Trial for the Nextcloud Swarm Plugin](https://metaprovide.org/hejbit/start)
 
-## Setup and Installation <span id="setup-and-installation"></span>
+## Setup and Installation
 
 Follow these steps to configure HejBit Swarm in Nextcloud:
 
 1. Ensure the **External Storage** plugin is enabled.
 2. Install the **External Storage: HejBit Swarm** app from the Nextcloud App Store.
 3. Navigate to External Storage Administration: Profile menu -> Settings -> External Storage.
-4. Create a new external storage with a folder name of your choice and select *'HejBit-Swarm'* as the storage type. Then, enter the license key and URL configuration.
+4. Create a new external storage with a folder name of your choice and select *'HejBit-Swarm'* as the storage type. Then, enter the Access Key and URL configuration.
 
-## Usage  <span id="usage"></span>
+## Usage
 
 Once installed, HejBit integrates Swarm directly with Nextcloud’s "Files" section, allowing seamless file operations:
 
 - **Upload:** Transfer files to decentralized storage.
-- **Download:** Retrieve and view files from decentralized storage.
-- **Copy/Move:** Shift files between any external storage and decentralized storage
+- **Download/View:** Retrieve and view files from decentralized storage.
+- **Copy/Move:** Shift files between any external storage and decentralized storage.
+- **Rename:** Change file names as needed.
+- **Archive/Restore:** Manage your files by archiving or restoring them.
+- **Hide/Show:** Control the visibility of files in your storage.
+- **View Swarm Reference:** Access the unique Swarm reference for each file.
+- **Export all Swarm References:** Backup all your Swarm references easily.
 
-### Settings <span id="settings"></span>
+Additionally, we have introduced a HejBit Feedback button that appears in the bottom left corner when you are inside a HejBit folder. This feature allows users to easily send feedback regarding general inquiries, ideas, or issues directly from the plugin.
 
-Users with administrative credentials can configure the plugin through the standard External Storage settings. Here, you can input your license key and URL for HejBit.
+### Settings
 
-### Using HejBit Swarm <span id="using-hejbit-swarm"></span>
+Users with administrative credentials can configure the plugin through the standard External Storage settings. Here, you can input your Access Key and URL for HejBit.
+
+### Using HejBit Swarm
 
 Once setup and configured, the Decentralized Storage is ready to use.
 
 - Access the Decentralized Storage folder under "All Files" or via the "Files" menu under "External Storage."
 - Once uploaded, it can be viewed internally or downloaded. It can also be copied to another storage.
 - Files from another Nextcloud storage can also be copied/moved to the decentralized storage. Choose the decentralized storage folder as the target Folder.
-- Right-click on a Swarm file to copy the Swarm reference (hash) to your clipboard. Alternatively, click the three dots in the Actions menu and select 'Copy Swarm Reference.' The Swarm reference is the unique address of the file on the Swarm network.
+- To access a file's Swarm reference (its unique swarm network address), you have two options: right-click directly on the file and select the reference option, or use the three-dot Actions menu and choose 'View Swarm Reference.' Both methods will display the hash, which you can then copy to your clipboard for sharing or future access.
+- To effectively organize your files, you can utilize the Archive and Restore features for both folders and individual files, allowing for better management of your storage.
+- For a comprehensive backup of all your Swarm hashes, you can easily export all Swarm references directly from the menu located in the root HejBit Swarm folder.
+- We encourage you to share your thoughts and experiences with us! A **HejBit Feedback** button is conveniently located in the bottom left corner when you are inside a HejBit folder. This feature allows you to provide feedback on any inquiries, suggestions, or issues you may encounter, helping us enhance your experience and improve the plugin for all users.
 
-### Additional Integration with Moodle <span id="additional-integration-with-moodle"></span>
+
+
+
+### Additional Integration with Moodle
 
 You can also enhance your experience by integrating the HejBit Swarm plugin with the **Moodle Nextcloud plugin**. This integration allows users to access decentralized storage directly within the Moodle environment, providing a seamless experience for educational content management. For more information on how to set up this integration, visit the [Moodle Nextcloud repository documentation](https://docs.moodle.org/405/en/Nextcloud_repository).
 
 For detailed guidance on using the integrated features, please refer to the [Metaprovide Learning Platform](https://learning.metaprovide.org/login/index.php).
 
-## Get HejBit Licence <span id="get-hejbit-license"></span>
+## HejBit Free Trial
 
-Experience the future of data storage with 5GB of free, decentralized storage on the Ethereum Swarm network. Our plugin seamlessly integrates with your existing Nextcloud interface, providing true data sovereignty without the complexity.
+Experience the future of data storage with 5GB of free, decentralized storage on the Ethereum Swarm network. This offer is available as a 14-day free trial, allowing you to explore the capabilities of our plugin without any commitment. HejBit seamlessly integrates with your existing Nextcloud interface, providing true data sovereignty without the complexity. Enjoy the benefits of decentralized storage and take control of your data today!
+[Get your Free Trial here!](https://metaprovide.org/hejbit/start)
 
-[Get your free licence here!](https://metaprovide.org/hejbit/start)
+## License
+
+This program is licensed under the AGPLv3 or later.
+
     ]]></description>
     <version>0.6.1</version>
     <licence>agpl</licence>

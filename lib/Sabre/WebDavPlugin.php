@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace OCA\Files_External_Ethswarm\Sabre;
 
+use Exception;
 use OCA\DAV\Connector\Sabre\Directory;
 use OCA\DAV\Connector\Sabre\File;
 use OCA\Files_External_Ethswarm\Service\EthswarmService;
@@ -101,61 +102,40 @@ class WebDavPlugin extends ServerPlugin {
 		}
 
 		try {
+			$path = $request->getPath();
+			$node = $this->server->tree->getNodeForPath($path);
+
+			if (!$node instanceof File && !$node instanceof Directory) {
+				return true;
+			}
+
+			$fileInfo = $node->getFileInfo();
+			$filename = $fileInfo->getinternalPath();
+			$storage = $fileInfo->getMountPoint()->getStorage();
+			$storageid = $fileInfo->getStorage()->getCache()->getNumericStorageId();
+
 			switch ($action) {
 				case 'hide':
-					$path = $request->getPath();
-					$node = $this->server->tree->getNodeForPath($path);
-					if ($node instanceof File) {
-						$storageid = $node->getFileInfo()->getStorage()->getCache()->getNumericStorageId();
-						$filename = $node->getFileInfo()->getinternalPath();
-					}
-					if ($node instanceof Directory) {
-						$storageid = $node->getFileInfo()->getStorage()->getCache()->getNumericStorageId();
-						$filename = $node->getFileInfo()->getinternalPath();
-					}
-
-					$this->EthswarmService->setVisibility($filename, $storageid, 0);
-
-					break;
-
 				case 'unhide':
-					$path = $request->getPath();
-					$node = $this->server->tree->getNodeForPath($path);
-					if ($node instanceof File) {
-						$storageid = $node->getFileInfo()->getStorage()->getCache()->getNumericStorageId();
-						$filename = $node->getFileInfo()->getinternalPath();
-					}
-					if ($node instanceof Directory) {
-						$storageid = $node->getFileInfo()->getStorage()->getCache()->getNumericStorageId();
-						$filename = $node->getFileInfo()->getinternalPath();
-					}
-
-					$this->EthswarmService->setVisibility($filename, $storageid, 1);
+					$hide = 'hide' === $action ? 0 : 1;
+					$this->EthswarmService->setVisibility($filename, $storageid, $hide);
 
 					break;
 
 				case 'archive':
-					$path = $request->getPath();
-					$node = $this->server->tree->getNodeForPath($path);
-					if ($node instanceof File || $node instanceof Directory) {
-						$fileInfo = $node->getFileInfo();
-						$filename = $fileInfo->getInternalPath();
-						$storage = $fileInfo->getMountPoint()->getStorage();
-						$this->EthswarmService->archiveNode($filename, $storage);
-					}
+					$this->EthswarmService->archiveNode($filename, $storage);
 
 					break;
 
-				case 'unarchive' || 'move':
-					$path = $request->getPath();
+				case 'unarchive':
+				case 'move':
 					$destination = $request->getHeader('Destination');
-					$node = $this->server->tree->getNodeForPath($path);
-					if ($node instanceof File || $node instanceof Directory) {
-						$fileInfo = $node->getFileInfo();
-						$filename = $fileInfo->getInternalPath();
-						$storage = $fileInfo->getMountPoint()->getStorage();
-						$this->EthswarmService->moveNode($filename, $storage, $destination);
-					}
+					$this->EthswarmService->moveNode($filename, $storage, $destination);
+
+					break;
+
+				case 'export':
+					$data = $this->EthswarmService->exportReferences($storage);
 
 					break;
 
@@ -166,8 +146,9 @@ class WebDavPlugin extends ServerPlugin {
 			$response->setBody(json_encode([
 				'status' => true,
 				'message' => 'success',
+				'data' => $data,
 			]));
-		} catch (\Exception $ex) {
+		} catch (Exception $ex) {
 			$response->setBody(json_encode([
 				'status' => false,
 				'message' => $ex->getMessage(),
@@ -203,7 +184,6 @@ class WebDavPlugin extends ServerPlugin {
 		} catch (Exception $ex) {
 			$response->setStatus(500);
 		}
-		$response->setHeader('Content-Length', '0');
 
 		return false;
 	}
