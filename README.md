@@ -49,13 +49,15 @@ Once installed, HejBit Swarm integrates directly with Nextcloud’s "Files" sect
 
 Additionally, we have introduced a HejBit Feedback button that appears in the bottom left corner when you are inside a HejBit folder. This feature allows users to easily send feedback regarding general inquiries, ideas, or issues directly from the plugin.
 
-![View, download, and file view actions in Nextcloud](https://github.com/user-attachments/assets/fcab775b-48ae-40b3-995d-d37fec871436)
+![View, download, and file view actions in Nextcloud](https://github.com/user-attachments/assets/3ecf2c98-a1ec-4677-b3a2-a9d596dfb11a)
+
 
 ### Settings
 
 Users with administrative credentials can configure the plugin through the standard External Storage settings. Here, you can input your Access Key and URL for HejBit Swarm.
 
-![Basic HejBit Swarm setup in External Storage in Nextcloud administration](https://github.com/user-attachments/assets/a2940684-f840-4198-8299-c01dcd4ba47d)
+![Basic HejBit Swarm setup in External Storage in Nextcloud administration](https://github.com/user-attachments/assets/3e80f664-86b9-4cfa-bbc5-6f9f1fbeb94a)
+
 
 ### Usage
 
