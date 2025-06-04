@@ -42,17 +42,32 @@ class SwarmFileMapper extends QBMapper {
 	}
 
 	/**
-	 * @return SwarmFile[]
-	 *
 	 * @throws Exception
 	 */
-	public function findAll(string $fileId): array {
+	public function findByFileId(string $fileId): ?SwarmFile {
 		$qb = $this->db->getQueryBuilder();
 
 		$select = $qb
 			->select('*')
 			->from($this->getTableName())
 			->where($qb->expr()->eq('fileId', $qb->createNamedParameter($fileId)))
+		;
+
+		return $this->findEntities($select)[0] ?? null;
+	}
+
+	/**
+	 * @return SwarmFile[]
+	 *
+	 * @throws Exception
+	 */
+	public function findAllByStorageId(int $storageId): array {
+		$qb = $this->db->getQueryBuilder();
+
+		$select = $qb
+			->select('*')
+			->from($this->getTableName())
+			->where($qb->expr()->eq('storage', $qb->createNamedParameter($storageId)))
 		;
 
 		return $this->findEntities($select);

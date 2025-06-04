@@ -19,7 +19,6 @@ registerFileAction(
 		enabled(files) {
 			if (files[0].attributes["ethswarm-node"]) {
 				return !(
-					FilesHelper.isFolder(files) ||
 					FilesHelper.isArchive(files) ||
 					FilesHelper.isRoot(files)
 				);
