@@ -47,6 +47,8 @@ Once installed, HejBit Swarm integrates directly with Nextcloud’s "Files" sect
 -   **View Swarm Reference:** Access the unique Swarm reference for each file.
 -   **Export all Swarm References:** Backup all your Swarm references easily.
 
+Additionally, we have introduced a HejBit Feedback button that appears in the bottom left corner when you are inside a HejBit folder. This feature allows users to easily send feedback regarding general inquiries, ideas, or issues directly from the plugin.
+
 ![View, download, and file view actions in Nextcloud](https://github.com/user-attachments/assets/fcab775b-48ae-40b3-995d-d37fec871436)
 
 ### Settings
@@ -83,6 +85,10 @@ Once setup and configured, the Decentralized Storage is ready to use.
 -   For a comprehensive backup of all your Swarm hashes, you can easily export all Swarm references directly from the menu located in the root HejBit Swarm folder.
 
 ![Export all swarm references from HejBit Swarm folder](https://github.com/user-attachments/assets/3aa10f33-6caf-4fac-a9a2-fcf9bdb17ae3)
+
+-   We encourage you to share your thoughts and experiences with us! A **HejBit Feedback** button is conveniently located in the bottom left corner when you are inside a HejBit folder. This feature allows you to provide feedback on any inquiries, suggestions, or issues you may encounter, helping us enhance your experience and improve the plugin for all users.
+
+![Send Feedback directly from the plug-in](https://github.com/user-attachments/assets/3aa10f33-6caf-4fac-a9a2-fcf9bdb17ae3)
 
 ### Additional Integration with Moodle
 
