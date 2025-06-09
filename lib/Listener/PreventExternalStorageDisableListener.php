@@ -3,13 +3,12 @@
 namespace OCA\Files_External_Ethswarm\Listener;
 
 use Exception;
+use OCA\Files_External_Ethswarm\Exception\BaseException;
 use OCP\App\Events\AppDisableEvent;
 use OCP\App\IAppManager;
 use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
 use Psr\Log\LoggerInterface;
-use OCA\Files_External_Ethswarm\Exception\BaseException;
-
 
 class PreventExternalStorageDisableListener implements IEventListener {
 	private IAppManager $appManager;
@@ -38,7 +37,6 @@ class PreventExternalStorageDisableListener implements IEventListener {
 
 			// Throw an exception to prevent the disable and show error message
 			throw new BaseException($message);
-
 		}
 	}
 }
