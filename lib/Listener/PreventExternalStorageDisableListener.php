@@ -7,6 +7,8 @@ use OCP\App\IAppManager;
 use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
 use Psr\Log\LoggerInterface;
+use OCA\Files_External_Ethswarm\Exception\BaseException;
+
 
 class PreventExternalStorageDisableListener implements IEventListener {
 	private IAppManager $appManager;
@@ -34,7 +36,7 @@ class PreventExternalStorageDisableListener implements IEventListener {
 			$this->logger->warning($message);
 
 			// Throw an exception to prevent the disable and show error message
-			throw new \Exception($message);
+			throw new BaseException($message);
 		}
 	}
 }
