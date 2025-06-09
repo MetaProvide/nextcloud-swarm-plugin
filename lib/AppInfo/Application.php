@@ -25,14 +25,14 @@ namespace OCA\Files_External_Ethswarm\AppInfo;
 
 use OC\Security\CSP\ContentSecurityPolicy;
 use OCA\Files\Event\LoadAdditionalScriptsEvent;
-use OCA\Files_External_Ethswarm\Utils\Env;
 use OCA\Files_External_Ethswarm\Listener\PreventExternalStorageDisableListener;
+use OCA\Files_External_Ethswarm\Utils\Env;
+use OCP\App\Events\AppDisableEvent;
 use OCP\AppFramework\Bootstrap\IBootContext;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use OCP\EventDispatcher\IEventDispatcher;
 use OCP\Exceptions\AppConfigException;
 use OCP\Security\CSP\AddContentSecurityPolicyEvent;
-use OCP\App\Events\AppDisableEvent;
 use OCP\Util;
 
 class Application extends BaseApp {
