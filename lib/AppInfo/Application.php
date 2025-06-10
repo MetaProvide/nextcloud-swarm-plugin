@@ -25,7 +25,9 @@ namespace OCA\Files_External_Ethswarm\AppInfo;
 
 use OC\Security\CSP\ContentSecurityPolicy;
 use OCA\Files\Event\LoadAdditionalScriptsEvent;
+use OCA\Files_External_Ethswarm\Listener\PreventExternalStorageDisableListener;
 use OCA\Files_External_Ethswarm\Utils\Env;
+use OCP\App\Events\AppDisableEvent;
 use OCP\AppFramework\Bootstrap\IBootContext;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use OCP\EventDispatcher\IEventDispatcher;
@@ -55,6 +57,12 @@ class Application extends BaseApp {
 
 	public function register(IRegistrationContext $context): void {
 		$this->loadTelemetry();
+
+		// Register the listener to prevent files_external from being disabled
+		$context->registerEventListener(
+			AppDisableEvent::class,
+			PreventExternalStorageDisableListener::class
+		);
 
 		/** @var IEventDispatcher $dispatcher */
 		$dispatcher = $this->container->get(IEventDispatcher::class);
