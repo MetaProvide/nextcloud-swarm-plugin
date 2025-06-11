@@ -9,13 +9,13 @@ import SvgHelper from "@/util/SvgHelper";
 registerFileAction(
 	new FileAction({
 		id: "exportAction",
-		displayName(nodes) {
+		displayName() {
 			return t(
 				"files_external_ethswarm",
 				"Export"
 			);
 		},
-		iconSvgInline(nodes) {
+		iconSvgInline() {
 			return SvgHelper.convert(DownloadSvg);
 		},
 		enabled(files) {
@@ -25,7 +25,7 @@ registerFileAction(
 			return false;
 		},
 		async exec(node) {
-			await getDialogBuilder("Export HejBit Storage Data")
+			await getDialogBuilder("Export HejBit Storage Metadata")
 				.setSeverity("warning")
 				.setText(`
 					This action will export your HejBit storage metadata such as Swarm references for this storage to a JSON file.
@@ -33,35 +33,36 @@ registerFileAction(
 				`)
 				.addButton({
 					label: "Cancel",
-					callback: () => {},
 				})
 				.addButton({
 					label: "Export",
-					callback: async () => {
-						await axios({
-							method: "post",
-							url: node.encodedSource,
-							headers: {
-								"Hejbit-Action": "export",
-							},
-						}).then((response) => {
-							if (response.data.status === true) {
-								const blob = new Blob([JSON.stringify(response.data.data)], {
-									type: "application/json",
-								});
-								const storageName = FilesHelper.getStoragePath(node.path);
-								const date = new Date().toISOString().split("T")[0];
-								FilesHelper.downloadFile(blob, `hejbit-export-${storageName}-${date}.json`);
-								showSuccess("Exported references successfully");
-							} else {
-								console.error("Error while exporting references", response);
-								showError(response.data.message);
-							}
-						});
-					},
+					callback: async () => downloadMetadata(node),
 				})
 				.build()
 				.show();
 		},
 	})
 );
+
+const downloadMetadata = async (node) => {
+	await axios({
+		method: "post",
+		url: node.encodedSource,
+		headers: {
+			"Hejbit-Action": "export",
+		},
+	}).then((response) => {
+		if (response.data.status === true) {
+			const blob = new Blob([JSON.stringify(response.data.data)], {
+				type: "application/json",
+			});
+			const storageName = FilesHelper.getStoragePath(node.path);
+			const date = new Date().toISOString().split("T")[0];
+			FilesHelper.downloadFile(blob, `hejbit-export-${storageName}-${date}.json`);
+			showSuccess("Exported storage metadata successfully");
+		} else {
+			console.error("Error while exporting metadata of the storage", response);
+			showError(response.data.message);
+		}
+	});
+}
