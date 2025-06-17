@@ -44,13 +44,13 @@ class SwarmFileMapper extends QBMapper {
 	/**
 	 * @throws Exception
 	 */
-	public function findByFileId(string $fileId): ?SwarmFile {
+	public function findById(string $id): ?SwarmFile {
 		$qb = $this->db->getQueryBuilder();
 
 		$select = $qb
 			->select('*')
 			->from($this->getTableName())
-			->where($qb->expr()->eq('fileId', $qb->createNamedParameter($fileId)))
+			->where($qb->expr()->eq('id', $qb->createNamedParameter($id)))
 		;
 
 		return $this->findEntities($select)[0] ?? null;
