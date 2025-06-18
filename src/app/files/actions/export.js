@@ -1,7 +1,7 @@
 import { FileAction, registerFileAction } from "@nextcloud/files";
 import axios from "@nextcloud/axios";
 import { showError, showSuccess } from "@nextcloud/dialogs";
-import { emit } from "@nextcloud/event-bus";
+import { getDialogBuilder } from "@nextcloud/dialogs";
 import DownloadSvg from "@material-design-icons/svg/filled/download.svg";
 import FilesHelper from "@/util/FilesHelper";
 import SvgHelper from "@/util/SvgHelper";
@@ -9,13 +9,13 @@ import SvgHelper from "@/util/SvgHelper";
 registerFileAction(
 	new FileAction({
 		id: "exportAction",
-		displayName(nodes) {
+		displayName() {
 			return t(
 				"files_external_ethswarm",
 				"Export"
 			);
 		},
-		iconSvgInline(nodes) {
+		iconSvgInline() {
 			return SvgHelper.convert(DownloadSvg);
 		},
 		enabled(files) {
@@ -25,26 +25,44 @@ registerFileAction(
 			return false;
 		},
 		async exec(node) {
-			await axios({
-				method: "post",
-				url: node.encodedSource,
-				headers: {
-					"Hejbit-Action": "export",
-				},
-			}).then((response) => {
-				if (response.data.status === true) {
-					const blob = new Blob([JSON.stringify(response.data.data)], {
-						type: "application/json",
-					});
-					const storageName = FilesHelper.getStoragePath(node.path);
-					const date = new Date().toISOString().split("T")[0];
-					FilesHelper.downloadFile(blob, `hejbit-export-${storageName}-${date}.json`);
-					showSuccess("Exported references successfully");
-				} else {
-					console.error("Error while exporting references", response);
-					showError(response.data.message);
-				}
-			});
+			await getDialogBuilder("Export HejBit Storage Metadata")
+				.setSeverity("warning")
+				.setText(`
+					This action will export your HejBit storage metadata such as Swarm references for this storage to a JSON file.
+					You're responsible for keeping this file secure. Are you sure you want to export your HejBit storage metadata?
+				`)
+				.addButton({
+					label: "Cancel",
+				})
+				.addButton({
+					label: "Export",
+					callback: async () => downloadMetadata(node),
+				})
+				.build()
+				.show();
 		},
 	})
 );
+
+const downloadMetadata = async (node) => {
+	await axios({
+		method: "post",
+		url: node.encodedSource,
+		headers: {
+			"Hejbit-Action": "export",
+		},
+	}).then((response) => {
+		if (response.data.status === true) {
+			const blob = new Blob([JSON.stringify(response.data.data)], {
+				type: "application/json",
+			});
+			const storageName = FilesHelper.getStoragePath(node.path);
+			const date = new Date().toISOString().split("T")[0];
+			FilesHelper.downloadFile(blob, `hejbit-export-${storageName}-${date}.json`);
+			showSuccess("Exported storage metadata successfully");
+		} else {
+			console.error("Error while exporting metadata of the storage", response);
+			showError(response.data.message);
+		}
+	});
+}

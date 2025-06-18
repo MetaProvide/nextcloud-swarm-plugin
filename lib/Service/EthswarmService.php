@@ -74,8 +74,8 @@ class EthswarmService {
 		return $this->fileMapper->update($swarmFile);
 	}
 
-	public function getToken(string $fileId): string {
-		$swarmFile = $this->fileMapper->findByFileId($fileId);
+	public function getToken(string $id): string {
+		$swarmFile = $this->fileMapper->findById($id);
 		if (!$swarmFile) {
 			throw new StorageNotAvailableException($this->l10n->t('No token found'));
 		}

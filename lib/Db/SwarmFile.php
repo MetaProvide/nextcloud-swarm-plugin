@@ -26,8 +26,6 @@ namespace OCA\Files_External_Ethswarm\Db;
 use OCP\AppFramework\Db\Entity;
 
 /**
- * @method void        setFileId(int $fileId)
- * @method int         getFileId()
  * @method void        setName(string $name)
  * @method string      getName()
  * @method void        setSwarmReference(string $swarmReference)
@@ -50,9 +48,6 @@ use OCP\AppFramework\Db\Entity;
  * @method int         getToken()
  */
 class SwarmFile extends Entity {
-	/** @var null|int */
-	protected $fileId;
-
 	/** @var string */
 	protected $name;
 
@@ -84,7 +79,6 @@ class SwarmFile extends Entity {
 	protected $token;
 
 	public function __construct() {
-		$this->addType('fileId', 'int');
 		$this->addType('name', 'string');
 		$this->addType('swarmReference', 'string');
 		$this->addType('swarmTag', 'string');
