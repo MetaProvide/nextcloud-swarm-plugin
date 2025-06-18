@@ -158,7 +158,7 @@ class BeeSwarm extends Common implements IBeeSwarm {
 		try {
 			// Get the source file from the mapper
 			$sourceFile = $this->fileMapper->find($source, $this->storageId);
-			if (!$sourceFile->getFileId()) {
+			if (!$sourceFile->getId()) {
 				$this->logger->error(
 					'copy failed: source file not found in mapper '.$source,
 					['app' => Application::NAME]
@@ -177,11 +177,12 @@ class BeeSwarm extends Common implements IBeeSwarm {
 			$copyData['storage_mtime'] = time();
 			$copyData['storage'] = $this->storageId;
 			$copyData['token'] = $this->token;
+			$copyData['visibility'] = $sourceFile->getVisibility();
 
 			// Create the new file entry in the mapper
 			$newFile = $this->fileMapper->createFile($copyData);
 
-			if (!$newFile->getFileId()) {
+			if (!$newFile->getId()) {
 				$this->logger->error(
 					'copy failed: failed to create new file in mapper '.$target,
 					['app' => Application::NAME]
