@@ -58,7 +58,7 @@ const feedback = {
 				success: "We Appreciate Your Feedback!",
 				failedTitle: "Oops, an error occurred!",
 				failedMessage:
-					"Please try again. If this keeps happening, try to send an email to feedback@hejbit.com instead.",
+					"Please try again. If this keeps happening, try to send an email to support@hejbit.com instead.",
 				position: "right",
 			});
 			feedbackInstance.renderButton();
