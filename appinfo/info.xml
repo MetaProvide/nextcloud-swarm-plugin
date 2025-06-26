@@ -28,7 +28,7 @@ Before using the plugin, ensure you have the following:
 
 - An active Nextcloud instance (version 30 or 31)
 - A valid Access Key and URL to activate the service
-  - [Get Your Free Trial for the Nextcloud Swarm Plugin](https://metaprovide.org/hejbit/start)
+  - [Get Your Free Trial for the Nextcloud Swarm Plugin](https://app.hejbit.com)
 
 ## Setup and Installation
 
@@ -82,14 +82,14 @@ For detailed guidance on using the integrated features, please refer to the [Met
 ## HejBit Free Trial
 
 Experience the future of data storage with 5GB of free, decentralized storage on the Ethereum Swarm network. This offer is available as a 14-day free trial, allowing you to explore the capabilities of our plugin without any commitment. HejBit seamlessly integrates with your existing Nextcloud interface, providing true data sovereignty without the complexity. Enjoy the benefits of decentralized storage and take control of your data today!
-[Get your Free Trial here!](https://metaprovide.org/hejbit/start)
+[Get your Free Trial here!](https://app.hejbit.com)
 
 ## License
 
 This program is licensed under the AGPLv3 or later.
 
     ]]></description>
-    <version>0.6.3</version>
+    <version>1.0.0</version>
     <licence>agpl</licence>
     <author>MetaProvide</author>
     <namespace>Files_External_Ethswarm</namespace>
