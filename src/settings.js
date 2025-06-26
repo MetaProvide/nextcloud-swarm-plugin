@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		const targetElement = document.querySelector(".settings-hint");
 		if (targetElement) {
 			const link =
-				'<a href="https://metaprovide.org/hejbit/start" target="_blank" style="text-decoration: underline">metaprovide.org/hejbit/start</a>';
+				'<a href="https://app.hejbit.com" target="_blank" style="text-decoration: underline">app.hejbit.com</a>';
 			const el = document.createElement("p");
 			el.style.marginBottom = "10px";
 			el.innerHTML = `To get <strong>Swarm</strong> external storage access key, please visit ${link}`;
