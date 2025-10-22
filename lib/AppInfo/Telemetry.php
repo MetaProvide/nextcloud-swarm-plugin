@@ -45,7 +45,7 @@ trait Telemetry {
 		if ($config->getSystemValue('telemetry.enabled') && $isSupported) {
 			/** @var IAppManager $appManager */
 			$appManager = $this->container->get(IAppManager::class);
-			$appInfo = $appManager->getAppInfo(parent::NAME);
+			$appInfo = $appManager->getAppInfo(Application::NAME);
 			$pluginVersion = $appInfo['version'] ?? 'unknown';
 
 			/** @var IURLGenerator $urlGenerator */
