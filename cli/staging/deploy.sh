@@ -119,7 +119,7 @@ log_gap
 
 DEPLOYMENT=()
 TIMESTAMP=$(date +%s)
-for version in {29..31}; do
+for version in {30..32}; do
 	deploy "$version" &
 	DEPLOYMENT+=($!)
 done

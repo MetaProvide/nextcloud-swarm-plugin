@@ -8,8 +8,6 @@ services:
     depends_on:
       nextcloud:
         condition: service_started
-      proxy:
-        condition: service_healthy
     labels:
       caddy: ${APP_URL}
       caddy.reverse_proxy: '{{upstreams 80}}'
@@ -22,7 +20,7 @@ services:
       context: ./docker/nextcloud
       dockerfile: Dockerfile
       args:
-        NC_VERSION: ${NC_VERSION:-31}
+        NC_VERSION: ${NC_VERSION:-32}
       target: ${ENV:-development}
     restart: unless-stopped
     depends_on:
@@ -45,7 +43,7 @@ services:
       - ./:/var/www/html/custom_apps/files_external_ethswarm
 
   cron:
-    image: nextcloud:${NC_VERSION:-31}-fpm-alpine
+    image: nextcloud:${NC_VERSION:-32}-fpm-alpine
     restart: always
     volumes:
       - nc-app:/var/www/html
@@ -75,7 +73,7 @@ services:
       - backend
 
   postgres:
-    image: postgres:alpine
+    image: postgres:18-alpine
     restart: unless-stopped
     env_file:
       - .env
@@ -97,13 +95,13 @@ networks:
   frontend:
     ipam:
         config:
-          - subnet: 172.${NC_VERSION:-31}.10.0/24
-            gateway: 172.${NC_VERSION:-31}.10.1
+          - subnet: 172.${NC_VERSION:-32}.10.0/24
+            gateway: 172.${NC_VERSION:-32}.10.1
   backend:
     ipam:
         config:
-          - subnet: 172.${NC_VERSION:-31}.20.0/24
-            gateway: 172.${NC_VERSION:-31}.20.1
+          - subnet: 172.${NC_VERSION:-32}.20.0/24
+            gateway: 172.${NC_VERSION:-32}.20.1
   proxy:
     name: hejbit-network
     external: true
