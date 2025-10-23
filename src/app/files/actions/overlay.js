@@ -1,6 +1,7 @@
 import { FileAction, registerFileAction } from "@nextcloud/files";
 import { showInfo } from "@nextcloud/dialogs";
 import HejBitSvg from "@/../img/hejbit-logo.svg";
+import HejBitPaddedSvg from "@/../img/hejbit-logo-padded.svg";
 import InfoSvg from "@material-design-icons/svg/filled/info.svg";
 import FilesHelper from "@/util/FilesHelper";
 import SvgHelper from "@/util/SvgHelper";
@@ -32,9 +33,14 @@ registerFileAction(
 		},
 
 		iconSvgInline(files, view) {
-			return SvgHelper.convert(
-				FilesHelper.isArchiveFolder(files) ? InfoSvg : HejBitSvg
-			);
+			const config = loadState('core', 'config');
+            const majorVersion = config?.version ? parseInt(config.version.split('.')[0]) : null;
+			if (majorVersion === 32){
+				return SvgHelper.convert(FilesHelper.isArchiveFolder(files) ? InfoSvg : HejBitPaddedSvg);
+			}else{
+				return SvgHelper.convert(FilesHelper.isArchiveFolder(files) ? InfoSvg : HejBitSvg);
+			}
+
 		},
 
 		inline(file, view) {
