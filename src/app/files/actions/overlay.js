@@ -4,6 +4,9 @@ import HejBitSvg from "@/../img/hejbit-logo.svg";
 import InfoSvg from "@material-design-icons/svg/filled/info.svg";
 import FilesHelper from "@/util/FilesHelper";
 import SvgHelper from "@/util/SvgHelper";
+import { loadState } from '@nextcloud/initial-state';
+
+
 
 registerFileAction(
 	new FileAction({
@@ -39,13 +42,23 @@ registerFileAction(
 		},
 
 		async renderInline(node, view) {
+
+			const config = loadState('core', 'config');
+            const majorVersion = config?.version ? parseInt(config.version.split('.')[0]) : null;
+
 			// Create the overlay element
 			const overlay = document.createElement("div");
-			overlay.classList.add("hejbit-overlay");
+
+            if (majorVersion === 32) {
+				overlay.classList.add("hejbit-overlay-32");
+            } else {
+                overlay.classList.add("hejbit-overlay");
+            }
 
 			if (FilesHelper.isArchive(node)) {
 				overlay.classList.add("hejbit-archive");
 			}
+
 
 			overlay.innerHTML = SvgHelper.convert(HejBitSvg);
 
