@@ -7,10 +7,25 @@
 	pointer-events: none;
 }
 
+.hejbit-overlay-32 {
+	position: absolute;
+	top: 23px;
+	left: 60px;
+	width: 16px;
+	height: 16px;
+	pointer-events: none;
+}
+
 .hejbit-overlay svg {
 	width: 16px;
 	height: 16px;
 }
+
+.hejbit-overlay-32 svg {
+	width: 16px;
+	height: 16px;
+}
+
 
 .hejbit-archive svg {
 	filter: grayscale(100%);

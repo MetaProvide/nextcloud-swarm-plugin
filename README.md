@@ -21,7 +21,7 @@ This plugin integrates [Swarm](https://www.ethswarm.org/) (a decentralized, bloc
 
 Before using the plugin, ensure you have the following:
 
--   An active Nextcloud instance (version 30 or 31)
+-   An active Nextcloud instance (version 30, 31 or 32)
 -   A valid Access Key and URL to activate the service
     -   [Get Your Free Trial for the Nextcloud Swarm Plugin](https://app.hejbit.com)
 
@@ -49,13 +49,11 @@ Once installed, HejBit Swarm integrates directly with Nextcloud’s "Files" sect
 
 Additionally, we have introduced a HejBit Feedback button that appears in the bottom left corner when you are inside a HejBit folder. This feature allows users to easily send feedback regarding general inquiries, ideas, or issues directly from the plugin.
 
-
 ### Settings
 
 Users with administrative credentials can configure the plugin through the standard External Storage settings. Here, you can input your Access Key and URL for HejBit Swarm.
 
 ![Basic HejBit Swarm setup in External Storage in Nextcloud administration](https://github.com/user-attachments/assets/3e80f664-86b9-4cfa-bbc5-6f9f1fbeb94a)
-
 
 ### Usage
 
