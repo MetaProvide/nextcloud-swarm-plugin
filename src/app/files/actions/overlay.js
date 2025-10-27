@@ -1,9 +1,13 @@
 import { FileAction, registerFileAction } from "@nextcloud/files";
 import { showInfo } from "@nextcloud/dialogs";
 import HejBitSvg from "@/../img/hejbit-logo.svg";
+import HejBitPaddedSvg from "@/../img/hejbit-logo-padded.svg";
 import InfoSvg from "@material-design-icons/svg/filled/info.svg";
 import FilesHelper from "@/util/FilesHelper";
 import SvgHelper from "@/util/SvgHelper";
+import { loadState } from '@nextcloud/initial-state';
+
+
 
 registerFileAction(
 	new FileAction({
@@ -29,9 +33,14 @@ registerFileAction(
 		},
 
 		iconSvgInline(files, view) {
-			return SvgHelper.convert(
-				FilesHelper.isArchiveFolder(files) ? InfoSvg : HejBitSvg
-			);
+			const config = loadState('core', 'config');
+            const majorVersion = config?.version ? parseInt(config.version.split('.')[0]) : null;
+			if (majorVersion === 32){
+				return SvgHelper.convert(FilesHelper.isArchiveFolder(files) ? InfoSvg : HejBitPaddedSvg);
+			}else{
+				return SvgHelper.convert(FilesHelper.isArchiveFolder(files) ? InfoSvg : HejBitSvg);
+			}
+
 		},
 
 		inline(file, view) {
@@ -39,13 +48,23 @@ registerFileAction(
 		},
 
 		async renderInline(node, view) {
+
+			const config = loadState('core', 'config');
+            const majorVersion = config?.version ? parseInt(config.version.split('.')[0]) : null;
+
 			// Create the overlay element
 			const overlay = document.createElement("div");
-			overlay.classList.add("hejbit-overlay");
+
+            if (majorVersion === 32) {
+				overlay.classList.add("hejbit-overlay-32");
+            } else {
+                overlay.classList.add("hejbit-overlay");
+            }
 
 			if (FilesHelper.isArchive(node)) {
 				overlay.classList.add("hejbit-archive");
 			}
+
 
 			overlay.innerHTML = SvgHelper.convert(HejBitSvg);
 
