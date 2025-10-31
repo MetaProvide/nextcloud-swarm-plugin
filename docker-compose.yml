@@ -7,7 +7,6 @@
 #  127.0.0.1 features.hejbit.local
 
 services:
-
   web:
     build: ./docker/web
     restart: unless-stopped
@@ -20,7 +19,7 @@ services:
         condition: service_healthy
     labels:
       caddy: ${APP_URL:-localhost}, nextcloud.local
-      caddy.reverse_proxy: '{{upstreams 80}}'
+      caddy.reverse_proxy: "{{upstreams 80}}"
     networks:
       - frontend
       - proxy
@@ -77,11 +76,12 @@ services:
 
   redis:
     image: redis:alpine
+    command: redis-server --requirepass secret
     #    ports:
     #      - '6379:6379'
     restart: unless-stopped
     healthcheck:
-      test: [ "CMD", "redis-cli", "ping" ]
+      test: ["CMD", "redis-cli", "-a", "secret", "ping"]
       start_period: 3s
       timeout: 5s
       interval: 30s
@@ -98,7 +98,16 @@ services:
     volumes:
       - nc-db:/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD", "pg_isready", "-q", "-d", "${POSTGRES_DB}", "-U", "${POSTGRES_USER}" ]
+      test:
+        [
+          "CMD",
+          "pg_isready",
+          "-q",
+          "-d",
+          "${POSTGRES_DB}",
+          "-U",
+          "${POSTGRES_USER}",
+        ]
       start_period: 3s
       timeout: 5s
       interval: 30s
@@ -121,7 +130,7 @@ services:
         condition: service_healthy
     labels:
       caddy: adminer.hejbit.local
-      caddy.reverse_proxy: '{{upstreams 8080}}'
+      caddy.reverse_proxy: "{{upstreams 8080}}"
     environment:
       ADMINER_DEFAULT_SERVER: postgres
 
@@ -145,16 +154,16 @@ services:
   flagd:
     image: ghcr.io/open-feature/flagd:latest
     restart: unless-stopped
-    command: 'start --uri file:/etc/flagd/hejbit.flagd.json --cors-origin *'
+    command: "start --uri file:/etc/flagd/hejbit.flagd.json --cors-origin *"
     #    ports:
     #      - '8013:8013'
     volumes:
-      - './docker/flagd/hejbit.flagd.json:/etc/flagd/hejbit.flagd.json'
+      - "./docker/flagd/hejbit.flagd.json:/etc/flagd/hejbit.flagd.json"
     networks:
       - proxy
     labels:
       caddy: features.hejbit.local
-      caddy.reverse_proxy: '{{upstreams 8013}}'
+      caddy.reverse_proxy: "{{upstreams 8013}}"
     depends_on:
       proxy:
         condition: service_healthy
@@ -182,7 +191,7 @@ services:
       - proxy
     labels:
       caddy: onlyoffice.local
-      caddy.reverse_proxy: '{{upstreams 80}}'
+      caddy.reverse_proxy: "{{upstreams 80}}"
     depends_on:
       proxy:
         condition: service_healthy
@@ -205,7 +214,13 @@ services:
     networks:
       - proxy
     healthcheck:
-      test: [ "CMD", "curl", "--fail", "http://localhost:2019/reverse_proxy/upstreams" ]
+      test:
+        [
+          "CMD",
+          "curl",
+          "--fail",
+          "http://localhost:2019/reverse_proxy/upstreams",
+        ]
       timeout: 30s
       retries: 3
       start_period: 10s
