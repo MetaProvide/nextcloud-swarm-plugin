@@ -12,7 +12,7 @@ use Sentry\State;
 
 trait Telemetry {
 	public const TELEMETRY_URL = 'https://c46a60056f22db1db257c1d99fa99e5f@sentry.metaprovide.org/2';
-	public const TELEMETRY_MINIMUM_SUPPORTED_NEXTCLOUD_VERSION = '30.0.0';
+	public const TELEMETRY_MINIMUM_SUPPORTED_NEXTCLOUD_VERSION = '31.0.0';
 
 	protected function loadTelemetry(): void {
 		// Register autoloader of sentry
