@@ -33,11 +33,12 @@ registerFileAction({
 		);
 	},
 
-	inline({ node }) {
+	inline({ nodes }) {
 		return true;
 	},
 
-	async renderInline({ node, view }) {
+	async renderInline({ nodes, view }) {
+		const node = nodes[0];
 		// Create the overlay element
 		const overlay = document.createElement("div");
 		overlay.classList.add("hejbit-overlay");

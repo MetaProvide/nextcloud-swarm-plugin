@@ -35,7 +35,7 @@ registerFileAction({
 	iconSvgInline: ({ nodes }) => {
 		return SvgHelper.convert(UnhideSource);
 	},
-	inline({ node }) {
+	inline({ nodes }) {
 		return true;
 	},
 
