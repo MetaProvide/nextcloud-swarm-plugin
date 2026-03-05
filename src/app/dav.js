@@ -1,4 +1,4 @@
-import { registerDavProperty } from "@nextcloud/files";
+import { registerDavProperty } from "@nextcloud/files/dav";
 
 const registeredProperties = new Set();
 

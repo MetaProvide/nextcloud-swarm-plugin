@@ -1,4 +1,4 @@
-import { FileAction, registerFileAction } from "@nextcloud/files";
+import { registerFileAction } from "@nextcloud/files";
 import axios from "@nextcloud/axios";
 import { showError, showSuccess } from "@nextcloud/dialogs";
 import { getDialogBuilder } from "@nextcloud/dialogs";
@@ -6,43 +6,41 @@ import DownloadSvg from "@material-design-icons/svg/filled/download.svg";
 import FilesHelper from "@/util/FilesHelper";
 import SvgHelper from "@/util/SvgHelper";
 
-registerFileAction(
-	new FileAction({
-		id: "exportAction",
-		displayName() {
-			return t(
-				"files_external_ethswarm",
-				"Export"
-			);
-		},
-		iconSvgInline() {
-			return SvgHelper.convert(DownloadSvg);
-		},
-		enabled(files) {
-			if (files[0].attributes["ethswarm-node"]) {
-				return FilesHelper.isRoot(files);
-			}
-			return false;
-		},
-		async exec(node) {
-			await getDialogBuilder("Export HejBit Storage Metadata")
-				.setSeverity("warning")
-				.setText(`
-					This action will export your HejBit storage metadata such as Swarm references for this storage to a JSON file.
-					You're responsible for keeping this file secure. Are you sure you want to export your HejBit storage metadata?
-				`)
-				.addButton({
-					label: "Cancel",
-				})
-				.addButton({
-					label: "Export",
-					callback: async () => downloadMetadata(node),
-				})
-				.build()
-				.show();
-		},
-	})
-);
+registerFileAction({
+	id: "exportAction",
+	displayName() {
+		return t("files_external_ethswarm", "Export");
+	},
+	iconSvgInline() {
+		return SvgHelper.convert(DownloadSvg);
+	},
+	enabled({ nodes }) {
+		if (nodes[0].attributes["ethswarm-node"]) {
+			return FilesHelper.isRoot(nodes);
+		}
+		return false;
+	},
+	async exec({ nodes }) {
+		const node = nodes[0];
+		await getDialogBuilder("Export HejBit Storage Metadata")
+			.setSeverity("warning")
+			.setText(
+				`
+				This action will export your HejBit storage metadata such as Swarm references for this storage to a JSON file.
+				You're responsible for keeping this file secure. Are you sure you want to export your HejBit storage metadata?
+			`
+			)
+			.addButton({
+				label: "Cancel",
+			})
+			.addButton({
+				label: "Export",
+				callback: async () => downloadMetadata(node),
+			})
+			.build()
+			.show();
+	},
+});
 
 const downloadMetadata = async (node) => {
 	await axios({
@@ -58,11 +56,17 @@ const downloadMetadata = async (node) => {
 			});
 			const storageName = FilesHelper.getStoragePath(node.path);
 			const date = new Date().toISOString().split("T")[0];
-			FilesHelper.downloadFile(blob, `hejbit-export-${storageName}-${date}.json`);
+			FilesHelper.downloadFile(
+				blob,
+				`hejbit-export-${storageName}-${date}.json`
+			);
 			showSuccess("Exported storage metadata successfully");
 		} else {
-			console.error("Error while exporting metadata of the storage", response);
+			console.error(
+				"Error while exporting metadata of the storage",
+				response
+			);
 			showError(response.data.message);
 		}
 	});
-}
+};
