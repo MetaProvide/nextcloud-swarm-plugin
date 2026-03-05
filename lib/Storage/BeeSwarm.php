@@ -515,7 +515,7 @@ class BeeSwarm extends Common implements IBeeSwarm {
 		$extension = '';
 		$tmpFile = $this->tempManager->getTemporaryFile($extension);
 		$target = fopen($tmpFile, 'w');
-		OC_Helper::streamCopy($stream, $target);
+		stream_copy_to_stream($stream, $target);
 		fclose($target);
 
 		return $tmpFile;
