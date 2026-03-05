@@ -73,24 +73,21 @@ registerFileAction({
 					`,
 				{
 					isHTML: true,
-				},
-				t("files_external_ethswarm", "Hejbit")
+				}
 			);
 		} else if (FilesHelper.isFolder(node)) {
 			showInfo(
 				t(
 					"files_external_ethswarm",
 					"Folder structure is not yet supported on Swarm. This folder is only available on Nextcloud, although all files within it are accessible on Swarm."
-				),
-				t("files_external_ethswarm", "Hejbit")
+				)
 			);
 		} else {
 			showInfo(
 				t(
 					"files_external_ethswarm",
 					"This file is on Swarm Network by Hejbit!"
-				),
-				t("files_external_ethswarm", "Hejbit")
+				)
 			);
 		}
 	},

@@ -32,6 +32,7 @@ registerFileAction({
 			)
 			.addButton({
 				label: "Cancel",
+				callback: () => {},
 			})
 			.addButton({
 				label: "Export",

@@ -40,8 +40,7 @@ registerFileAction({
 				t(
 					"files_external_ethswarm",
 					"Folder structure is not yet supported on Swarm. This folder is only available on Nextcloud, although all files within it are accessible on Swarm."
-				),
-				t("files_external_ethswarm", "Swarm Reference")
+				)
 			);
 			return;
 		}
@@ -49,7 +48,7 @@ registerFileAction({
 		await new Dialog("View Swarm Reference", swarmref, [
 			{
 				label: t("files_external_ethswarm", "Copy to Clipboard"),
-				type: "secondary",
+				variant: "secondary",
 				icon: SvgHelper.convert(ClipboardSvg),
 				callback: () =>
 					navigator.clipboard.writeText(swarmref).then(
