@@ -1,5 +1,6 @@
 import { registerFileAction } from "@nextcloud/files";
 import { showInfo } from "@nextcloud/dialogs";
+import HejBitSvg from "@/../img/hejbit-logo.svg";
 import HejBitSvgPadded from "@/../img/hejbit-logo-padded.svg";
 import InfoSvg from "@material-design-icons/svg/filled/info.svg";
 import FilesHelper from "@/util/FilesHelper";
