@@ -26,7 +26,6 @@ use Exception;
 use OC;
 use OC\Files\Cache\Cache;
 use OC\Files\Storage\Common;
-use OC_Helper;
 use OCA\Files_External_Ethswarm\AppInfo\Application;
 use OCA\Files_External_Ethswarm\Db\SwarmFile;
 use OCA\Files_External_Ethswarm\Db\SwarmFileMapper;
