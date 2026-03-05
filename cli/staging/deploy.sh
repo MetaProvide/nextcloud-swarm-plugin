@@ -64,7 +64,7 @@ action() {
 
 deploy() {
 	local version=$1
-	cd hejbit-"$version" || failed "hejbit-$version not found"
+	cd "/opt/hejbit/hejbit-$version" || failed "$version" "/opt/hejbit/hejbit-$version not found"
 
 	buffer "$(log_note "deploying hejbit-$version")"
 
@@ -91,7 +91,13 @@ setup_node() {
 	export NVM_DIR="$HOME/.nvm"
 	if [ -s "$NVM_DIR/nvm.sh" ]; then
 		. "$NVM_DIR/nvm.sh"
-		nvm use --silent default > /dev/null 2>&1 || return 1
+
+		NODE_20_VERSION=$(nvm version 20 2> /dev/null)
+		if [ "$NODE_20_VERSION" != "N/A" ]; then
+			nvm use --silent "$NODE_20_VERSION" > /dev/null 2>&1 || return 1
+		else
+			nvm use --silent default > /dev/null 2>&1 || return 1
+		fi
 	fi
 
 	command -v npm > /dev/null 2>&1 || return 1
@@ -136,21 +142,9 @@ fi
 log_note "deploying hejbit to staging"
 log_gap
 
-DEPLOYMENT=()
 TIMESTAMP=$(date +%s)
 for version in {32..33}; do
-	deploy "$version" &
-	DEPLOYMENT+=($!)
+	deploy "$version"
 done
 
-statuses=0
-for pid in "${DEPLOYMENT[@]}"; do
-	wait "$pid"
-	statuses+=$?
-done
-
-if [ $statuses -ne 0 ]; then
-	log_error "failed to deploy hejbit to staging"
-	exit 1
-fi
 log_success "deployed hejbit to staging"
