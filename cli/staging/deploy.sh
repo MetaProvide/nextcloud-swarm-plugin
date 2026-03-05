@@ -85,6 +85,18 @@ sync_code() {
 	git pull 2>&1 || return 1
 }
 
+setup_node() {
+	command -v npm > /dev/null 2>&1 && return 0
+
+	export NVM_DIR="$HOME/.nvm"
+	if [ -s "$NVM_DIR/nvm.sh" ]; then
+		. "$NVM_DIR/nvm.sh"
+		nvm use --silent default > /dev/null 2>&1 || return 1
+	fi
+
+	command -v npm > /dev/null 2>&1 || return 1
+}
+
 build_app() {
 	result=$(npm install 2>&1)
 	status=$?
@@ -114,6 +126,13 @@ nextcloud_upgrade() {
 }
 
 cd /opt/hejbit || log_error "/opt/hejbit not found"
+
+if ! setup_node; then
+	log_error "npm not found for user $(whoami)"
+	log_error "install node/npm or configure nvm default"
+	exit 1
+fi
+
 log_note "deploying hejbit to staging"
 log_gap
 
