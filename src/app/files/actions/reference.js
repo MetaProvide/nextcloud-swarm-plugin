@@ -1,11 +1,11 @@
-import { registerFileAction } from "@nextcloud/files";
 import { Dialog, showSuccess, showWarning } from "@nextcloud/dialogs";
 import SwarmSvg from "@/../img/swarm-logo.svg";
 import ClipboardSvg from "@material-design-icons/svg/filled/content_paste.svg";
 import SvgHelper from "@/util/SvgHelper";
 import FilesHelper from "@/util/FilesHelper";
+import { registerFileActionCompat } from "@/util/FileActionCompat";
 
-registerFileAction({
+registerFileActionCompat({
 	id: "EthswarmCopyRef",
 
 	displayName() {

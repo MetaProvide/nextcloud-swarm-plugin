@@ -1,4 +1,3 @@
-import { registerFileAction } from "@nextcloud/files";
 import axios from "@nextcloud/axios";
 import { showError, showSuccess } from "@nextcloud/dialogs";
 import { emit } from "@nextcloud/event-bus";
@@ -6,8 +5,9 @@ import ArchiveSvg from "@material-design-icons/svg/filled/archive.svg";
 import UnarchiveSvg from "@material-design-icons/svg/filled/unarchive.svg";
 import FilesHelper from "@/util/FilesHelper";
 import SvgHelper from "@/util/SvgHelper";
+import { registerFileActionCompat } from "@/util/FileActionCompat";
 
-registerFileAction({
+registerFileActionCompat({
 	id: "archiveAction",
 	displayName({ nodes }) {
 		return t(

@@ -1,12 +1,12 @@
-import { registerFileAction } from "@nextcloud/files";
 import { emit } from "@nextcloud/event-bus";
 import MoveSvg from "@material-design-icons/svg/filled/drive_file_move.svg";
 import FilesHelper from "@/util/FilesHelper";
 import SvgHelper from "@/util/SvgHelper";
 import axios from "@nextcloud/axios";
 import { showError, showSuccess } from "@nextcloud/dialogs";
+import { registerFileActionCompat } from "@/util/FileActionCompat";
 
-registerFileAction({
+registerFileActionCompat({
 	id: "moveAction",
 	displayName({ nodes }) {
 		return t("files_external_ethswarm", "Move");

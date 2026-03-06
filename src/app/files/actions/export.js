@@ -1,12 +1,12 @@
-import { registerFileAction } from "@nextcloud/files";
 import axios from "@nextcloud/axios";
 import { showError, showSuccess } from "@nextcloud/dialogs";
 import { getDialogBuilder } from "@nextcloud/dialogs";
 import DownloadSvg from "@material-design-icons/svg/filled/download.svg";
 import FilesHelper from "@/util/FilesHelper";
 import SvgHelper from "@/util/SvgHelper";
+import { registerFileActionCompat } from "@/util/FileActionCompat";
 
-registerFileAction({
+registerFileActionCompat({
 	id: "exportAction",
 	displayName() {
 		return t("files_external_ethswarm", "Export");

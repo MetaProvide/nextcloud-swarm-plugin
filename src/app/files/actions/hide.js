@@ -1,4 +1,4 @@
-import { FileType, registerFileAction } from "@nextcloud/files";
+import { FileType } from "@nextcloud/files";
 import { showError, showInfo } from "@nextcloud/dialogs";
 import axios from "@nextcloud/axios";
 import { emit } from "@nextcloud/event-bus";
@@ -8,8 +8,9 @@ import HideSource from "@material-design-icons/svg/filled/visibility_off.svg";
 import UnhideSource from "@material-design-icons/svg/filled/settings_backup_restore.svg";
 import FilesHelper from "@/util/FilesHelper";
 import SvgHelper from "@/util/SvgHelper";
+import { registerFileActionCompat } from "@/util/FileActionCompat";
 
-registerFileAction({
+registerFileActionCompat({
 	id: "unhideAction",
 	displayName({ nodes, view }) {
 		/**
@@ -84,7 +85,7 @@ registerFileAction({
 	order: 150,
 });
 
-registerFileAction({
+registerFileActionCompat({
 	id: "hideAction",
 	displayName({ nodes, view }) {
 		/**
