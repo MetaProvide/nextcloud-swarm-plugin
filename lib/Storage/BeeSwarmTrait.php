@@ -243,4 +243,27 @@ trait BeeSwarmTrait {
 
 		return $reference;
 	}
+
+	private function createStorage() {
+		$endpoint = "/ocs/v2.php/apps/files_external_ethswarm/api/v1/storages";
+
+		$data = array("mountPoint"=>"MySwarmFolder", "accessKey"=>"your-access-key-here", "hostUrl"=>"app.hejbit.com");
+
+		$request = new Curl($endpoint, [
+			CURLOPT_PUT => true,
+			CURLOPT_POST => true,
+		], [
+			'content-type: application/x-www-form-urlencoded',
+			//'content-length: ' . strlen($data)
+		]);
+
+		$response = $request->post($data, true);
+
+		$httpCode = $request->getInfo(CURLINFO_HTTP_CODE);
+		if (200 !== $httpCode) {
+			throw new HejBitException('Failed to create Swarm storage');
+		}
+
+		return $response;
+	}
 }
