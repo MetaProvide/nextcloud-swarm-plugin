@@ -67,7 +67,6 @@ class BeeSwarm extends Backend {
 	}
 
 	public function validateStorageDefinition(StorageConfig $storage): bool {
-
 		$result = true;
 
 		// access key
