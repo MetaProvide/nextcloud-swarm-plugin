@@ -2,139 +2,189 @@
 
 declare(strict_types=1);
 
+/**
+ * @copyright Copyright (c) 2022, MetaProvide Holding EKF
+ * @license GNU AGPL version 3 or any later version
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 namespace OCA\Files_External_Ethswarm\Controller;
 
-use OCA\Files_External\Lib\StorageConfig;
 use OCA\Files_External\Service\GlobalStoragesService;
 use OCA\Files_External_Ethswarm\AppInfo\Application;
+use OCA\Files_External_Ethswarm\Auth\AccessKey;
+use OCA\Files_External_Ethswarm\Backend\BeeSwarm;
 use OCP\AppFramework\OCSController;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
+use OCP\AppFramework\Http\Attribute\ApiRoute;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\IRequest;
 use OCP\IUserSession;
 use Psr\Log\LoggerInterface;
 
-class StoragesController extends OCSController {
-    private GlobalStoragesService $globalStoragesService;
-    private IUserSession $userSession;
-    private LoggerInterface $logger;
+class StorageController extends OCSController {
+	private GlobalStoragesService $globalStoragesService;
+	private IUserSession $userSession;
+	private LoggerInterface $logger;
 
-    public function __construct(
-        string $appName,
-        IRequest $request,
-        GlobalStoragesService $globalStoragesService,
-        IUserSession $userSession,
-        LoggerInterface $logger
-    ) {
-        parent::__construct($appName, $request);
-        $this->globalStoragesService = $globalStoragesService;
-        $this->userSession = $userSession;
-        $this->logger = $logger;
-    }
+	public function __construct(
+		string $appName,
+		IRequest $request,
+		GlobalStoragesService $globalStoragesService,
+		IUserSession $userSession,
+		LoggerInterface $logger
+	) {
+		parent::__construct($appName, $request);
+		$this->globalStoragesService = $globalStoragesService;
+		$this->userSession = $userSession;
+		$this->logger = $logger;
+	}
 
-    /**
-     * Create a new Swarm external storage
-     *
-     * @param string $mountPoint The folder name/mount point (e.g., "/MySwarmStorage")
-     * @param string $accessKey The Swarm access key
-     * @param string $hostUrl The Access Server URL (e.g., "app.hejbit.com")
-     * @return DataResponse
-     */
-    #[NoAdminRequired]
-    public function create(
-        string $mountPoint,
-        string $accessKey,
-        string $hostUrl
-    ): DataResponse {
-        // Validate required parameters
-        if (empty($mountPoint)) {
-            return new DataResponse([
-                'ocs' => [
-                    'meta' => [
-                        'status' => 'failure',
-                        'statuscode' => 400,
-                        'message' => 'Mount point is required'
-                    ]
-                ]
-            ], 400);
-        }
+	/**
+	 * Create a new Hejbit Swarm external storage
+	 *
+	 * @param string $folderName The folder name/mount point for the storage
+	 * @param string $accessKey The Hejbit access key for authentication
+	 * @param string $hostUrl The Access Server URL (e.g., "app.hejbit.com")
+	 * @return DataResponse<Http::STATUS_CREATED, array{ocs: array{meta: array{status: string, statuscode: int, message: string}, data: array{id: int, mountPoint: string, backend: string}}}, array{}>
+	 * @return DataResponse<Http::STATUS_BAD_REQUEST, array{ocs: array{meta: array{status: string, statuscode: int, message: string}, data: array<string, mixed>}}, array{}>
+	 * @return DataResponse<Http::STATUS_UNAUTHORIZED, array{ocs: array{meta: array{status: string, statuscode: int, message: string}, data: array<string, mixed>}}, array{}>
+	 * @return DataResponse<Http::STATUS_INTERNAL_SERVER_ERROR, array{ocs: array{meta: array{status: string, statuscode: int, message: string}, data: array<string, mixed>}}, array{}>
+	 *
+	 * 201: Storage created successfully
+	 * 400: Bad request (missing parameters or invalid URL)
+	 * 401: Unauthorized (user not authenticated)
+	 * 500: Internal server error (failed to create storage)
+	 */
+	#[NoAdminRequired]
+	public function create(
+		string $folderName,
+		string $accessKey,
+		string $hostUrl
+	): DataResponse {
+		// Validate required parameters
+		$validationError = $this->validateParameters($folderName, $accessKey, $hostUrl);
+		if ($validationError !== null) {
+			return $validationError;
+		}
 
-        if (empty($accessKey)) {
-            return new DataResponse([
-                'ocs' => [
-                    'meta' => [
-                        'status' => 'failure',
-                        'statuscode' => 400,
-                        'message' => 'Access key is required'
-                    ]
-                ]
-            ], 400);
-        }
+		// Validate host URL format
+		$validatedHost = $this->validateHostUrl($hostUrl);
+		if ($validatedHost === null) {
+			return $this->errorResponse('Invalid host URL format', 400);
+		}
 
-        if (empty($hostUrl)) {
-            return new DataResponse([
-                'ocs' => [
-                    'meta' => [
-                        'status' => 'failure',
-                        'statuscode' => 400,
-                        'message' => 'Access key is required'
-                    ]
-                ]
-            ], 400);
-        }
+		// Ensure mount point starts with /
+		$mountPoint = '/' . ltrim($folderName, '/');
 
-        // Ensure mount point starts with /
-        if (strpos($mountPoint, '/') !== 0) {
-            $mountPoint = '/' . $mountPoint;
-        }
+		try {
+			// Get the current user
+			$user = $this->userSession->getUser();
+			if ($user === null) {
+				return $this->errorResponse('User not authenticated', 401);
+			}
 
-        try {
-            // Set as personal storage (current user only)
-            $user = $this->userSession->getUser();
-			$user = [$user->getUID()];
-
-			// Create StorageConfig
-            $storageConfig = new StorageConfig();
+			// Create storage using GlobalStoragesService
 			$storageConfig = $this->globalStoragesService->createStorage(
 				$mountPoint,
-				APPLICATION::NAME,
+				Application::NAME,
 				'access:key',
-				[
-                'access_key' => $accessKey,
-                'host_url' => $hostUrl ?: 'app.hejbit.com'
-            	],
+				[BeeSwarm::OPTION_HOST_URL => $hostUrl, 
+				AccessKey::SCHEME => $accessKey],
 				null,
-				$user
-				);
+				[]  // Empty array = all users
+			);
 
-            // Add the storage via the service
-            $newStorage = $this->globalStoragesService->addStorage($storageConfig);
+			// Add the storage via the service
+			$newStorage = $this->globalStoragesService->addStorage($storageConfig);
 
-            $this->logger->info('Swarm storage created: ' . $mountPoint);
+			$this->logger->info('Swarm storage created successfully: ' . $mountPoint . ' for user: ' . $user->getUID());
 
-            return new DataResponse([
-                'ocs' => [
-                    'meta' => [
-                        'status' => 'success',
-                        'statuscode' => 201,
-                        'message' => 'Storage created successfully'
-                    ]
-                ],
-                'data' => $newStorage->jsonSerialize(true)
-            ], 201);
+			return $this->successResponse([
+				'id' => $newStorage->getId(),
+				'mountPoint' => $newStorage->getMountPoint(),
+				'backend' => Application::NAME,
+			]);
+		} catch (\Exception $e) {
+			$this->logger->error('Failed to create Swarm storage: ' . $e->getMessage(), [
+				'exception' => $e,
+				'folderName' => $folderName,
+				'hostUrl' => $hostUrl
+			]);
 
-        } catch (\Exception $e) {
-            $this->logger->error('Failed to create storage: ' . $e->getMessage());
+			return $this->errorResponse('Failed to create storage: ' . $e->getMessage(), 500);
+		}
+	}
 
-            return new DataResponse([
-                'ocs' => [
-                    'meta' => [
-                        'status' => 'failure',
-                        'statuscode' => 500,
-                        'message' => $e->getMessage()
-                    ]
-                ]
-            ], 500);
-        }
-    }
+	/**
+	 * Validate required parameters
+	 */
+	private function validateParameters(string $folderName, string $accessKey, string $hostUrl): ?DataResponse {
+		if (empty($folderName)) {
+			return $this->errorResponse('Folder name is required', 400);
+		}
+		if (empty($accessKey)) {
+			return $this->errorResponse('Access key is required', 400);
+		}
+		if (empty($hostUrl)) {
+			return $this->errorResponse('Host URL is required', 400);
+		}
+		return null;
+	}
+
+	/**
+	 * Validate and normalize host URL
+	 * @return string|null Normalized URL or null if invalid
+	 */
+	private function validateHostUrl(string $hostUrl): ?string {
+		$validatedHost = $hostUrl;
+		if (!preg_match('/^https?:\/\//i', $validatedHost)) {
+			$validatedHost = 'https://' . $validatedHost;
+		}
+		return filter_var($validatedHost, FILTER_VALIDATE_URL) ? $validatedHost : null;
+	}
+
+	/**
+	 * Create a success response
+	 */
+	private function successResponse(array $data): DataResponse {
+		return new DataResponse([
+			'ocs' => [
+				'meta' => [
+					'status' => 'success',
+					'statuscode' => 201,
+					'message' => 'Storage created successfully'
+				],
+				'data' => $data
+			]
+		], 201);
+	}
+
+	/**
+	 * Create an error response
+	 */
+	private function errorResponse(string $message, int $statusCode): DataResponse {
+		return new DataResponse([
+			'ocs' => [
+				'meta' => [
+					'status' => 'failure',
+					'statuscode' => $statusCode,
+					'message' => $message
+				],
+				'data' => []
+			]
+		], $statusCode);
+	}
 }

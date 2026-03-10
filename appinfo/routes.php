@@ -34,11 +34,11 @@ return [
 			'verb' => 'POST',
 		],
 	],
-    'ocs' => [
-        [
-            'name' => 'Storage#create',
-            'url' => '/api/v1/storages',
-            'verb' => 'POST',
-        ],
-    ],
+	'ocs' => [
+		[
+			'name' => 'Storage#create',
+			'url' => '/api/v1/storages',
+			'verb' => 'POST',
+		],
+	],
 ];
