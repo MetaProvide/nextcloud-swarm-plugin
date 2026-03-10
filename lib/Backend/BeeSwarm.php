@@ -27,14 +27,11 @@ use OCA\Files_External\Lib\StorageConfig;
 use OCA\Files_External\Service\GlobalStoragesService;
 use OCA\Files_External_Ethswarm\AppInfo\Application;
 use OCA\Files_External_Ethswarm\Auth\AccessKey;
-use OCA\Files_External_Ethswarm\Storage\BeeSwarmTrait;
 use OCP\IConfig;
 use OCP\IL10N;
 use Psr\Log\LoggerInterface;
 
 class BeeSwarm extends Backend {
-	use BeeSwarmTrait;
-
 	/** @const string */
 	public const OPTION_HOST_URL = 'host_url';
 
@@ -70,8 +67,6 @@ class BeeSwarm extends Backend {
 	}
 
 	public function validateStorageDefinition(StorageConfig $storage): bool {
-
-		$this->createStorage();
 
 		$result = true;
 
