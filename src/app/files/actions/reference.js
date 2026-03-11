@@ -1,15 +1,16 @@
 import { Dialog, showSuccess, showWarning } from "@nextcloud/dialogs";
 import SwarmSvg from "@/../img/swarm-logo.svg";
 import ClipboardSvg from "@material-design-icons/svg/filled/content_paste.svg";
+import OpenSvg from "@material-design-icons/svg/filled/open_in_new.svg";
 import SvgHelper from "@/util/SvgHelper";
 import FilesHelper from "@/util/FilesHelper";
-import { registerFileActionCompat } from "@/util/FileActionCompat";
+import { registerFileActionCompat } from "@/util/FilesCompatibility";
 
 registerFileActionCompat({
 	id: "EthswarmCopyRef",
 
 	displayName() {
-		return t("files_external_ethswarm", "View Swarm Reference");
+		return t("files_external_ethswarm", "Swarm Reference");
 	},
 
 	altText() {
@@ -45,7 +46,9 @@ registerFileActionCompat({
 			return;
 		}
 
-		await new Dialog("View Swarm Reference", swarmref, [
+		const gatewayUrl = `https://gateway.ethswarm.org/access/${swarmref}`;
+
+		await new Dialog("Swarm Reference", swarmref, [
 			{
 				label: t("files_external_ethswarm", "Copy to Clipboard"),
 				variant: "secondary",
@@ -74,6 +77,14 @@ registerFileActionCompat({
 								}
 							)
 					),
+			},
+			{
+				label: t("files_external_ethswarm", "Access on Swarm Gateway"),
+				variant: "secondary",
+				icon: SvgHelper.convert(OpenSvg),
+				callback: () => {
+					window.open(gatewayUrl, "_blank", "noopener,noreferrer");
+				},
 			},
 		]).show();
 	},

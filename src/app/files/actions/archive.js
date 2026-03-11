@@ -5,7 +5,7 @@ import ArchiveSvg from "@material-design-icons/svg/filled/archive.svg";
 import UnarchiveSvg from "@material-design-icons/svg/filled/unarchive.svg";
 import FilesHelper from "@/util/FilesHelper";
 import SvgHelper from "@/util/SvgHelper";
-import { registerFileActionCompat } from "@/util/FileActionCompat";
+import { registerFileActionCompat } from "@/util/FilesCompatibility";
 
 registerFileActionCompat({
 	id: "archiveAction",

@@ -8,7 +8,7 @@ import HideSource from "@material-design-icons/svg/filled/visibility_off.svg";
 import UnhideSource from "@material-design-icons/svg/filled/settings_backup_restore.svg";
 import FilesHelper from "@/util/FilesHelper";
 import SvgHelper from "@/util/SvgHelper";
-import { registerFileActionCompat } from "@/util/FileActionCompat";
+import { registerFileActionCompat } from "@/util/FilesCompatibility";
 
 registerFileActionCompat({
 	id: "unhideAction",
