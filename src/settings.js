@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			'<a href="https://app.hejbit.com" target="_blank" style="text-decoration: underline">app.hejbit.com</a>';
 		const el = document.createElement("p");
 		el.style.marginBottom = "10px";
-		el.innerHTML = `To get <strong>Swarm</strong> external storage access key, please visit ${link}`;
+		el.innerHTML = `To get <strong>HejBit Swarm</strong> external storage access key, please visit ${link}`;
 		targetElement.insertAdjacentElement("afterend", el);
 	}
 
