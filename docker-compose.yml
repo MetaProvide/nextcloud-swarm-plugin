@@ -105,26 +105,6 @@ services:
     networks:
       - backend
 
-  adminer: # visit https://adminer.hejbit.local/?pgsql=postgres&username=swarmbox&db=swarmbox
-    image: adminer:latest
-    restart: unless-stopped
-    #    ports:
-    #      - '8080:8080'
-    networks:
-      - backend
-      - proxy
-
-    depends_on:
-      postgres:
-        condition: service_healthy
-      proxy:
-        condition: service_healthy
-    labels:
-      caddy: adminer.hejbit.local
-      caddy.reverse_proxy: '{{upstreams 8080}}'
-    environment:
-      ADMINER_DEFAULT_SERVER: postgres
-
   rsync:
     build:
       context: ./docker/rsync
@@ -142,7 +122,31 @@ services:
     networks:
       - backend
 
+  adminer:
+    profiles:
+      - development
+    # visit https://adminer.hejbit.local/?pgsql=postgres&username=swarmbox&db=swarmbox
+    image: adminer:latest
+    restart: unless-stopped
+    #    ports:
+    #      - '8080:8080'
+    networks:
+      - backend
+      - proxy
+    depends_on:
+      postgres:
+        condition: service_healthy
+      proxy:
+        condition: service_healthy
+    labels:
+      caddy: adminer.hejbit.local
+      caddy.reverse_proxy: '{{upstreams 8080}}'
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres
+
   flagd:
+    profiles:
+      - feature
     image: ghcr.io/open-feature/flagd:latest
     restart: unless-stopped
     command: 'start --uri file:/etc/flagd/hejbit.flagd.json --cors-origin *'
@@ -158,10 +162,10 @@ services:
     depends_on:
       proxy:
         condition: service_healthy
-    profiles:
-      - feature
 
   onlyoffice:
+    profiles:
+      - onlyoffice
     image: onlyoffice/documentserver
     environment:
       JWT_ENABLED: true
@@ -186,8 +190,6 @@ services:
     depends_on:
       proxy:
         condition: service_healthy
-    profiles:
-      - onlyoffice
 
   proxy:
     image: lucaslorentz/caddy-docker-proxy:alpine
@@ -219,6 +221,7 @@ volumes:
   onlyoffice_db:
   onlyoffice_lib:
   onlyoffice_logs:
+
 
 networks:
   frontend:

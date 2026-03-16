@@ -1,122 +1,102 @@
-import { FileAction, registerFileAction } from "@nextcloud/files";
 import { showInfo } from "@nextcloud/dialogs";
 import HejBitSvg from "@/../img/hejbit-logo.svg";
-import HejBitPaddedSvg from "@/../img/hejbit-logo-padded.svg";
+import HejBitSvgPadded from "@/../img/hejbit-logo-padded.svg";
 import InfoSvg from "@material-design-icons/svg/filled/info.svg";
 import FilesHelper from "@/util/FilesHelper";
 import SvgHelper from "@/util/SvgHelper";
-import { loadState } from '@nextcloud/initial-state';
+import { registerFileActionCompat } from "@/util/FilesCompatibility";
 
+registerFileActionCompat({
+	id: "overlayAction",
 
+	displayName() {
+		return "";
+	},
 
-registerFileAction(
-	new FileAction({
-		id: "overlayAction",
+	enabled({ nodes, view }) {
+		if (nodes.length !== 1)
+			// We don't support batch actions
+			return false;
 
-		displayName() {
-			return "";
-		},
+		// To fix fileaction navigation bug this action is now available for
+		// files and folders on Swarm storage
+		const attrs = nodes[0].attributes["ethswarm-node"];
 
-		enabled(files, view) {
-			if (files.length !== 1)
-				// We don't support batch actions
-				return false;
+		if (attrs === undefined) return false;
+		else if (attrs === "") return false;
 
-			// To fix fileaction navigation bug this action is now available for
-			// files and folders on Swarm storage
-			const attrs = files[0].attributes["ethswarm-node"];
+		return true;
+	},
 
-			if (attrs === undefined) return false;
-			else if (attrs === "") return false;
+	iconSvgInline({ nodes }) {
+		return SvgHelper.convert(
+			FilesHelper.isArchiveFolder(nodes) ? InfoSvg : HejBitSvgPadded
+		);
+	},
 
-			return true;
-		},
+	inline({ nodes }) {
+		return true;
+	},
 
-		iconSvgInline(files, view) {
-			const config = loadState('core', 'config');
-            const majorVersion = config?.version ? parseInt(config.version.split('.')[0]) : null;
-			if (majorVersion === 32){
-				return SvgHelper.convert(FilesHelper.isArchiveFolder(files) ? InfoSvg : HejBitPaddedSvg);
-			}else{
-				return SvgHelper.convert(FilesHelper.isArchiveFolder(files) ? InfoSvg : HejBitSvg);
-			}
+	async renderInline({ nodes, view }) {
+		const node = nodes[0];
+		// Create the overlay element
+		const overlay = document.createElement("div");
+		overlay.classList.add("hejbit-overlay");
 
-		},
+		if (FilesHelper.isArchive(node)) {
+			overlay.classList.add("hejbit-archive");
+		}
 
-		inline(file, view) {
-			return true;
-		},
+		overlay.innerHTML = SvgHelper.convert(HejBitSvg);
 
-		async renderInline(node, view) {
+		return overlay;
+	},
 
-			const config = loadState('core', 'config');
-            const majorVersion = config?.version ? parseInt(config.version.split('.')[0]) : null;
+	async exec({ nodes, view }) {
+		const node = nodes[0];
+		if (FilesHelper.isArchiveFolder(node)) {
+			showInfo(
+				`
+					<div style="display: block; margin: 1rem 0;">
+						<div style="margin-bottom: 0.5rem;">${t(
+							"files_external_ethswarm",
+							"Archive folder is for keeping your HejBit storage more organized."
+						)}</div>
+						<div style="font-weight: lighter">${t(
+							"files_external_ethswarm",
+							"You can archive files and folder from menu action."
+						)}</div>
+						<div style="font-weight: lighter">${t(
+							"files_external_ethswarm",
+							"You can restore archived files in the archive folder from menu action."
+						)}</div>
+					</div>
+					`,
+				{
+					isHTML: true,
+				}
+			);
+		} else if (FilesHelper.isFolder(node)) {
+			showInfo(
+				t(
+					"files_external_ethswarm",
+					"Folder structure is not yet supported on Swarm. This folder is only available on Nextcloud, although all files within it are accessible on Swarm."
+				)
+			);
+		} else {
+			showInfo(
+				t(
+					"files_external_ethswarm",
+					"This file is on Swarm Network by Hejbit!"
+				)
+			);
+		}
+	},
 
-			// Create the overlay element
-			const overlay = document.createElement("div");
-
-            if (majorVersion === 32) {
-				overlay.classList.add("hejbit-overlay-32");
-            } else {
-                overlay.classList.add("hejbit-overlay");
-            }
-
-			if (FilesHelper.isArchive(node)) {
-				overlay.classList.add("hejbit-archive");
-			}
-
-
-			overlay.innerHTML = SvgHelper.convert(HejBitSvg);
-
-			return overlay;
-		},
-
-		async exec(node, view) {
-			if (FilesHelper.isArchiveFolder(node)) {
-				showInfo(
-					`
-						<div style="display: block; margin: 1rem 0;">
-							<div style="margin-bottom: 0.5rem;">${t(
-								"files_external_ethswarm",
-								"Archive folder is for keeping your HejBit storage more organized."
-							)}</div>
-							<div style="font-weight: lighter">${t(
-								"files_external_ethswarm",
-								"You can archive files and folder from menu action."
-							)}</div>
-							<div style="font-weight: lighter">${t(
-								"files_external_ethswarm",
-								"You can restore archived files in the archive folder from menu action."
-							)}</div>
-						</div>
-						`,
-					{
-						isHTML: true,
-					},
-					t("files_external_ethswarm", "Hejbit")
-				);
-			} else if (FilesHelper.isFolder(node)) {
-				showInfo(
-					t(
-						"files_external_ethswarm",
-						"Folder structure is not yet supported on Swarm. This folder is only available on Nextcloud, although all files within it are accessible on Swarm."
-					),
-					t("files_external_ethswarm", "Hejbit")
-				);
-			} else {
-				showInfo(
-					t(
-						"files_external_ethswarm",
-						"This file is on Swarm Network by Hejbit!"
-					),
-					t("files_external_ethswarm", "Hejbit")
-				);
-			}
-		},
-
-		execBatch(nodes, view) {
-			return Promise.all(nodes.map((node) => this.exec(node, view)));
-		},
-	})
-);
-
+	execBatch({ nodes, view }) {
+		return Promise.all(
+			nodes.map((node) => this.exec({ nodes: [node], view }))
+		);
+	},
+});
