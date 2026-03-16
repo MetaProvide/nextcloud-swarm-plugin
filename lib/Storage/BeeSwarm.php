@@ -26,7 +26,6 @@ use Exception;
 use OC;
 use OC\Files\Cache\Cache;
 use OC\Files\Storage\Common;
-use OC_Helper;
 use OCA\Files_External_Ethswarm\AppInfo\Application;
 use OCA\Files_External_Ethswarm\Db\SwarmFile;
 use OCA\Files_External_Ethswarm\Db\SwarmFileMapper;
@@ -515,7 +514,7 @@ class BeeSwarm extends Common implements IBeeSwarm {
 		$extension = '';
 		$tmpFile = $this->tempManager->getTemporaryFile($extension);
 		$target = fopen($tmpFile, 'w');
-		OC_Helper::streamCopy($stream, $target);
+		stream_copy_to_stream($stream, $target);
 		fclose($target);
 
 		return $tmpFile;
