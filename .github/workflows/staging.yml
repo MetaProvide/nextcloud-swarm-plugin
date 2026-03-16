@@ -17,6 +17,9 @@ jobs:
         uses: appleboy/ssh-action@master
         with:
           host: ${{ vars.STAGING_SERVER_HOST }}
-          username: deploy
+          username: ${{ vars.STAGING_SERVER_USER }}
           key: ${{ secrets.STAGING_SSH_PRIVATE_KEY }}
+          proxy_host: ${{ vars.STAGING_PROXY_HOST }}
+          proxy_username: ${{ vars.STAGING_PROXY_USER }}
+          proxy_key: ${{ secrets.STAGING_PROXY_SSH_PRIVATE_KEY }}
           script: bash deploy

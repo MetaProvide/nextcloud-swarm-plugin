@@ -64,7 +64,7 @@ action() {
 
 deploy() {
 	local version=$1
-	cd hejbit-"$version" || failed "hejbit-$version not found"
+	cd "/opt/hejbit/hejbit-$version" || failed "$version" "/opt/hejbit/hejbit-$version not found"
 
 	buffer "$(log_note "deploying hejbit-$version")"
 
@@ -83,6 +83,24 @@ deploy() {
 sync_code() {
 	git reset --hard > /dev/null 2>&1
 	git pull 2>&1 || return 1
+}
+
+setup_node() {
+	command -v npm > /dev/null 2>&1 && return 0
+
+	export NVM_DIR="$HOME/.nvm"
+	if [ -s "$NVM_DIR/nvm.sh" ]; then
+		. "$NVM_DIR/nvm.sh"
+
+		NODE_20_VERSION=$(nvm version 20 2> /dev/null)
+		if [ "$NODE_20_VERSION" != "N/A" ]; then
+			nvm use --silent "$NODE_20_VERSION" > /dev/null 2>&1 || return 1
+		else
+			nvm use --silent default > /dev/null 2>&1 || return 1
+		fi
+	fi
+
+	command -v npm > /dev/null 2>&1 || return 1
 }
 
 build_app() {
@@ -114,24 +132,19 @@ nextcloud_upgrade() {
 }
 
 cd /opt/hejbit || log_error "/opt/hejbit not found"
+
+if ! setup_node; then
+	log_error "npm not found for user $(whoami)"
+	log_error "install node/npm or configure nvm default"
+	exit 1
+fi
+
 log_note "deploying hejbit to staging"
 log_gap
 
-DEPLOYMENT=()
 TIMESTAMP=$(date +%s)
-for version in {30..32}; do
-	deploy "$version" &
-	DEPLOYMENT+=($!)
+for version in {32..33}; do
+	deploy "$version"
 done
 
-statuses=0
-for pid in "${DEPLOYMENT[@]}"; do
-	wait "$pid"
-	statuses+=$?
-done
-
-if [ $statuses -ne 0 ]; then
-	log_error "failed to deploy hejbit to staging"
-	exit 1
-fi
 log_success "deployed hejbit to staging"

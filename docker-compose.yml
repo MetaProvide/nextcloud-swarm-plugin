@@ -7,6 +7,8 @@
 #  127.0.0.1 features.hejbit.local
 
 services:
+
+services:
   web:
     build: ./docker/web
     restart: unless-stopped
@@ -76,7 +78,6 @@ services:
 
   redis:
     image: redis:alpine
-    command: redis-server --requirepass secret
     #    ports:
     #      - '6379:6379'
     restart: unless-stopped
@@ -98,41 +99,12 @@ services:
     volumes:
       - nc-db:/var/lib/postgresql/data
     healthcheck:
-      test:
-        [
-          "CMD",
-          "pg_isready",
-          "-q",
-          "-d",
-          "${POSTGRES_DB}",
-          "-U",
-          "${POSTGRES_USER}",
-        ]
+      test: [ "CMD", "pg_isready", "-q", "-d", "${POSTGRES_DB}", "-U", "${POSTGRES_USER}" ]
       start_period: 3s
       timeout: 5s
       interval: 30s
     networks:
       - backend
-
-  adminer: # visit https://adminer.hejbit.local/?pgsql=postgres&username=swarmbox&db=swarmbox
-    image: adminer:latest
-    restart: unless-stopped
-    #    ports:
-    #      - '8080:8080'
-    networks:
-      - backend
-      - proxy
-
-    depends_on:
-      postgres:
-        condition: service_healthy
-      proxy:
-        condition: service_healthy
-    labels:
-      caddy: adminer.hejbit.local
-      caddy.reverse_proxy: "{{upstreams 8080}}"
-    environment:
-      ADMINER_DEFAULT_SERVER: postgres
 
   rsync:
     build:
@@ -151,26 +123,50 @@ services:
     networks:
       - backend
 
+  adminer:
+    profiles:
+      - development
+    # visit https://adminer.hejbit.local/?pgsql=postgres&username=swarmbox&db=swarmbox
+    image: adminer:latest
+    restart: unless-stopped
+    #    ports:
+    #      - '8080:8080'
+    networks:
+      - backend
+      - proxy
+    depends_on:
+      postgres:
+        condition: service_healthy
+      proxy:
+        condition: service_healthy
+    labels:
+      caddy: adminer.hejbit.local
+      caddy.reverse_proxy: '{{upstreams 8080}}'
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres
+
   flagd:
+    profiles:
+      - feature
     image: ghcr.io/open-feature/flagd:latest
     restart: unless-stopped
-    command: "start --uri file:/etc/flagd/hejbit.flagd.json --cors-origin *"
+    command: 'start --uri file:/etc/flagd/hejbit.flagd.json --cors-origin *'
     #    ports:
     #      - '8013:8013'
     volumes:
-      - "./docker/flagd/hejbit.flagd.json:/etc/flagd/hejbit.flagd.json"
+      - './docker/flagd/hejbit.flagd.json:/etc/flagd/hejbit.flagd.json'
     networks:
       - proxy
     labels:
       caddy: features.hejbit.local
-      caddy.reverse_proxy: "{{upstreams 8013}}"
+      caddy.reverse_proxy: '{{upstreams 8013}}'
     depends_on:
       proxy:
         condition: service_healthy
-    profiles:
-      - feature
 
   onlyoffice:
+    profiles:
+      - onlyoffice
     image: onlyoffice/documentserver
     environment:
       JWT_ENABLED: true
@@ -191,12 +187,10 @@ services:
       - proxy
     labels:
       caddy: onlyoffice.local
-      caddy.reverse_proxy: "{{upstreams 80}}"
+      caddy.reverse_proxy: '{{upstreams 80}}'
     depends_on:
       proxy:
         condition: service_healthy
-    profiles:
-      - onlyoffice
 
   proxy:
     image: lucaslorentz/caddy-docker-proxy:alpine
@@ -234,6 +228,7 @@ volumes:
   onlyoffice_db:
   onlyoffice_lib:
   onlyoffice_logs:
+
 
 networks:
   frontend:
