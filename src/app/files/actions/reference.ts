@@ -83,9 +83,34 @@ registerFileActionCompat({
 				variant: "secondary",
 				icon: SvgHelper.convert(OpenSvg),
 				callback: () => {
-					window.open(gatewayUrl, "_blank", "noopener,noreferrer");
+					void new Dialog(
+						t("files_external_ethswarm", "Access on Swarm Gateway?"),
+						t(
+							"files_external_ethswarm",
+							"You are about to access this file through gateway.ethswarm.org, a public Swarm gateway used to access Swarm content. Please note this opens an external link and can leave network and server access traces to your swarm reference."
+						),
+						[
+							{
+								label: t("files_external_ethswarm", "Cancel"),
+								variant: "secondary",
+								callback: () => null,
+							},
+							{
+								label: t("files_external_ethswarm", "Proceed"),
+								variant: "primary",
+								icon: SvgHelper.convert(OpenSvg),
+								callback: () => {
+									window.open(
+										gatewayUrl,
+										"_blank",
+										"noopener,noreferrer"
+									);
+								},
+							},
+						]
+					).show().catch(() => null);
 				},
 			},
-		]).show();
+		]).show().catch(() => null);
 	},
 });
