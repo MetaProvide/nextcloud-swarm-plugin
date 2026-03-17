@@ -62,7 +62,7 @@ function getNextcloudMajorVersion() {
 		return 33;
 	}
 	console.warn(
-		"[FilesCompatibility] Could not detect Nextcloud version, defaulting to 32"
+		"[FilesCompatibility] Could not detect Nextcloud version, defaulting to 32",
 	);
 	return 32;
 }
@@ -109,7 +109,7 @@ function registerFileActionV3(actionConfig) {
 
 	if (window._nc_fileactions.find((a) => a.id === actionConfig.id)) {
 		console.error(
-			`[FilesCompatibility] FileAction ${actionConfig.id} already registered`
+			`[FilesCompatibility] FileAction ${actionConfig.id} already registered`,
 		);
 		return;
 	}
@@ -118,13 +118,13 @@ function registerFileActionV3(actionConfig) {
 
 	if (typeof actionConfig.displayName === "function") {
 		wrapped.displayName = function (nodes, view) {
-			return actionConfig.displayName.call(actionConfig, { nodes, view });
+			return actionConfig.displayName({ nodes, view });
 		};
 	}
 
 	if (typeof actionConfig.iconSvgInline === "function") {
 		wrapped.iconSvgInline = function (nodes, view) {
-			return actionConfig.iconSvgInline.call(actionConfig, {
+			return actionConfig.iconSvgInline({
 				nodes,
 				view,
 			});
@@ -133,13 +133,13 @@ function registerFileActionV3(actionConfig) {
 
 	if (typeof actionConfig.enabled === "function") {
 		wrapped.enabled = function (nodes, view) {
-			return actionConfig.enabled.call(actionConfig, { nodes, view });
+			return actionConfig.enabled({ nodes, view });
 		};
 	}
 
 	if (typeof actionConfig.exec === "function") {
 		wrapped.exec = function (node, view, dir) {
-			return actionConfig.exec.call(actionConfig, {
+			return actionConfig.exec({
 				nodes: [node],
 				view,
 			});
@@ -148,13 +148,13 @@ function registerFileActionV3(actionConfig) {
 
 	if (typeof actionConfig.execBatch === "function") {
 		wrapped.execBatch = function (nodes, view, dir) {
-			return actionConfig.execBatch.call(actionConfig, { nodes, view });
+			return actionConfig.execBatch({ nodes, view });
 		};
 	}
 
 	if (typeof actionConfig.inline === "function") {
 		wrapped.inline = function (node, view) {
-			return actionConfig.inline.call(actionConfig, {
+			return actionConfig.inline({
 				nodes: [node],
 				view,
 			});
@@ -163,7 +163,7 @@ function registerFileActionV3(actionConfig) {
 
 	if (typeof actionConfig.renderInline === "function") {
 		wrapped.renderInline = function (node, view) {
-			return actionConfig.renderInline.call(actionConfig, {
+			return actionConfig.renderInline({
 				nodes: [node],
 				view,
 			});

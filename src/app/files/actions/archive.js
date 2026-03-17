@@ -1,8 +1,8 @@
 import axios from "@nextcloud/axios";
 import { showError, showSuccess } from "@nextcloud/dialogs";
 import { emit } from "@nextcloud/event-bus";
-import ArchiveSvg from "@material-design-icons/svg/filled/archive.svg";
-import UnarchiveSvg from "@material-design-icons/svg/filled/unarchive.svg";
+import ArchiveSvg from "@material-design-icons/svg/filled/archive.svg?raw";
+import UnarchiveSvg from "@material-design-icons/svg/filled/unarchive.svg?raw";
 import FilesHelper from "@/util/FilesHelper";
 import SvgHelper from "@/util/SvgHelper";
 import { registerFileActionCompat } from "@/util/FilesCompatibility";
@@ -12,7 +12,7 @@ registerFileActionCompat({
 	displayName({ nodes }) {
 		return t(
 			"files_external_ethswarm",
-			FilesHelper.isArchive(nodes) ? "Restore" : "Archive"
+			FilesHelper.isArchive(nodes) ? "Restore" : "Archive",
 		);
 	},
 	iconSvgInline({ nodes }) {
@@ -34,7 +34,7 @@ registerFileActionCompat({
 			const path = await FilesHelper.locationPicker(
 				node,
 				"Restore",
-				UnarchiveSvg
+				UnarchiveSvg,
 			);
 			const destination = FilesHelper.getPathParts(path)
 				.slice(1)
@@ -76,7 +76,7 @@ registerFileActionCompat({
 	},
 	execBatch({ nodes, view }) {
 		return Promise.all(
-			nodes.map((node) => this.exec({ nodes: [node], view }))
+			nodes.map((node) => this.exec({ nodes: [node], view })),
 		);
 	},
 });

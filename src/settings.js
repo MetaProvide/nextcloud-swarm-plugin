@@ -44,7 +44,7 @@ function prefillHostUrlForNc33() {
 			// Use the native setter so Vue's reactivity picks up the change.
 			const nativeSetter = Object.getOwnPropertyDescriptor(
 				window.HTMLInputElement.prototype,
-				"value"
+				"value",
 			).set;
 			nativeSetter.call(input, DEFAULT_HOST);
 			input.dispatchEvent(new Event("input", { bubbles: true }));

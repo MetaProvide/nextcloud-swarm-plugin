@@ -1,7 +1,7 @@
 import { Dialog, showSuccess, showWarning } from "@nextcloud/dialogs";
-import SwarmSvg from "@/../img/swarm-logo.svg";
-import ClipboardSvg from "@material-design-icons/svg/filled/content_paste.svg";
-import OpenSvg from "@material-design-icons/svg/filled/open_in_new.svg";
+import SwarmSvg from "@/../img/swarm-logo.svg?raw";
+import ClipboardSvg from "@material-design-icons/svg/filled/content_paste.svg?raw";
+import OpenSvg from "@material-design-icons/svg/filled/open_in_new.svg?raw";
 import SvgHelper from "@/util/SvgHelper";
 import FilesHelper from "@/util/FilesHelper";
 import { registerFileActionCompat } from "@/util/FilesCompatibility";
@@ -33,15 +33,15 @@ registerFileActionCompat({
 		return SvgHelper.convert(SwarmSvg);
 	},
 
-	async exec({ nodes, view }) {
+	async exec({ nodes }) {
 		const node = nodes[0];
 		const swarmref = FilesHelper.getSwarmRef(node);
 		if (FilesHelper.isFolder(node)) {
 			showWarning(
 				t(
 					"files_external_ethswarm",
-					"Folder structure is not yet supported on Swarm. This folder is only available on Nextcloud, although all files within it are accessible on Swarm."
-				)
+					"Folder structure is not yet supported on Swarm. This folder is only available on Nextcloud, although all files within it are accessible on Swarm.",
+				),
 			);
 			return;
 		}
@@ -59,8 +59,8 @@ registerFileActionCompat({
 							showSuccess(
 								t(
 									"files_external_ethswarm",
-									"The Swarm reference has been copied to your clipboard"
-								)
+									"The Swarm reference has been copied to your clipboard",
+								),
 							),
 						() =>
 							showWarning(
@@ -68,14 +68,14 @@ registerFileActionCompat({
 										<div style="margin: 1rem 0; width: 35rem;">
 											<span>${t(
 												"files_external_ethswarm",
-												"Unable to write the Swarm Reference into your clipboard. Copy it manually"
+												"Unable to write the Swarm Reference into your clipboard. Copy it manually",
 											)}</span>
 										</div>
 									`,
 								{
 									isHTML: true,
-								}
-							)
+								},
+							),
 					),
 			},
 			{

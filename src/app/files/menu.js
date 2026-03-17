@@ -37,7 +37,7 @@ const filesMenu = {
 		const currentEntries = getNewFileMenuEntriesCompat();
 		this.originalMenu.forEach(function (backedUpMenuEntry) {
 			!currentEntries.some(
-				(entry) => entry.id === backedUpMenuEntry.id
+				(entry) => entry.id === backedUpMenuEntry.id,
 			) && addNewFileMenuEntryCompat(backedUpMenuEntry);
 		});
 		this.originalMenu = [];

@@ -2,10 +2,10 @@ import { FileType } from "@nextcloud/files";
 import { showError, showInfo } from "@nextcloud/dialogs";
 import axios from "@nextcloud/axios";
 import { emit } from "@nextcloud/event-bus";
-import Close from "@material-design-icons/svg/filled/close.svg";
-import CloudOff from "@material-design-icons/svg/filled/cloud_off.svg";
-import HideSource from "@material-design-icons/svg/filled/visibility_off.svg";
-import UnhideSource from "@material-design-icons/svg/filled/settings_backup_restore.svg";
+import Close from "@material-design-icons/svg/filled/close.svg?raw";
+import CloudOff from "@material-design-icons/svg/filled/cloud_off.svg?raw";
+import HideSource from "@material-design-icons/svg/filled/visibility_off.svg?raw";
+import UnhideSource from "@material-design-icons/svg/filled/settings_backup_restore.svg?raw";
 import FilesHelper from "@/util/FilesHelper";
 import SvgHelper from "@/util/SvgHelper";
 import { registerFileActionCompat } from "@/util/FilesCompatibility";
@@ -79,7 +79,7 @@ registerFileActionCompat({
 	},
 	execBatch({ nodes, view }) {
 		return Promise.all(
-			nodes.map((node) => this.exec({ nodes: [node], view }))
+			nodes.map((node) => this.exec({ nodes: [node], view })),
 		);
 	},
 	order: 150,
@@ -162,12 +162,12 @@ registerFileActionCompat({
 		if (node.type === FileType.File) {
 			message = t(
 				"files_external_ethswarm",
-				"The file will be set to hide on the folder view. The file will continue to exist on the Swarm network."
+				"The file will be set to hide on the folder view. The file will continue to exist on the Swarm network.",
 			);
 		} else if (node.type === FileType.Folder) {
 			message = t(
 				"files_external_ethswarm",
-				"The folder will be set to hide on the folder view. All the files inside the folder will continue to exist on the Swarm network."
+				"The folder will be set to hide on the folder view. All the files inside the folder will continue to exist on the Swarm network.",
 			);
 		}
 		showInfo(message);
@@ -194,7 +194,7 @@ registerFileActionCompat({
 	},
 	execBatch({ nodes, view }) {
 		return Promise.all(
-			nodes.map((node) => this.exec({ nodes: [node], view }))
+			nodes.map((node) => this.exec({ nodes: [node], view })),
 		);
 	},
 	order: 150,

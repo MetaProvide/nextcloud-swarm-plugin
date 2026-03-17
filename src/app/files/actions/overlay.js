@@ -1,7 +1,7 @@
 import { showInfo } from "@nextcloud/dialogs";
-import HejBitSvg from "@/../img/hejbit-logo.svg";
-import HejBitSvgPadded from "@/../img/hejbit-logo-padded.svg";
-import InfoSvg from "@material-design-icons/svg/filled/info.svg";
+import HejBitSvg from "@/../img/hejbit-logo.svg?raw";
+import HejBitSvgPadded from "@/../img/hejbit-logo-padded.svg?raw";
+import InfoSvg from "@material-design-icons/svg/filled/info.svg?raw";
 import FilesHelper from "@/util/FilesHelper";
 import SvgHelper from "@/util/SvgHelper";
 import { registerFileActionCompat } from "@/util/FilesCompatibility";
@@ -30,7 +30,7 @@ registerFileActionCompat({
 
 	iconSvgInline({ nodes }) {
 		return SvgHelper.convert(
-			FilesHelper.isArchiveFolder(nodes) ? InfoSvg : HejBitSvgPadded
+			FilesHelper.isArchiveFolder(nodes) ? InfoSvg : HejBitSvgPadded,
 		);
 	},
 
@@ -61,42 +61,42 @@ registerFileActionCompat({
 					<div style="display: block; margin: 1rem 0;">
 						<div style="margin-bottom: 0.5rem;">${t(
 							"files_external_ethswarm",
-							"Archive folder is for keeping your HejBit storage more organized."
+							"Archive folder is for keeping your HejBit storage more organized.",
 						)}</div>
 						<div style="font-weight: lighter">${t(
 							"files_external_ethswarm",
-							"You can archive files and folder from menu action."
+							"You can archive files and folder from menu action.",
 						)}</div>
 						<div style="font-weight: lighter">${t(
 							"files_external_ethswarm",
-							"You can restore archived files in the archive folder from menu action."
+							"You can restore archived files in the archive folder from menu action.",
 						)}</div>
 					</div>
 					`,
 				{
 					isHTML: true,
-				}
+				},
 			);
 		} else if (FilesHelper.isFolder(node)) {
 			showInfo(
 				t(
 					"files_external_ethswarm",
-					"Folder structure is not yet supported on Swarm. This folder is only available on Nextcloud, although all files within it are accessible on Swarm."
-				)
+					"Folder structure is not yet supported on Swarm. This folder is only available on Nextcloud, although all files within it are accessible on Swarm.",
+				),
 			);
 		} else {
 			showInfo(
 				t(
 					"files_external_ethswarm",
-					"This file is on Swarm Network by Hejbit!"
-				)
+					"This file is on Swarm Network by Hejbit!",
+				),
 			);
 		}
 	},
 
 	execBatch({ nodes, view }) {
 		return Promise.all(
-			nodes.map((node) => this.exec({ nodes: [node], view }))
+			nodes.map((node) => this.exec({ nodes: [node], view })),
 		);
 	},
 });
