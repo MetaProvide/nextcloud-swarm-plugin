@@ -30,12 +30,31 @@ jobs:
         run: composer require --dev friendsofphp/php-cs-fixer
 
       - name: Run php-cs-fixer
-        run: vendor/bin/php-cs-fixer fix
+        run: vendor/bin/php-cs-fixer fix --dry-run --diff
 
-      - name: Commit changes
-        uses: stefanzweifel/git-auto-commit-action@v5
+  frontend-lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          commit_message: "chore: fix code style"
-          commit_options: "--no-verify"
-          commit_user_name: "GitHub Actions"
-          commit_user_email: "github-actions[bot]@users.noreply.github.com"
+          node-version: "24"
+          cache: "pnpm"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run Oxlint
+        run: pnpm run lint:check
+
+      - name: Run Biome format check
+        run: pnpm run format:check
