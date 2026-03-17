@@ -1,0 +1,36 @@
+{
+	"$schema": "./node_modules/oxlint/configuration_schema.json",
+	"plugins": [
+		"oxc",
+		"typescript",
+		"unicorn",
+		"import",
+		"vue",
+		"jsdoc",
+		"node"
+	],
+	"categories": {
+		"correctness": "warn",
+		"suspicious": "warn"
+	},
+	"rules": {
+		"no-console": "off",
+		"eslint/no-unused-vars": [
+			"warn",
+			{
+				"argsIgnorePattern": "^_",
+				"varsIgnorePattern": "^_"
+			}
+		],
+		"eslint/no-unused-expressions": [
+			"warn",
+			{
+				"allowShortCircuit": true,
+				"allowTernary": true
+			}
+		]
+	},
+	"env": {
+		"builtin": true
+	}
+}
