@@ -19,29 +19,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  */
-import { generateFilePath } from "@nextcloud/router";
+import { createApp } from "vue";
+import "@nextcloud/dialogs/style.css";
+import Setting from "./pages/Setting.vue";
 
-import Vue from "vue";
-import Setting from "./pages/Setting";
+const rootElement = document.querySelector("#app");
+const settings = rootElement?.dataset?.params
+	? JSON.parse(rootElement.dataset.params)
+	: {};
 
-const appName = "files_external_ethswarm";
-
-// eslint-disable-next-line
-__webpack_public_path__ = generateFilePath(appName, "", "js/");
-
-export default new Vue({
-	el: "#app",
-	data() {
-		// State varible to hold settings coming from backend
-		return { settings: {} };
-	},
-	beforeMount() {
-		// Importing params from backend
-		const dataset = document.querySelector("#app").dataset;
-		this.settings = JSON.parse(dataset.params);
-	},
-	render(h) {
-		// Render with settings passed as props to App component
-		return h(Setting, { props: { settings: this.settings } });
-	},
-});
+export default createApp(Setting, { settings }).mount("#app");

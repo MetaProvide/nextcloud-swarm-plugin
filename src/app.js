@@ -23,10 +23,8 @@
  *
  */
 
-import { generateFilePath } from "@nextcloud/router";
+import "../styles/app.css";
+import "../styles/feedback.css";
 
-// eslint-disable-next-line
-__webpack_public_path__ = generateFilePath("files_external_ethswarm", "", "js/");
-
-const requireContext = require.context('./app', true, /\.js$/);
-requireContext.keys().forEach(requireContext);
+const appModules = import.meta.glob("./app/**/*.js", { eager: true });
+Object.values(appModules);
