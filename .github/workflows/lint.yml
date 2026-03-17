@@ -11,7 +11,7 @@ on:
 
 jobs:
   backend-lint:
-    name: Backend lint
+    name: Backend Lint
     runs-on: ubuntu-latest
 
     strategy:
@@ -34,6 +34,7 @@ jobs:
         run: vendor/bin/php-cs-fixer fix --dry-run --diff
 
   frontend-lint:
+    name: Frontend Lint
     runs-on: ubuntu-latest
 
     steps:
