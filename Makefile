@@ -33,10 +33,6 @@ pnpm-init:
 pnpm-update:
 	pnpm update
 
-npm-init: pnpm-init
-
-npm-update: pnpm-update
-
 # Building
 build-js:
 	pnpm run dev
