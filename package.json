@@ -17,10 +17,13 @@
 		"dev": "vite build --mode development --watch",
 		"serve": "vite --mode development --host 127.0.0.1",
 		"check": "pnpm run format && pnpm run lint && pnpm run typecheck",
+		"precommit": "pnpm run format:fix && pnpm run backend:format:fix && pnpm run lint && pnpm run typecheck",
 		"lint": "biome lint src styles",
 		"lint:fix": "biome lint --write src styles",
 		"format": "biome format .",
 		"format:fix": "biome format --write .",
+		"backend:format": "PHP_CS_FIXER_IGNORE_ENV=1 vendor/bin/php-cs-fixer fix --dry-run",
+		"backend:format:fix": "PHP_CS_FIXER_IGNORE_ENV=1 vendor/bin/php-cs-fixer fix",
 		"typecheck": "vue-tsc --noEmit",
 		"prepare": "simple-git-hooks"
 	},
@@ -54,6 +57,6 @@
 		"extends @nextcloud/browserslist-config"
 	],
 	"simple-git-hooks": {
-		"pre-commit": "pnpm run check"
+		"pre-commit": "pnpm run precommit"
 	}
 }
