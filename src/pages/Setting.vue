@@ -2,16 +2,13 @@
 	<NcContent app-name="files_external_ethswarm" about="HejBit Settings">
 		<NcAppContent>
 			<NcSettingsSection name="Telemetry">
-				<strong
-					>Why Telemetry is Important for Us and for You</strong
-				>
+				<strong>Why Telemetry is Important for Us and for You</strong>
 				<p>
 					Our telemetry is designed solely to capture exceptions
-					(errors) that occur while using our Nextcloud plugin.
-					This means it focuses exclusively on identifying and
+					(errors) that occur while using our Nextcloud plugin. This
+					means it focuses exclusively on identifying and
 					understanding issues that might disrupt your experience.
-					Here's why enabling telemetry can benefit both you and
-					us:
+					Here's why enabling telemetry can benefit both you and us:
 				</p>
 
 				<ul>
@@ -54,10 +51,10 @@
 					Services</strong
 				>
 				<p>
-					To ensure seamless access to your decentralized data, it
-					is essential that at least one Bee node service is
-					operational alongside the HejBit Application. Check out
-					the status page for more information.
+					To ensure seamless access to your decentralized data, it is
+					essential that at least one Bee node service is operational
+					alongside the HejBit Application. Check out the status page
+					for more information.
 				</p>
 				<p>
 					<a
@@ -84,6 +81,7 @@ import {
 } from "@nextcloud/vue";
 
 import axios from "@nextcloud/axios";
+import { showError, showSuccess } from "@nextcloud/dialogs";
 import { generateUrl } from "@nextcloud/router";
 
 export default {
@@ -135,19 +133,17 @@ export default {
 					generateUrl("/apps/files_external_ethswarm/settings"),
 					{
 						telemetry: this.telemetryEnabled,
-					}
+					},
 				);
 
 				this.saveSuccess = true;
-				OC.Notification.showTemporary(
-					t("files_external_ethswarm", "Settings saved")
-				);
+				showSuccess(t("files_external_ethswarm", "Settings saved"));
 				this.originalTelemetryState = this.telemetryEnabled;
 			} catch (error) {
 				console.error("Error saving settings:", error);
 				this.saveSuccess = false;
-				OC.Notification.showTemporary(
-					t("files_external_ethswarm", "Error saving settings")
+				showError(
+					t("files_external_ethswarm", "Error saving settings"),
 				);
 			} finally {
 				this.isSaving = false;

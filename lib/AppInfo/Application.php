@@ -80,14 +80,13 @@ class Application extends BaseApp {
 	}
 
 	private function loadAssets($context): void {
-		Util::addStyle(Application::NAME, 'app');
-		Util::addScript(Application::NAME, 'nextcloud-swarm-plugin-settings');
+		Util::addStyle(Application::NAME, 'files_external_ethswarm-app');
+		Util::addScript(Application::NAME, 'files_external_ethswarm-settings');
 
 		/** @var IEventDispatcher $dispatcher */
 		$dispatcher = $context->getAppContainer()->get(IEventDispatcher::class);
 		$dispatcher->addListener(LoadAdditionalScriptsEvent::class, function () {
-			Util::addStyle(Application::NAME, 'feedback');
-			Util::addInitScript(Application::NAME, 'nextcloud-swarm-plugin-app');
+			Util::addInitScript(Application::NAME, 'files_external_ethswarm-app');
 		});
 	}
 }

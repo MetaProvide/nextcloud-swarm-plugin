@@ -12,7 +12,6 @@
 	height: 16px;
 }
 
-
 .hejbit-archive svg {
 	filter: grayscale(100%);
 	border: 1px dashed #f6c915;
@@ -22,4 +21,3 @@
 [data-section-id="files_external_ethswarm"] img {
 	filter: none !important;
 }
-

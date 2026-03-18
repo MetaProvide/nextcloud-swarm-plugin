@@ -1,7 +1,7 @@
 import { subscribe } from "@nextcloud/event-bus";
 import {
-	getNewFileMenuEntriesCompat,
 	addNewFileMenuEntryCompat,
+	getNewFileMenuEntriesCompat,
 	removeNewFileMenuEntryCompat,
 } from "@/util/FilesCompatibility";
 
@@ -27,7 +27,7 @@ const filesMenu = {
 		}
 	},
 	cleanup() {
-		this.originalMenu.forEach(function (removeMenuEntry) {
+		this.originalMenu.forEach((removeMenuEntry) => {
 			if (removeMenuEntry.id !== "newFolder") {
 				removeNewFileMenuEntryCompat(removeMenuEntry);
 			}
@@ -35,9 +35,9 @@ const filesMenu = {
 	},
 	restore() {
 		const currentEntries = getNewFileMenuEntriesCompat();
-		this.originalMenu.forEach(function (backedUpMenuEntry) {
+		this.originalMenu.forEach((backedUpMenuEntry) => {
 			!currentEntries.some(
-				(entry) => entry.id === backedUpMenuEntry.id
+				(entry) => entry.id === backedUpMenuEntry.id,
 			) && addNewFileMenuEntryCompat(backedUpMenuEntry);
 		});
 		this.originalMenu = [];

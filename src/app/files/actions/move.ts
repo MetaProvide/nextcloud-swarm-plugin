@@ -1,17 +1,17 @@
-import { emit } from "@nextcloud/event-bus";
-import MoveSvg from "@material-design-icons/svg/filled/drive_file_move.svg";
-import FilesHelper from "@/util/FilesHelper";
-import SvgHelper from "@/util/SvgHelper";
+import MoveSvg from "@material-design-icons/svg/filled/drive_file_move.svg?raw";
 import axios from "@nextcloud/axios";
 import { showError, showSuccess } from "@nextcloud/dialogs";
+import { emit } from "@nextcloud/event-bus";
 import { registerFileActionCompat } from "@/util/FilesCompatibility";
+import FilesHelper from "@/util/FilesHelper";
+import SvgHelper from "@/util/SvgHelper";
 
 registerFileActionCompat({
 	id: "moveAction",
-	displayName({ nodes }) {
+	displayName() {
 		return t("files_external_ethswarm", "Move");
 	},
-	iconSvgInline({ nodes }) {
+	iconSvgInline() {
 		return SvgHelper.convert(MoveSvg);
 	},
 	enabled({ nodes }) {
@@ -43,7 +43,7 @@ registerFileActionCompat({
 	},
 	execBatch({ nodes, view }) {
 		return Promise.all(
-			nodes.map((node) => this.exec({ nodes: [node], view }))
+			nodes.map((node) => this.exec({ nodes: [node], view })),
 		);
 	},
 });

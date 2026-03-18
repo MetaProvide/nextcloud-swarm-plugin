@@ -1,15 +1,15 @@
+import EditSvg from "@material-design-icons/svg/filled/edit.svg?raw";
 import { emit } from "@nextcloud/event-bus";
-import EditSvg from "@material-design-icons/svg/filled/edit.svg";
+import { registerFileActionCompat } from "@/util/FilesCompatibility";
 import FilesHelper from "@/util/FilesHelper";
 import SvgHelper from "@/util/SvgHelper";
-import { registerFileActionCompat } from "@/util/FilesCompatibility";
 
 registerFileActionCompat({
 	id: "renameAction",
-	displayName({ nodes }) {
+	displayName() {
 		return t("files_external_ethswarm", "Rename");
 	},
-	iconSvgInline({ nodes }) {
+	iconSvgInline() {
 		return SvgHelper.convert(EditSvg);
 	},
 	enabled({ nodes }) {

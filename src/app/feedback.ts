@@ -1,8 +1,14 @@
-import { subscribe } from "@nextcloud/event-bus";
 import Feedback from "@betahuhn/feedback-js";
+import { getCurrentUser } from "@nextcloud/auth";
 import axios from "@nextcloud/axios";
-import HejBitLogo from "../../img/hejbit-logo.svg";
+import { subscribe } from "@nextcloud/event-bus";
+import { generateOcsUrl, generateUrl } from "@nextcloud/router";
 import FeaturesHelper from "@/util/FeaturesHelper";
+import HejBitLogo from "../../img/hejbit-logo.svg";
+
+if (typeof Feedback?.prototype?._addStyle === "function") {
+	Feedback.prototype._addStyle = () => {};
+}
 
 const feedback = {
 	async enabled() {
@@ -29,8 +35,8 @@ const feedback = {
 			const feedbackButton = `<img src="${HejBitLogo}" alt="HejBit" style="height: 20px; vertical-align: middle;margin-right:10px">HejBit Feedback`;
 			const feedbackInstance = new Feedback({
 				id: "feedback",
-				endpoint: OC.generateUrl(
-					"/apps/files_external_ethswarm/feedback/submit"
+				endpoint: generateUrl(
+					"/apps/files_external_ethswarm/feedback/submit",
 				),
 				emailField: true,
 				events: false,
@@ -68,24 +74,25 @@ const feedback = {
 		}
 	},
 	fetchUserEmail() {
+		const currentUser = getCurrentUser();
+		if (!currentUser?.uid) {
+			return;
+		}
+
 		axios
-			.get(
-				OC.generateUrl(
-					"ocs/v2.php/cloud/users/" + OC.getCurrentUser().uid
-				)
-			)
+			.get(generateOcsUrl("/cloud/users/{uid}", { uid: currentUser.uid }))
 			.then((response) => {
 				const email = response.data.ocs.data.email;
 				const observer = new MutationObserver((mutations) => {
 					for (const mutation of mutations) {
 						if (mutation.addedNodes.length) {
 							const emailField = document.querySelector(
-								"input#feedback-email"
-							);
+								"input#feedback-email",
+							) as HTMLInputElement | null;
 							if (emailField) {
 								emailField.value = email;
 								emailField.dispatchEvent(
-									new Event("input", { bubbles: true })
+									new Event("input", { bubbles: true }),
 								);
 								observer.disconnect();
 								break;
@@ -93,10 +100,14 @@ const feedback = {
 						}
 					}
 				});
-				observer.observe(document.querySelector("div#feedback-root"), {
-					childList: true,
-					subtree: true,
-				});
+				const feedbackRoot =
+					document.querySelector("div#feedback-root");
+				if (feedbackRoot) {
+					observer.observe(feedbackRoot, {
+						childList: true,
+						subtree: true,
+					});
+				}
 			})
 			.catch((error) => {
 				console.error("Error fetching user data:", error);
