@@ -1,10 +1,9 @@
+import DownloadSvg from "@material-design-icons/svg/filled/download.svg?raw";
 import axios from "@nextcloud/axios";
-import { showError, showSuccess } from "@nextcloud/dialogs";
-import { getDialogBuilder } from "@nextcloud/dialogs";
-import DownloadSvg from "@material-design-icons/svg/filled/download.svg";
+import { getDialogBuilder, showError, showSuccess } from "@nextcloud/dialogs";
+import { registerFileActionCompat } from "@/util/FilesCompatibility";
 import FilesHelper from "@/util/FilesHelper";
 import SvgHelper from "@/util/SvgHelper";
-import { registerFileActionCompat } from "@/util/FilesCompatibility";
 
 registerFileActionCompat({
 	id: "exportAction",
@@ -28,7 +27,7 @@ registerFileActionCompat({
 				`
 				This action will export your HejBit storage metadata such as Swarm references for this storage to a JSON file.
 				You're responsible for keeping this file secure. Are you sure you want to export your HejBit storage metadata?
-			`
+			`,
 			)
 			.addButton({
 				label: "Cancel",
@@ -59,13 +58,13 @@ const downloadMetadata = async (node) => {
 			const date = new Date().toISOString().split("T")[0];
 			FilesHelper.downloadFile(
 				blob,
-				`hejbit-export-${storageName}-${date}.json`
+				`hejbit-export-${storageName}-${date}.json`,
 			);
 			showSuccess("Exported storage metadata successfully");
 		} else {
 			console.error(
 				"Error while exporting metadata of the storage",
-				response
+				response,
 			);
 			showError(response.data.message);
 		}

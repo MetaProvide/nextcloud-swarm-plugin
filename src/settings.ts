@@ -36,17 +36,19 @@ document.addEventListener("DOMContentLoaded", () => {
 function prefillHostUrlForNc33() {
 	const DEFAULT_HOST = "app.hejbit.com";
 
-	const tryPrefill = (root) => {
-		const input = root.querySelector
-			? root.querySelector('input[name="host_url"]')
-			: null;
+	const tryPrefill = (root: ParentNode) => {
+		const input = root.querySelector(
+			'input[name="host_url"]',
+		) as HTMLInputElement | null;
 		if (input && input.value === "") {
 			// Use the native setter so Vue's reactivity picks up the change.
 			const nativeSetter = Object.getOwnPropertyDescriptor(
 				window.HTMLInputElement.prototype,
-				"value"
-			).set;
-			nativeSetter.call(input, DEFAULT_HOST);
+				"value",
+			)?.set;
+			if (nativeSetter) {
+				nativeSetter.call(input, DEFAULT_HOST);
+			}
 			input.dispatchEvent(new Event("input", { bubbles: true }));
 		}
 	};
@@ -55,7 +57,7 @@ function prefillHostUrlForNc33() {
 		for (const mutation of mutations) {
 			for (const node of mutation.addedNodes) {
 				if (node.nodeType === Node.ELEMENT_NODE) {
-					tryPrefill(node);
+					tryPrefill(node as ParentNode);
 				}
 			}
 		}

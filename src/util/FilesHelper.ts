@@ -1,24 +1,25 @@
-import { FileType } from "@nextcloud/files";
 import { getFilePickerBuilder } from "@nextcloud/dialogs";
+import { FileType } from "@nextcloud/files";
 import { basename, dirname } from "path";
 import SvgHelper from "@/util/SvgHelper";
 
 const FilesHelper = {
-	isSwarmNode: (nodes) => getMainNode(nodes).attributes["ethswarm-node"] !== undefined,
+	isSwarmNode: (nodes) =>
+		getMainNode(nodes).attributes["ethswarm-node"] !== undefined,
 	getSwarmRef: (nodes) => getSwarmRef(nodes),
 	hasSwarmRef: (nodes) => getSwarmRef(nodes) !== undefined,
 	canUnshareOnly: (nodes) => {
 		return nodes.every(
 			(node) =>
 				node.attributes["is-mount-root"] === true &&
-				node.attributes["mount-type"] === "shared"
+				node.attributes["mount-type"] === "shared",
 		);
 	},
 	canDisconnectOnly: (nodes) => {
 		return nodes.every(
 			(node) =>
 				node.attributes["is-mount-root"] === true &&
-				node.attributes["mount-type"] === "external"
+				node.attributes["mount-type"] === "external",
 		);
 	},
 	isMixedUnshareAndDelete: (nodes) => {
@@ -26,10 +27,10 @@ const FilesHelper = {
 			return false;
 		}
 		const hasSharedItems = nodes.some((node) =>
-			this.canUnshareOnly([node])
+			FilesHelper.canUnshareOnly([node]),
 		);
 		const hasDeleteItems = nodes.some(
-			(node) => !this.canUnshareOnly([node])
+			(node) => !FilesHelper.canUnshareOnly([node]),
 		);
 		return hasSharedItems && hasDeleteItems;
 	},
@@ -49,7 +50,7 @@ const FilesHelper = {
 		getPathParts(node).length === 2 && isArchive(node),
 	locationPicker: (node, action, logo) =>
 		getFilePickerBuilder(`Select ${action} Location`)
-			.setButtonFactory((selection, path) => {
+			.setButtonFactory((_selection, path) => {
 				return FilesHelper.getStoragePath(path) === ""
 					? []
 					: [
@@ -63,14 +64,14 @@ const FilesHelper = {
 											{
 												escape: false,
 												sanitize: false,
-											}
-									  )
+											},
+										)
 									: t("files", action),
 								type: "primary",
 								icon: SvgHelper.convert(logo),
-								callback: (destination) => destination,
+								callback: () => undefined,
 							},
-					  ];
+						];
 			})
 			.allowDirectories(true)
 			.setFilter((n) => {
@@ -84,12 +85,12 @@ const FilesHelper = {
 			})
 			.setMimeTypeFilter([])
 			.setMultiSelect(false)
-			.disableNavigation(true)
+			.disableNavigation()
 			.startAt(
 				dirname(node.path).substring(
 					0,
-					dirname(node.path).lastIndexOf("/")
-				)
+					dirname(node.path).lastIndexOf("/"),
+				),
 			)
 			.build()
 			.pick(),

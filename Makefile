@@ -10,15 +10,15 @@ cert_directory=$(HOME)/.nextcloud/certificates
 
 all: dev-setup lint build-js-production
 
-release: composer npm-init build-js-production build-tarball
+release: composer pnpm-init build-js-production build-tarball
 
-appstore: composer npm-init build-js-production build-appstore-tarball
+appstore: composer pnpm-init build-js-production build-appstore-tarball
 
-dev-setup: clean-dev composer npm-init
+dev-setup: clean-dev composer pnpm-init
 
-lint: eslint stylelint prettier php-cs
+lint: lint-js-check format-check typecheck php-cs
 
-lint-fix: eslint-fix stylelint-fix prettier-fix php-cs-fix
+lint-fix: lint-js-fix format-fix php-cs-fix
 
 # Dependencies
 composer:
@@ -27,45 +27,40 @@ composer:
 composer-update:
 	composer update --prefer-dist
 
-npm-init:
-	npm ci
+pnpm-init:
+	pnpm install --frozen-lockfile
 
-npm-update:
-	npm update
+pnpm-update:
+	pnpm update
 
 # Building
 build-js:
-	npm run dev
+	pnpm run dev
 
 build-js-production:
-	npm run build
+	pnpm run build
 
 watch-js:
-	npm run watch
+	pnpm run dev
 
 serve-js:
-	npm run serve
+	pnpm run serve
 
 # Linting
-eslint:
-	npm run eslint
+lint-js-check:
+	pnpm run lint
 
-eslint-fix:
-	npm run eslint:fix
+lint-js-fix:
+	pnpm run lint:fix
 
-# Style linting
-stylelint:
-	npm run stylelint
+format-check:
+	pnpm run format
 
-stylelint-fix:
-	npm run stylelint:fix
+format-fix:
+	pnpm run format:fix
 
-# Prettier
-prettier:
-	npm run prettier
-
-prettier-fix:
-	npm run prettier:fix
+typecheck:
+	pnpm run typecheck
 
 # PHP CS Fixer
 php-cs:
@@ -92,23 +87,21 @@ build-tarball:
 	--exclude="docker" \
 	--exclude="node_modules" \
 	--exclude="./src" \
+	--exclude="styles" \
 	--exclude="./vendor" \
+	--exclude="biome.json" \
 	--exclude=".editorconfig" \
-	--exclude=".eslintrc.js" \
 	--exclude=".gitignore" \
 	--exclude=".php_cs.cache" \
 	--exclude=".php-cs-fixer.dist.php" \
-	--exclude=".prettierignore" \
-	--exclude=".prettierrc.json" \
-	--exclude="babel.config.js" \
 	--exclude="composer.json" \
 	--exclude="composer.lock" \
 	--exclude="docker-compose.yml" \
+	--exclude="tsconfig.json" \
 	--exclude="Makefile" \
-	--exclude="package-lock.json" \
 	--exclude="package.json" \
-	--exclude="stylelint.config.js" \
-	--exclude="webpack.config.js" \
+	--exclude="pnpm-lock.yaml" \
+	--exclude="vite.config.mjs" \
 	--exclude="CHANGELOG.md" \
 	../$(app_name)/ $(temp_build_directory)/$(app_id)
 	tar czf $(build_directory)/$(app_name).tar.gz \
@@ -128,23 +121,21 @@ build-appstore-tarball:
 	--exclude="docker" \
 	--exclude="node_modules" \
 	--exclude="./src" \
+	--exclude="styles" \
 	--exclude="./vendor" \
+	--exclude="biome.json" \
 	--exclude=".editorconfig" \
-	--exclude=".eslintrc.js" \
 	--exclude=".gitignore" \
 	--exclude=".php_cs.cache" \
 	--exclude=".php-cs-fixer.dist.php" \
-	--exclude=".prettierignore" \
-	--exclude=".prettierrc.json" \
-	--exclude="babel.config.js" \
 	--exclude="composer.json" \
 	--exclude="composer.lock" \
 	--exclude="docker-compose.yml" \
+	--exclude="tsconfig.json" \
 	--exclude="Makefile" \
-	--exclude="package-lock.json" \
 	--exclude="package.json" \
-	--exclude="stylelint.config.js" \
-	--exclude="webpack.config.js" \
+	--exclude="pnpm-lock.yaml" \
+	--exclude="vite.config.mjs" \
 	--exclude="CHANGELOG.md" \
 	../$(app_id)/ $(temp_build_directory)/$(app_id)
 	@if [ -f $(cert_directory)/$(app_id).key ]; then \
