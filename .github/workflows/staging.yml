@@ -13,6 +13,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Copy staging deploy script
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ vars.STAGING_SERVER_HOST }}
+          username: ${{ vars.STAGING_SERVER_USER }}
+          key: ${{ secrets.STAGING_SSH_PRIVATE_KEY }}
+          proxy_host: ${{ vars.STAGING_PROXY_HOST }}
+          proxy_username: ${{ vars.STAGING_PROXY_USER }}
+          proxy_key: ${{ secrets.STAGING_PROXY_SSH_PRIVATE_KEY }}
+          source: "scripts/stage/deploy.sh"
+          target: "/tmp"
+          strip_components: 1
+
       - name: Deploy
         uses: appleboy/ssh-action@master
         with:
@@ -22,4 +35,11 @@ jobs:
           proxy_host: ${{ vars.STAGING_PROXY_HOST }}
           proxy_username: ${{ vars.STAGING_PROXY_USER }}
           proxy_key: ${{ secrets.STAGING_PROXY_SSH_PRIVATE_KEY }}
-          script: bash deploy
+          script: |
+            set -e
+            SCRIPT_PATH="/tmp/deploy.sh"
+            if [ ! -f "$SCRIPT_PATH" ]; then
+              SCRIPT_PATH="/tmp/scripts/stage/deploy.sh"
+            fi
+            chmod +x "$SCRIPT_PATH"
+            bash "$SCRIPT_PATH"
