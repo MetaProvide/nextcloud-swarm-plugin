@@ -1,10 +1,10 @@
-import { Dialog, showSuccess, showWarning } from "@nextcloud/dialogs";
-import SwarmSvg from "@/../img/swarm-logo.svg?raw";
 import ClipboardSvg from "@material-design-icons/svg/filled/content_paste.svg?raw";
 import OpenSvg from "@material-design-icons/svg/filled/open_in_new.svg?raw";
-import SvgHelper from "@/util/SvgHelper";
-import FilesHelper from "@/util/FilesHelper";
+import { Dialog, showSuccess, showWarning } from "@nextcloud/dialogs";
+import SwarmSvg from "@/../img/swarm-logo.svg?raw";
 import { registerFileActionCompat } from "@/util/FilesCompatibility";
+import FilesHelper from "@/util/FilesHelper";
+import SvgHelper from "@/util/SvgHelper";
 
 registerFileActionCompat({
 	id: "EthswarmCopyRef",

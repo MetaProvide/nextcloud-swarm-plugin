@@ -16,9 +16,9 @@ const overrides = defineConfig({
 
 export default createAppConfig(
 	{
-		main: "src/main.js",
-		app: "src/app.js",
-		settings: "src/settings.js",
+		main: "src/main.ts",
+		app: "src/app.ts",
+		settings: "src/settings.ts",
 	},
 	{
 		config: overrides,

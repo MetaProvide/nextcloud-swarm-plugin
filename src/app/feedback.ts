@@ -1,10 +1,10 @@
-import { subscribe } from "@nextcloud/event-bus";
 import Feedback from "@betahuhn/feedback-js";
-import axios from "@nextcloud/axios";
 import { getCurrentUser } from "@nextcloud/auth";
+import axios from "@nextcloud/axios";
+import { subscribe } from "@nextcloud/event-bus";
 import { generateOcsUrl, generateUrl } from "@nextcloud/router";
-import HejBitLogo from "../../img/hejbit-logo.svg";
 import FeaturesHelper from "@/util/FeaturesHelper";
+import HejBitLogo from "../../img/hejbit-logo.svg";
 
 if (typeof Feedback?.prototype?._addStyle === "function") {
 	Feedback.prototype._addStyle = () => {};
@@ -88,7 +88,7 @@ const feedback = {
 						if (mutation.addedNodes.length) {
 							const emailField = document.querySelector(
 								"input#feedback-email",
-							);
+							) as HTMLInputElement | null;
 							if (emailField) {
 								emailField.value = email;
 								emailField.dispatchEvent(
@@ -100,10 +100,14 @@ const feedback = {
 						}
 					}
 				});
-				observer.observe(document.querySelector("div#feedback-root"), {
-					childList: true,
-					subtree: true,
-				});
+				const feedbackRoot =
+					document.querySelector("div#feedback-root");
+				if (feedbackRoot) {
+					observer.observe(feedbackRoot, {
+						childList: true,
+						subtree: true,
+					});
+				}
 			})
 			.catch((error) => {
 				console.error("Error fetching user data:", error);

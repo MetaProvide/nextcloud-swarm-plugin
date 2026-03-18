@@ -1,5 +1,5 @@
-import { FileType } from "@nextcloud/files";
 import { getFilePickerBuilder } from "@nextcloud/dialogs";
+import { FileType } from "@nextcloud/files";
 import { basename, dirname } from "path";
 import SvgHelper from "@/util/SvgHelper";
 
@@ -27,10 +27,10 @@ const FilesHelper = {
 			return false;
 		}
 		const hasSharedItems = nodes.some((node) =>
-			this.canUnshareOnly([node]),
+			FilesHelper.canUnshareOnly([node]),
 		);
 		const hasDeleteItems = nodes.some(
-			(node) => !this.canUnshareOnly([node]),
+			(node) => !FilesHelper.canUnshareOnly([node]),
 		);
 		return hasSharedItems && hasDeleteItems;
 	},
@@ -50,7 +50,7 @@ const FilesHelper = {
 		getPathParts(node).length === 2 && isArchive(node),
 	locationPicker: (node, action, logo) =>
 		getFilePickerBuilder(`Select ${action} Location`)
-			.setButtonFactory((selection, path) => {
+			.setButtonFactory((_selection, path) => {
 				return FilesHelper.getStoragePath(path) === ""
 					? []
 					: [
@@ -69,7 +69,7 @@ const FilesHelper = {
 									: t("files", action),
 								type: "primary",
 								icon: SvgHelper.convert(logo),
-								callback: (destination) => destination,
+								callback: () => undefined,
 							},
 						];
 			})
@@ -85,7 +85,7 @@ const FilesHelper = {
 			})
 			.setMimeTypeFilter([])
 			.setMultiSelect(false)
-			.disableNavigation(true)
+			.disableNavigation()
 			.startAt(
 				dirname(node.path).substring(
 					0,

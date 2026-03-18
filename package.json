@@ -16,10 +16,11 @@
 		"build": "vite build",
 		"dev": "vite build --mode development --watch",
 		"serve": "vite --mode development --host 127.0.0.1",
-		"lint": "oxlint --config .oxlintrc.json --fix src",
-		"lint:check": "oxlint --config .oxlintrc.json src",
-		"format": "biome format --write .",
-		"format:check": "biome format ."
+		"lint": "biome lint src styles",
+		"lint:fix": "biome lint --write src styles",
+		"format": "biome format .",
+		"format:fix": "biome format --write .",
+		"typecheck": "vue-tsc --noEmit"
 	},
 	"dependencies": {
 		"@betahuhn/feedback-js": "^2.1.25",
@@ -30,6 +31,7 @@
 		"@nextcloud/event-bus": "^3.3.3",
 		"@nextcloud/files": "^4.0.0",
 		"@nextcloud/router": "^3.1.0",
+		"@nextcloud/typings": "^1.10.0",
 		"@nextcloud/vue": "^9.6.0",
 		"@openfeature/flagd-web-provider": "^0.7.4",
 		"@openfeature/web-sdk": "^1.7.3",
@@ -39,9 +41,11 @@
 		"@biomejs/biome": "2.4.7",
 		"@nextcloud/browserslist-config": "^3.1.2",
 		"@nextcloud/vite-config": "^2.5.2",
+		"@types/node": "^24.5.2",
 		"browserslist": "^4.26.2",
-		"oxlint": "^1.56.0",
-		"vite": "^7.3.1"
+		"typescript": "^5.9.3",
+		"vite": "^7.3.1",
+		"vue-tsc": "^3.0.8"
 	},
 	"browserslist": [
 		"extends @nextcloud/browserslist-config"

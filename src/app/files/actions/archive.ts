@@ -1,11 +1,11 @@
+import ArchiveSvg from "@material-design-icons/svg/filled/archive.svg?raw";
+import UnarchiveSvg from "@material-design-icons/svg/filled/unarchive.svg?raw";
 import axios from "@nextcloud/axios";
 import { showError, showSuccess } from "@nextcloud/dialogs";
 import { emit } from "@nextcloud/event-bus";
-import ArchiveSvg from "@material-design-icons/svg/filled/archive.svg?raw";
-import UnarchiveSvg from "@material-design-icons/svg/filled/unarchive.svg?raw";
+import { registerFileActionCompat } from "@/util/FilesCompatibility";
 import FilesHelper from "@/util/FilesHelper";
 import SvgHelper from "@/util/SvgHelper";
-import { registerFileActionCompat } from "@/util/FilesCompatibility";
 
 registerFileActionCompat({
 	id: "archiveAction",
@@ -65,7 +65,7 @@ registerFileActionCompat({
 					emit("files:node:deleted", node);
 					showSuccess("Archived successfully");
 					if (FilesHelper.isRootLevel(node)) {
-						emit("files:config:updated");
+						emit("files:config:updated", undefined);
 					}
 				} else {
 					console.error("Error while archiving file", response);

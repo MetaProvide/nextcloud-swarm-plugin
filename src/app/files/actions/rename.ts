@@ -1,8 +1,8 @@
-import { emit } from "@nextcloud/event-bus";
 import EditSvg from "@material-design-icons/svg/filled/edit.svg?raw";
+import { emit } from "@nextcloud/event-bus";
+import { registerFileActionCompat } from "@/util/FilesCompatibility";
 import FilesHelper from "@/util/FilesHelper";
 import SvgHelper from "@/util/SvgHelper";
-import { registerFileActionCompat } from "@/util/FilesCompatibility";
 
 registerFileActionCompat({
 	id: "renameAction",

@@ -1,10 +1,10 @@
+import InfoSvg from "@material-design-icons/svg/filled/info.svg?raw";
 import { showInfo } from "@nextcloud/dialogs";
 import HejBitSvg from "@/../img/hejbit-logo.svg?raw";
 import HejBitSvgPadded from "@/../img/hejbit-logo-padded.svg?raw";
-import InfoSvg from "@material-design-icons/svg/filled/info.svg?raw";
+import { registerFileActionCompat } from "@/util/FilesCompatibility";
 import FilesHelper from "@/util/FilesHelper";
 import SvgHelper from "@/util/SvgHelper";
-import { registerFileActionCompat } from "@/util/FilesCompatibility";
 
 registerFileActionCompat({
 	id: "overlayAction",

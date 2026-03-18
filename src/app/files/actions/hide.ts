@@ -1,14 +1,14 @@
-import { FileType } from "@nextcloud/files";
-import { showError, showInfo } from "@nextcloud/dialogs";
-import axios from "@nextcloud/axios";
-import { emit } from "@nextcloud/event-bus";
 import Close from "@material-design-icons/svg/filled/close.svg?raw";
 import CloudOff from "@material-design-icons/svg/filled/cloud_off.svg?raw";
-import HideSource from "@material-design-icons/svg/filled/visibility_off.svg?raw";
 import UnhideSource from "@material-design-icons/svg/filled/settings_backup_restore.svg?raw";
+import HideSource from "@material-design-icons/svg/filled/visibility_off.svg?raw";
+import axios from "@nextcloud/axios";
+import { showError, showInfo } from "@nextcloud/dialogs";
+import { emit } from "@nextcloud/event-bus";
+import { FileType } from "@nextcloud/files";
+import { registerFileActionCompat } from "@/util/FilesCompatibility";
 import FilesHelper from "@/util/FilesHelper";
 import SvgHelper from "@/util/SvgHelper";
-import { registerFileActionCompat } from "@/util/FilesCompatibility";
 
 registerFileActionCompat({
 	id: "unhideAction",
@@ -64,7 +64,7 @@ registerFileActionCompat({
 				},
 			});
 
-			emit("files:config:updated");
+			emit("files:config:updated", undefined);
 
 			return true;
 		} catch (error) {
@@ -180,7 +180,7 @@ registerFileActionCompat({
 				},
 			});
 
-			emit("files:config:updated");
+			emit("files:config:updated", undefined);
 			return true;
 		} catch (error) {
 			showError("Error while hiding file");

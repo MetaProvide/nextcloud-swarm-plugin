@@ -1,8 +1,8 @@
-import { OpenFeature } from "@openfeature/web-sdk";
 import { FlagdWebProvider } from "@openfeature/flagd-web-provider";
+import { OpenFeature } from "@openfeature/web-sdk";
 
 const FLAGD_HOST = "features-test.hejbit.com";
-let client = null;
+let client: any = null;
 
 /**
  * Initialize the OpenFeature client with the FlagdWebProvider
@@ -24,8 +24,11 @@ async function init() {
 				platform: "web",
 			},
 		});
-		const logMessage = (level, ...messages) => {
-			console[level](`[OpenFeature]`, ...messages);
+		const logMessage = (
+			level: "debug" | "info" | "warn" | "error",
+			...messages: unknown[]
+		) => {
+			console[level]("[OpenFeature]", ...messages);
 		};
 		OpenFeature.setLogger({
 			debug: (...messages) => logMessage("debug", ...messages),
@@ -42,7 +45,7 @@ async function init() {
  * Feature flag utility functions
  */
 const FeaturesHelper = {
-	async bool(key, defaultValue = false) {
+	async bool(key: string, defaultValue = false) {
 		try {
 			const featureClient = await init();
 			return featureClient.getBooleanValue(key, defaultValue);

@@ -38,12 +38,14 @@
  */
 
 import {
-	registerFileAction,
 	addNewFileMenuEntry,
 	getNewFileMenuEntries,
+	registerFileAction,
 	removeNewFileMenuEntry,
 } from "@nextcloud/files";
 import { registerDavProperty } from "@nextcloud/files/dav";
+
+type AnyRecord = Record<string, any>;
 
 /* ================================================================== */
 /*  Version detection                                                  */
@@ -102,7 +104,7 @@ export function isNextcloud33OrHigher() {
  *   inline({ nodes: [node], view })
  *   renderInline({ nodes: [node], view })
  */
-function registerFileActionV3(actionConfig) {
+function registerFileActionV3(actionConfig: AnyRecord) {
 	if (typeof window._nc_fileactions === "undefined") {
 		window._nc_fileactions = [];
 	}
@@ -114,60 +116,53 @@ function registerFileActionV3(actionConfig) {
 		return;
 	}
 
-	const wrapped = {};
+	const wrapped: AnyRecord = {};
 
 	if (typeof actionConfig.displayName === "function") {
-		wrapped.displayName = function (nodes, view) {
-			return actionConfig.displayName({ nodes, view });
-		};
+		wrapped.displayName = (nodes, view) =>
+			actionConfig.displayName({ nodes, view });
 	}
 
 	if (typeof actionConfig.iconSvgInline === "function") {
-		wrapped.iconSvgInline = function (nodes, view) {
-			return actionConfig.iconSvgInline({
+		wrapped.iconSvgInline = (nodes, view) =>
+			actionConfig.iconSvgInline({
 				nodes,
 				view,
 			});
-		};
 	}
 
 	if (typeof actionConfig.enabled === "function") {
-		wrapped.enabled = function (nodes, view) {
-			return actionConfig.enabled({ nodes, view });
-		};
+		wrapped.enabled = (nodes, view) =>
+			actionConfig.enabled({ nodes, view });
 	}
 
 	if (typeof actionConfig.exec === "function") {
-		wrapped.exec = function (node, view, dir) {
-			return actionConfig.exec({
+		wrapped.exec = (node, view, dir) =>
+			actionConfig.exec({
 				nodes: [node],
 				view,
 			});
-		};
 	}
 
 	if (typeof actionConfig.execBatch === "function") {
-		wrapped.execBatch = function (nodes, view, dir) {
-			return actionConfig.execBatch({ nodes, view });
-		};
+		wrapped.execBatch = (nodes, view, dir) =>
+			actionConfig.execBatch({ nodes, view });
 	}
 
 	if (typeof actionConfig.inline === "function") {
-		wrapped.inline = function (node, view) {
-			return actionConfig.inline({
+		wrapped.inline = (node, view) =>
+			actionConfig.inline({
 				nodes: [node],
 				view,
 			});
-		};
 	}
 
 	if (typeof actionConfig.renderInline === "function") {
-		wrapped.renderInline = function (node, view) {
-			return actionConfig.renderInline({
+		wrapped.renderInline = (node, view) =>
+			actionConfig.renderInline({
 				nodes: [node],
 				view,
 			});
-		};
 	}
 
 	const v3Action = {
@@ -224,11 +219,11 @@ function registerFileActionV3(actionConfig) {
  * Action code should use the v4 context-object style for callbacks,
  * e.g. `exec({ nodes, view }) { ... }`.
  */
-export function registerFileActionCompat(actionConfig) {
+export function registerFileActionCompat(actionConfig: AnyRecord) {
 	if (isNextcloud32OrLower()) {
 		registerFileActionV3(actionConfig);
 	} else {
-		registerFileAction(actionConfig);
+		registerFileAction(actionConfig as any);
 	}
 }
 
@@ -246,7 +241,7 @@ const registeredDavProperties = new Set();
  * writes to the v4 scoped globals, so on NC 32 we additionally push
  * into the v3 globals.
  */
-export function registerDavPropertyCompat(property) {
+export function registerDavPropertyCompat(property: string) {
 	if (registeredDavProperties.has(property)) {
 		return;
 	}
@@ -287,7 +282,7 @@ export function registerDavPropertyCompat(property) {
 /**
  * Get new-file menu entries, compatible with both NC 32 and NC 33+.
  */
-export function getNewFileMenuEntriesCompat(context) {
+export function getNewFileMenuEntriesCompat(context?: any) {
 	if (isNextcloud32OrLower() && window._nc_newfilemenu) {
 		return window._nc_newfilemenu.getEntries(context);
 	}
@@ -297,7 +292,7 @@ export function getNewFileMenuEntriesCompat(context) {
 /**
  * Add a new-file menu entry, compatible with both NC 32 and NC 33+.
  */
-export function addNewFileMenuEntryCompat(entry) {
+export function addNewFileMenuEntryCompat(entry: any) {
 	if (isNextcloud32OrLower() && window._nc_newfilemenu) {
 		return window._nc_newfilemenu.registerEntry(entry);
 	}
@@ -307,7 +302,7 @@ export function addNewFileMenuEntryCompat(entry) {
 /**
  * Remove a new-file menu entry, compatible with both NC 32 and NC 33+.
  */
-export function removeNewFileMenuEntryCompat(entry) {
+export function removeNewFileMenuEntryCompat(entry: any) {
 	if (isNextcloud32OrLower() && window._nc_newfilemenu) {
 		return window._nc_newfilemenu.unregisterEntry(entry);
 	}

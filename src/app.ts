@@ -1,7 +1,10 @@
 /**
  * @copyright Copyright (c) 2025, MetaProvide Holding EKF
  *
+ * @author Mahyar Iranibazaz <mahiarirani@pm.me>
  * @author Henry Bergström <metahenry@metaprovide.org>
+ * @author Ron Trevor <ecoron@proton.me>
+ * @author Joao Raposo <joaosraposo@gmail.com>
  *
  * @license GNU AGPL version 3 or any later version
  *
@@ -19,13 +22,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  */
-import { createApp } from "vue";
-import "@nextcloud/dialogs/style.css";
-import Setting from "./pages/Setting.vue";
 
-const rootElement = document.querySelector("#app");
-const settings = rootElement?.dataset?.params
-	? JSON.parse(rootElement.dataset.params)
-	: {};
+import "../styles/app.css";
+import "../styles/feedback.css";
 
-export default createApp(Setting, { settings }).mount("#app");
+const appModules = import.meta.glob("./app/**/*.ts", { eager: true });
+Object.values(appModules);

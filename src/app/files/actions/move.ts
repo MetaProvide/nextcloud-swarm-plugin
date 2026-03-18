@@ -1,10 +1,10 @@
-import { emit } from "@nextcloud/event-bus";
 import MoveSvg from "@material-design-icons/svg/filled/drive_file_move.svg?raw";
-import FilesHelper from "@/util/FilesHelper";
-import SvgHelper from "@/util/SvgHelper";
 import axios from "@nextcloud/axios";
 import { showError, showSuccess } from "@nextcloud/dialogs";
+import { emit } from "@nextcloud/event-bus";
 import { registerFileActionCompat } from "@/util/FilesCompatibility";
+import FilesHelper from "@/util/FilesHelper";
+import SvgHelper from "@/util/SvgHelper";
 
 registerFileActionCompat({
 	id: "moveAction",

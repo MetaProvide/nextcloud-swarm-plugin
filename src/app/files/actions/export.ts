@@ -1,9 +1,9 @@
+import DownloadSvg from "@material-design-icons/svg/filled/download.svg?raw";
 import axios from "@nextcloud/axios";
 import { getDialogBuilder, showError, showSuccess } from "@nextcloud/dialogs";
-import DownloadSvg from "@material-design-icons/svg/filled/download.svg?raw";
+import { registerFileActionCompat } from "@/util/FilesCompatibility";
 import FilesHelper from "@/util/FilesHelper";
 import SvgHelper from "@/util/SvgHelper";
-import { registerFileActionCompat } from "@/util/FilesCompatibility";
 
 registerFileActionCompat({
 	id: "exportAction",

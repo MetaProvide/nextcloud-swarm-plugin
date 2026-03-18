@@ -16,7 +16,7 @@ appstore: composer pnpm-init build-js-production build-appstore-tarball
 
 dev-setup: clean-dev composer pnpm-init
 
-lint: lint-js-check format-check php-cs
+lint: lint-js-check format-check typecheck php-cs
 
 lint-fix: lint-js-fix format-fix php-cs-fix
 
@@ -48,16 +48,19 @@ serve-js:
 
 # Linting
 lint-js-check:
-	pnpm run lint:check
-
-lint-js-fix:
 	pnpm run lint
 
+lint-js-fix:
+	pnpm run lint:fix
+
 format-check:
-	pnpm run format:check
+	pnpm run format
 
 format-fix:
-	pnpm run format
+	pnpm run format:fix
+
+typecheck:
+	pnpm run typecheck
 
 # PHP CS Fixer
 php-cs:
@@ -86,7 +89,6 @@ build-tarball:
 	--exclude="./src" \
 	--exclude="styles" \
 	--exclude="./vendor" \
-	--exclude=".oxlintrc.json" \
 	--exclude="biome.json" \
 	--exclude=".editorconfig" \
 	--exclude=".gitignore" \
@@ -95,7 +97,7 @@ build-tarball:
 	--exclude="composer.json" \
 	--exclude="composer.lock" \
 	--exclude="docker-compose.yml" \
-	--exclude="jsconfig.json" \
+	--exclude="tsconfig.json" \
 	--exclude="Makefile" \
 	--exclude="package.json" \
 	--exclude="pnpm-lock.yaml" \
@@ -121,7 +123,6 @@ build-appstore-tarball:
 	--exclude="./src" \
 	--exclude="styles" \
 	--exclude="./vendor" \
-	--exclude=".oxlintrc.json" \
 	--exclude="biome.json" \
 	--exclude=".editorconfig" \
 	--exclude=".gitignore" \
@@ -130,7 +131,7 @@ build-appstore-tarball:
 	--exclude="composer.json" \
 	--exclude="composer.lock" \
 	--exclude="docker-compose.yml" \
-	--exclude="jsconfig.json" \
+	--exclude="tsconfig.json" \
 	--exclude="Makefile" \
 	--exclude="package.json" \
 	--exclude="pnpm-lock.yaml" \

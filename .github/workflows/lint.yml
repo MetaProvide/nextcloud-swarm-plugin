@@ -56,8 +56,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Run Oxlint
-        run: pnpm run lint:check
+      - name: Run Biome lint
+        run: pnpm run lint
 
       - name: Run Biome format check
-        run: pnpm run format:check
+        run: pnpm run format
+
+      - name: Run TypeScript type check
+        run: pnpm run typecheck
