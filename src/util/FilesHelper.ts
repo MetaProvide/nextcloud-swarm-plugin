@@ -6,6 +6,7 @@ import SvgHelper from "@/util/SvgHelper";
 const FilesHelper = {
 	isSwarmNode: (nodes) =>
 		getMainNode(nodes).attributes["ethswarm-node"] !== undefined,
+	isDialogCancelError: (error) => isDialogCancelError(error),
 	getSwarmRef: (nodes) => getSwarmRef(nodes),
 	hasSwarmRef: (nodes) => getSwarmRef(nodes) !== undefined,
 	canUnshareOnly: (nodes) => {
@@ -93,7 +94,13 @@ const FilesHelper = {
 				),
 			)
 			.build()
-			.pick(),
+			.pick()
+			.catch((error) => {
+				if (isDialogCancelError(error)) {
+					return null;
+				}
+				throw error;
+			}),
 	downloadFile: (blob, filename) => {
 		const url = URL.createObjectURL(blob);
 		const a = document.createElement("a");
@@ -138,6 +145,28 @@ function getStoragePath(path) {
 
 function isArchive(nodes) {
 	return getPathParts(nodes)[1] === "Archive - HejBit";
+}
+
+function isDialogCancelError(error) {
+	if (error === null || typeof error === "undefined") {
+		return true;
+	}
+
+	if (typeof error === "string") {
+		return /cancel|abort|dismiss|closed|no nodes selected/i.test(error);
+	}
+
+	if (typeof error === "object") {
+		const message = "message" in error ? String(error.message ?? "") : "";
+		const name = "name" in error ? String(error.name ?? "") : "";
+
+		return (
+			/abort|cancel|dismiss|closed/i.test(name) ||
+			/cancel|abort|dismiss|closed|no nodes selected/i.test(message)
+		);
+	}
+
+	return false;
 }
 
 export default FilesHelper;

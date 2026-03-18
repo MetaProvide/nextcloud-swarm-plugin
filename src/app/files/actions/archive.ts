@@ -36,6 +36,9 @@ registerFileActionCompat({
 				"Restore",
 				UnarchiveSvg,
 			);
+			if (!path) {
+				return;
+			}
 			const destination = FilesHelper.getPathParts(path)
 				.slice(1)
 				.join("/");

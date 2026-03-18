@@ -23,6 +23,9 @@ registerFileActionCompat({
 	async exec({ nodes }) {
 		const node = nodes[0];
 		const path = await FilesHelper.locationPicker(node, "Move", MoveSvg);
+		if (!path) {
+			return;
+		}
 		const destination = FilesHelper.getPathParts(path).slice(1).join("/");
 		await axios({
 			method: "post",

@@ -38,7 +38,12 @@ registerFileActionCompat({
 				callback: async () => downloadMetadata(node),
 			})
 			.build()
-			.show();
+			.show()
+			.catch((error) => {
+				if (!FilesHelper.isDialogCancelError(error)) {
+					throw error;
+				}
+			});
 	},
 });
 
