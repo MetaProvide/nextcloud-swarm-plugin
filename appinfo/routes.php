@@ -33,6 +33,11 @@ return [
 			'url' => '/feedback/submit',
 			'verb' => 'POST',
 		],
+		[
+			'name' => 'Configuration#create',
+			'url' => 'configure/create',
+			'verb' => 'GET',
+		],		
 	],
 	'ocs' => [
 		[

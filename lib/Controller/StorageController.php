@@ -28,7 +28,6 @@ use OCA\Files_External_Ethswarm\Auth\AccessKey;
 use OCA\Files_External_Ethswarm\Backend\BeeSwarm;
 use OCP\AppFramework\OCSController;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
-use OCP\AppFramework\Http\Attribute\ApiRoute;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\IRequest;
 use OCP\IUserSession;
@@ -101,7 +100,7 @@ class StorageController extends OCSController {
 				$mountPoint,
 				Application::NAME,
 				'access:key',
-				[BeeSwarm::OPTION_HOST_URL => $hostUrl, 
+				[BeeSwarm::OPTION_HOST_URL => $hostUrl,
 				AccessKey::SCHEME => $accessKey],
 				null,
 				[]  // Empty array = all users
