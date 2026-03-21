@@ -22,13 +22,14 @@ declare(strict_types=1);
 
 namespace OCA\Files_External_Ethswarm\Controller;
 
+use Exception;
 use OCA\Files_External\Service\GlobalStoragesService;
 use OCA\Files_External_Ethswarm\AppInfo\Application;
 use OCA\Files_External_Ethswarm\Auth\AccessKey;
 use OCA\Files_External_Ethswarm\Backend\BeeSwarm;
-use OCP\AppFramework\OCSController;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\DataResponse;
+use OCP\AppFramework\OCSController;
 use OCP\IRequest;
 use OCP\IUserSession;
 use Psr\Log\LoggerInterface;
@@ -52,11 +53,12 @@ class StorageController extends OCSController {
 	}
 
 	/**
-	 * Create a new Hejbit Swarm external storage
+	 * Create a new Hejbit Swarm external storage.
 	 *
 	 * @param string $folderName The folder name/mount point for the storage
-	 * @param string $accessKey The Hejbit access key for authentication
-	 * @param string $hostUrl The Access Server URL (e.g., "app.hejbit.com")
+	 * @param string $accessKey  The Hejbit access key for authentication
+	 * @param string $hostUrl    The Access Server URL (e.g., "app.hejbit.com")
+	 *
 	 * @return DataResponse<Http::STATUS_CREATED, array{ocs: array{meta: array{status: string, statuscode: int, message: string}, data: array{id: int, mountPoint: string, backend: string}}}, array{}>
 	 * @return DataResponse<Http::STATUS_BAD_REQUEST, array{ocs: array{meta: array{status: string, statuscode: int, message: string}, data: array<string, mixed>}}, array{}>
 	 * @return DataResponse<Http::STATUS_UNAUTHORIZED, array{ocs: array{meta: array{status: string, statuscode: int, message: string}, data: array<string, mixed>}}, array{}>
@@ -75,23 +77,23 @@ class StorageController extends OCSController {
 	): DataResponse {
 		// Validate required parameters
 		$validationError = $this->validateParameters($folderName, $accessKey, $hostUrl);
-		if ($validationError !== null) {
+		if (null !== $validationError) {
 			return $validationError;
 		}
 
 		// Validate host URL format
 		$validatedHost = $this->validateHostUrl($hostUrl);
-		if ($validatedHost === null) {
+		if (null === $validatedHost) {
 			return $this->errorResponse('Invalid host URL format', 400);
 		}
 
 		// Ensure mount point starts with /
-		$mountPoint = '/' . ltrim($folderName, '/');
+		$mountPoint = '/'.ltrim($folderName, '/');
 
 		try {
 			// Get the current user
 			$user = $this->userSession->getUser();
-			if ($user === null) {
+			if (null === $user) {
 				return $this->errorResponse('User not authenticated', 401);
 			}
 
@@ -101,7 +103,7 @@ class StorageController extends OCSController {
 				Application::NAME,
 				'access:key',
 				[BeeSwarm::OPTION_HOST_URL => $hostUrl,
-				AccessKey::SCHEME => $accessKey],
+					AccessKey::SCHEME => $accessKey],
 				null,
 				[]  // Empty array = all users
 			);
@@ -109,26 +111,26 @@ class StorageController extends OCSController {
 			// Add the storage via the service
 			$newStorage = $this->globalStoragesService->addStorage($storageConfig);
 
-			$this->logger->info('Swarm storage created successfully: ' . $mountPoint . ' for user: ' . $user->getUID());
+			$this->logger->info('Swarm storage created successfully: '.$mountPoint.' for user: '.$user->getUID());
 
 			return $this->successResponse([
 				'id' => $newStorage->getId(),
 				'mountPoint' => $newStorage->getMountPoint(),
 				'backend' => Application::NAME,
 			]);
-		} catch (\Exception $e) {
-			$this->logger->error('Failed to create Swarm storage: ' . $e->getMessage(), [
+		} catch (Exception $e) {
+			$this->logger->error('Failed to create Swarm storage: '.$e->getMessage(), [
 				'exception' => $e,
 				'folderName' => $folderName,
-				'hostUrl' => $hostUrl
+				'hostUrl' => $hostUrl,
 			]);
 
-			return $this->errorResponse('Failed to create storage: ' . $e->getMessage(), 500);
+			return $this->errorResponse('Failed to create storage: '.$e->getMessage(), 500);
 		}
 	}
 
 	/**
-	 * Validate required parameters
+	 * Validate required parameters.
 	 */
 	private function validateParameters(string $folderName, string $accessKey, string $hostUrl): ?DataResponse {
 		if (empty($folderName)) {
@@ -140,23 +142,26 @@ class StorageController extends OCSController {
 		if (empty($hostUrl)) {
 			return $this->errorResponse('Host URL is required', 400);
 		}
+
 		return null;
 	}
 
 	/**
-	 * Validate and normalize host URL
-	 * @return string|null Normalized URL or null if invalid
+	 * Validate and normalize host URL.
+	 *
+	 * @return null|string Normalized URL or null if invalid
 	 */
 	private function validateHostUrl(string $hostUrl): ?string {
 		$validatedHost = $hostUrl;
 		if (!preg_match('/^https?:\/\//i', $validatedHost)) {
-			$validatedHost = 'https://' . $validatedHost;
+			$validatedHost = 'https://'.$validatedHost;
 		}
+
 		return filter_var($validatedHost, FILTER_VALIDATE_URL) ? $validatedHost : null;
 	}
 
 	/**
-	 * Create a success response
+	 * Create a success response.
 	 */
 	private function successResponse(array $data): DataResponse {
 		return new DataResponse([
@@ -164,15 +169,15 @@ class StorageController extends OCSController {
 				'meta' => [
 					'status' => 'success',
 					'statuscode' => 201,
-					'message' => 'Storage created successfully'
+					'message' => 'Storage created successfully',
 				],
-				'data' => $data
-			]
+				'data' => $data,
+			],
 		], 201);
 	}
 
 	/**
-	 * Create an error response
+	 * Create an error response.
 	 */
 	private function errorResponse(string $message, int $statusCode): DataResponse {
 		return new DataResponse([
@@ -180,10 +185,10 @@ class StorageController extends OCSController {
 				'meta' => [
 					'status' => 'failure',
 					'statuscode' => $statusCode,
-					'message' => $message
+					'message' => $message,
 				],
-				'data' => []
-			]
+				'data' => [],
+			],
 		], $statusCode);
 	}
 }

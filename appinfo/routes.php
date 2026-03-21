@@ -37,7 +37,7 @@ return [
 			'name' => 'Configuration#create',
 			'url' => 'configure/create',
 			'verb' => 'GET',
-		],		
+		],
 	],
 	'ocs' => [
 		[
