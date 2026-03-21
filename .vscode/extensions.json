@@ -8,7 +8,7 @@
 		"junstyle.php-cs-fixer",
 		"xdebug.php-debug",
 		"bmewburn.vscode-intelephense-client",
-		"esbenp.prettier-vscode"
+		"biomejs.biome"
 	],
 	// List of extensions recommended by VS Code that should not be recommended for users of this workspace.
 	"unwantedRecommendations": []

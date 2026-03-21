@@ -2,7 +2,8 @@
 .env
 /build
 /dev-environment
-js/nextcloud-swarm-plugin*.*
+/css
+/js
 /.php-cs-fixer.cache
 
 # Package Manages
@@ -11,6 +12,7 @@ js/nextcloud-swarm-plugin*.*
 
 # IDE
 .idea
+.history
 
 # OS
 .DS_Store

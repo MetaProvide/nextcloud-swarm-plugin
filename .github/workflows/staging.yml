@@ -13,10 +13,24 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Prepare staging deploy script payload
+        id: deploy_script
+        run: |
+          SCRIPT_B64="$(base64 < scripts/stage/deploy.sh | tr -d '\n')"
+          echo "script_b64=$SCRIPT_B64" >> "$GITHUB_OUTPUT"
+
       - name: Deploy
         uses: appleboy/ssh-action@master
         with:
           host: ${{ vars.STAGING_SERVER_HOST }}
-          username: deploy
+          username: ${{ vars.STAGING_SERVER_USER }}
           key: ${{ secrets.STAGING_SSH_PRIVATE_KEY }}
-          script: bash deploy
+          proxy_host: ${{ vars.STAGING_PROXY_HOST }}
+          proxy_username: ${{ vars.STAGING_PROXY_USER }}
+          proxy_key: ${{ secrets.STAGING_PROXY_SSH_PRIVATE_KEY }}
+          script: |
+            set -e
+            SCRIPT_PATH="/tmp/deploy.sh"
+            printf '%s' '${{ steps.deploy_script.outputs.script_b64 }}' | base64 -d > "$SCRIPT_PATH"
+            chmod +x "$SCRIPT_PATH"
+            bash "$SCRIPT_PATH"

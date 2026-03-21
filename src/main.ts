@@ -1,10 +1,7 @@
 /**
  * @copyright Copyright (c) 2025, MetaProvide Holding EKF
  *
- * @author Mahyar Iranibazaz <mahiarirani@pm.me>
  * @author Henry Bergström <metahenry@metaprovide.org>
- * @author Ron Trevor <ecoron@proton.me>
- * @author Joao Raposo <joaosraposo@gmail.com>
  *
  * @license GNU AGPL version 3 or any later version
  *
@@ -22,11 +19,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  */
+import { createApp } from "vue";
+import "@nextcloud/dialogs/style.css";
+import Setting from "./pages/Setting.vue";
 
-import { generateFilePath } from "@nextcloud/router";
+const rootElement = document.querySelector("#app") as HTMLElement | null;
+const settings = rootElement?.dataset?.params
+	? JSON.parse(rootElement.dataset.params)
+	: {};
 
-// eslint-disable-next-line
-__webpack_public_path__ = generateFilePath("files_external_ethswarm", "", "js/");
-
-const requireContext = require.context('./app', true, /\.js$/);
-requireContext.keys().forEach(requireContext);
+export default createApp(Setting, { settings }).mount("#app");

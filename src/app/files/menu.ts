@@ -1,9 +1,9 @@
-import {
-	addNewFileMenuEntry,
-	getNewFileMenuEntries,
-	removeNewFileMenuEntry,
-} from "@nextcloud/files";
 import { subscribe } from "@nextcloud/event-bus";
+import {
+	addNewFileMenuEntryCompat,
+	getNewFileMenuEntriesCompat,
+	removeNewFileMenuEntryCompat,
+} from "@/util/FilesCompatibility";
 
 const filesMenu = {
 	originalMenu: [],
@@ -21,24 +21,24 @@ const filesMenu = {
 	},
 	backup() {
 		if (!this.originalMenu.length) {
-			this.originalMenu = getNewFileMenuEntries().map((entry) => ({
+			this.originalMenu = getNewFileMenuEntriesCompat().map((entry) => ({
 				...entry,
 			}));
 		}
 	},
 	cleanup() {
-		this.originalMenu.forEach(function (removeMenuEntry) {
+		this.originalMenu.forEach((removeMenuEntry) => {
 			if (removeMenuEntry.id !== "newFolder") {
-				removeNewFileMenuEntry(removeMenuEntry);
+				removeNewFileMenuEntryCompat(removeMenuEntry);
 			}
 		});
 	},
 	restore() {
-		const currentEntries = getNewFileMenuEntries();
-		this.originalMenu.forEach(function (backedUpMenuEntry) {
+		const currentEntries = getNewFileMenuEntriesCompat();
+		this.originalMenu.forEach((backedUpMenuEntry) => {
 			!currentEntries.some(
-				(entry) => entry.id === backedUpMenuEntry.id
-			) && addNewFileMenuEntry(backedUpMenuEntry);
+				(entry) => entry.id === backedUpMenuEntry.id,
+			) && addNewFileMenuEntryCompat(backedUpMenuEntry);
 		});
 		this.originalMenu = [];
 	},
