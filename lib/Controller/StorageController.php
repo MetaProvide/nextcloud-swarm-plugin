@@ -105,7 +105,7 @@ class StorageController extends OCSController {
 				AccessKey::IDENTIFIER,
 				[
 					BeeSwarm::OPTION_HOST_URL => $validatedHost,
-					AccessKey::SCHEME => $accessKey
+					AccessKey::SCHEME => $accessKey,
 				],
 				null,
 				[], // Empty array = all users
