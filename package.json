@@ -17,12 +17,16 @@
 		"dev": "vite build --mode development --watch",
 		"serve": "vite --mode development --host 127.0.0.1",
 		"check": "pnpm run format && pnpm run lint && pnpm run typecheck",
+		"prepare": "pnpm run prepare:format && pnpm run prepare:check",
+		"prepare:format": "lint-staged",
+		"prepare:check": "pnpm run lint && pnpm run typecheck",
 		"lint": "biome lint src styles",
 		"lint:fix": "biome lint --write src styles",
 		"format": "biome format .",
 		"format:fix": "biome format --write .",
-		"typecheck": "vue-tsc --noEmit",
-		"prepare": "simple-git-hooks"
+		"backend:format": "PHP_CS_FIXER_IGNORE_ENV=1 vendor/bin/php-cs-fixer fix --dry-run",
+		"backend:format:fix": "PHP_CS_FIXER_IGNORE_ENV=1 vendor/bin/php-cs-fixer fix",
+		"typecheck": "vue-tsc --noEmit"
 	},
 	"dependencies": {
 		"@betahuhn/feedback-js": "^2.1.25",
@@ -45,6 +49,7 @@
 		"@nextcloud/vite-config": "^2.5.2",
 		"@types/node": "^24.5.2",
 		"browserslist": "^4.26.2",
+		"lint-staged": "^16.2.7",
 		"simple-git-hooks": "^2.13.1",
 		"typescript": "^5.9.3",
 		"vite": "^7.3.1",
@@ -54,6 +59,10 @@
 		"extends @nextcloud/browserslist-config"
 	],
 	"simple-git-hooks": {
-		"pre-commit": "pnpm run check"
+		"pre-commit": "pnpm run prepare"
+	},
+	"lint-staged": {
+		"**/*.{js,jsx,ts,tsx,vue,json,css,scss,md}": "biome format --write",
+		"**/*.php": "pnpm run backend:format:fix --"
 	}
 }
