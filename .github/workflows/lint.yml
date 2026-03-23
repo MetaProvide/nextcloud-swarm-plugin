@@ -30,8 +30,8 @@ jobs:
           php-version: "8.3"
           tools: composer
 
-      - name: Install PHP dependencies
-        run: composer install --no-interaction --prefer-dist
+      - name: Install php-cs-fixer
+        run: composer require --dev friendsofphp/php-cs-fixer nextcloud/coding-standard --no-interaction --no-progress --no-scripts
 
       - name: Apply php-cs-fixer
         run: vendor/bin/php-cs-fixer fix
