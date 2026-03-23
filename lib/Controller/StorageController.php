@@ -23,6 +23,9 @@ declare(strict_types=1);
 namespace OCA\Files_External_Ethswarm\Controller;
 
 use Exception;
+use OCA\Files_External\Lib\InsufficientDataForMeaningfulAnswerException;
+use OCA\Files_External\Lib\StorageConfig;
+use OCA\Files_External\MountConfig;
 use OCA\Files_External\Service\GlobalStoragesService;
 use OCA\Files_External_Ethswarm\AppInfo\Application;
 use OCA\Files_External_Ethswarm\Auth\AccessKey;
@@ -31,6 +34,7 @@ use OCA\Files_External_Ethswarm\Utils\HostUrl;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\OCSController;
+use OCP\Files\StorageNotAvailableException;
 use OCP\IRequest;
 use OCP\IUserSession;
 use Psr\Log\LoggerInterface;
@@ -77,19 +81,22 @@ class StorageController extends OCSController {
 		string $hostUrl
 	): DataResponse {
 		// Validate required parameters
-		$validationError = $this->validateParameters($folderName, $accessKey, $hostUrl);
-		if (null !== $validationError) {
-			return $validationError;
+		$validationErrors = $this->validateParameters($folderName, $accessKey, $hostUrl);
+		if (!empty($validationErrors)) {
+			return $this->validationErrorResponse($validationErrors);
 		}
 
 		// Validate host URL format
 		$validatedHost = HostUrl::normalize($hostUrl);
 		if (null === $validatedHost) {
-			return $this->errorResponse('Invalid host URL format', 400);
+			return $this->validationErrorResponse([
+				'hostUrl' => 'Invalid host URL format',
+			]);
 		}
 
 		// Ensure mount point starts with /
 		$mountPoint = '/'.ltrim($folderName, '/');
+		$mountPoint = $this->resolveUniqueMountPoint($mountPoint);
 
 		try {
 			// Get the current user
@@ -110,6 +117,19 @@ class StorageController extends OCSController {
 				null,
 				[], // Empty array = all users
 			);
+
+			$connectionValidationError = $this->validateStorageConnection($storageConfig);
+			if (null !== $connectionValidationError) {
+				return $this->errorResponse(
+					'Failed to connect to external storage: '.$connectionValidationError,
+					400,
+					[
+						'errors' => [
+							'connection' => $connectionValidationError,
+						],
+					]
+				);
+			}
 
 			// Add the storage via the service
 			$newStorage = $this->globalStoragesService->addStorage($storageConfig);
@@ -134,16 +154,88 @@ class StorageController extends OCSController {
 
 	/**
 	 * Validate required parameters.
+	 *
+	 * @return array<string, string>
 	 */
-	private function validateParameters(string $folderName, string $accessKey, string $hostUrl): ?DataResponse {
-		if (empty($folderName)) {
-			return $this->errorResponse('Folder name is required', 400);
+	private function validateParameters(string $folderName, string $accessKey, string $hostUrl): array {
+		$errors = [];
+
+		if (empty(trim($folderName))) {
+			$errors['folderName'] = 'Folder name is required';
 		}
-		if (empty($accessKey)) {
-			return $this->errorResponse('Access key is required', 400);
+
+		if (empty(trim($accessKey))) {
+			$errors['accessKey'] = 'Access key is required';
 		}
-		if (empty($hostUrl)) {
-			return $this->errorResponse('Host URL is required', 400);
+
+		if (empty(trim($hostUrl))) {
+			$errors['hostUrl'] = 'Host URL is required';
+		}
+
+		return $errors;
+	}
+
+	/**
+	 * Create a validation error response with an errors bag.
+	 *
+	 * @param array<string, string> $errors
+	 */
+	private function validationErrorResponse(array $errors): DataResponse {
+		return $this->errorResponse(
+			implode('; ', array_values($errors)),
+			400,
+			['errors' => $errors]
+		);
+	}
+
+	/**
+	 * Resolve a unique mount point by appending a numeric suffix when needed.
+	 */
+	private function resolveUniqueMountPoint(string $mountPoint): string {
+		$existingMountPoints = [];
+		foreach ($this->globalStoragesService->getAllGlobalStorages() as $storage) {
+			$existingMountPoints[strtolower($storage->getMountPoint())] = true;
+		}
+
+		if (!isset($existingMountPoints[strtolower($mountPoint)])) {
+			return $mountPoint;
+		}
+
+		$baseMountPoint = $mountPoint;
+		$suffix = 1;
+		do {
+			$candidateMountPoint = $baseMountPoint.'-'.$suffix;
+			++$suffix;
+		} while (isset($existingMountPoints[strtolower($candidateMountPoint)]));
+
+		return $candidateMountPoint;
+	}
+
+	/**
+	 * Validate storage connectivity before persisting config.
+	 */
+	private function validateStorageConnection(StorageConfig $storageConfig): ?string {
+		try {
+			$authMechanism = $storageConfig->getAuthMechanism();
+			$authMechanism->manipulateStorageConfig($storageConfig);
+
+			$backend = $storageConfig->getBackend();
+			$backend->manipulateStorageConfig($storageConfig);
+
+			$status = MountConfig::getBackendStatus(
+				$backend->getStorageClass(),
+				$storageConfig->getBackendOptions(),
+			);
+
+			if (StorageNotAvailableException::STATUS_SUCCESS !== $status) {
+				return StorageNotAvailableException::getStateCodeName($status);
+			}
+		} catch (InsufficientDataForMeaningfulAnswerException $e) {
+			return 'Insufficient data: '.$e->getMessage();
+		} catch (StorageNotAvailableException $e) {
+			return $e->getMessage();
+		} catch (Exception $e) {
+			return $e->getMessage();
 		}
 
 		return null;
@@ -168,7 +260,7 @@ class StorageController extends OCSController {
 	/**
 	 * Create an error response.
 	 */
-	private function errorResponse(string $message, int $statusCode): DataResponse {
+	private function errorResponse(string $message, int $statusCode, array $data = []): DataResponse {
 		return new DataResponse([
 			'ocs' => [
 				'meta' => [
@@ -176,7 +268,7 @@ class StorageController extends OCSController {
 					'statuscode' => $statusCode,
 					'message' => $message,
 				],
-				'data' => [],
+				'data' => $data,
 			],
 		], $statusCode);
 	}

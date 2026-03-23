@@ -7,8 +7,8 @@ namespace OCA\Files_External_Ethswarm\Controller;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
-use OCP\AppFramework\Http\JSONResponse;
 use OCP\AppFramework\Http\RedirectResponse;
+use OCP\AppFramework\Http\TemplateResponse;
 use OCP\IRequest;
 use OCP\IURLGenerator;
 use Throwable;
@@ -30,39 +30,45 @@ class ConfigurationController extends Controller {
 
 	/**
 	 * Create a storage definition by delegating to StorageController::create().
-	 *
-	 * @return JSONResponse|RedirectResponse JSON response with status and message, or redirect
 	 */
 	#[NoCSRFRequired]
-	public function create(): JSONResponse|RedirectResponse {
+	public function create(): RedirectResponse|TemplateResponse {
 		$params = $this->request->getParams();
-		$key = trim($params['key'] ?? '');
-		$folder = trim($params['folder'] ?? 'Hejbit-Storage');
-		$hosturl = trim($params['hosturl'] ?? 'app.hejbit.com');
+		$accessKey = trim((string) ($params['accessKey'] ?? ''));
+		$folderName = trim((string) ($params['folderName'] ?? 'Hejbit-Storage'));
+		$hostUrl = trim((string) ($params['hostUrl'] ?? 'app.hejbit.com'));
 
 		try {
-			$dataResponse = $this->storageController->create($folder, $key, $hosturl);
+			$dataResponse = $this->storageController->create($folderName, $accessKey, $hostUrl);
 
 			// Extract status and message from DataResponse
 			$data = $dataResponse->getData();
 			$meta = $data['ocs']['meta'] ?? [];
 			$status = $dataResponse->getStatus();
+			$isFailure = Http::STATUS_CREATED !== $status || 'success' !== ($meta['status'] ?? '');
+
+			if ($isFailure) {
+				return $this->buildErrorResponse((string) ($meta['message'] ?? 'Failed to create storage'), $status);
+			}
 
 			// Redirect to NC external storage mounts page after creation
 			$redirectUrl = $this->urlGenerator->getAbsoluteURL('/apps/files/extstoragemounts');
 
-			// TODO: Determine how to send $dataResponse parameters to the caller or the redirect URL.
-			// For now, send them as querystring parameters for demonstration/debug purposes.
-			$redirectUrl .= '?status='.urlencode($meta['status'] ?? 'unknown').'&message='.urlencode($meta['message'] ?? '');
-
 			return new RedirectResponse($redirectUrl);
-			// To return a JSON response to the caller (instead of redirecting):
-			/*return new JSONResponse([
-				'status' => $meta['status'] ?? 'unknown',
-				'message' => $meta['message'] ?? ''
-			], $status);*/
 		} catch (Throwable $e) {
-			return new JSONResponse(['status' => 'error', 'message' => $e->getMessage()], Http::STATUS_INTERNAL_SERVER_ERROR);
+			return $this->buildErrorResponse($e->getMessage(), Http::STATUS_INTERNAL_SERVER_ERROR);
 		}
+	}
+
+	private function buildErrorResponse(string $message, int $statusCode): TemplateResponse {
+		$response = new TemplateResponse('core', 'error', [
+			'errors' => [
+				['error' => $message],
+			],
+		], 'error');
+
+		$response->setStatus($statusCode);
+
+		return $response;
 	}
 }
