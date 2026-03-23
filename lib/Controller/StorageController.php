@@ -101,7 +101,7 @@ class StorageController extends OCSController {
 			$storageConfig = $this->globalStoragesService->createStorage(
 				$mountPoint,
 				Application::NAME,
-				'access:key',
+				AccessKey::IDENTIFIER,
 				[BeeSwarm::OPTION_HOST_URL => $hostUrl,
 					AccessKey::SCHEME => $accessKey],
 				null,

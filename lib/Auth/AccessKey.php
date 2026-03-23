@@ -30,11 +30,12 @@ use OCP\IL10N;
  */
 class AccessKey extends AuthMechanism {
 	/** @const string */
+	public const IDENTIFIER = 'access:key';
 	public const SCHEME = 'access_key';
 
 	public function __construct(IL10N $l) {
 		$this
-			->setIdentifier('access:key')
+			->setIdentifier(self::IDENTIFIER)
 			->setScheme(self::SCHEME)
 			->setText($l->t('Access Key'))
 			->addParameters([
