@@ -1,6 +1,6 @@
+import { basename, dirname } from "node:path";
 import { getFilePickerBuilder } from "@nextcloud/dialogs";
 import { FileType } from "@nextcloud/files";
-import { basename, dirname } from "path";
 import SvgHelper from "@/util/SvgHelper";
 
 const FilesHelper = {
@@ -77,8 +77,8 @@ const FilesHelper = {
 			.allowDirectories(true)
 			.setFilter((n) => {
 				const isNotArchiveFolder = !FilesHelper.isArchiveFolder(n);
-				console.log("node:" + FilesHelper.getStoragePath(n));
-				console.log("file:" + FilesHelper.getStoragePath(node));
+				console.log(`node:${FilesHelper.getStoragePath(n)}`);
+				console.log(`file:${FilesHelper.getStoragePath(node)}`);
 				const isSameStorage =
 					FilesHelper.getStoragePath(n) ===
 					FilesHelper.getStoragePath(node);

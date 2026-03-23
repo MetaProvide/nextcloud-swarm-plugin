@@ -1,0 +1,399 @@
+{
+	"openapi": "3.0.3",
+	"info": {
+		"title": "files_external_ethswarm",
+		"version": "0.0.1",
+		"description": "Bring decentralized, sovereign cloud storage to Nextcloud with the HejBit Swarm plugin!",
+		"license": {
+			"name": "agpl"
+		}
+	},
+	"components": {
+		"securitySchemes": {
+			"basic_auth": {
+				"type": "http",
+				"scheme": "basic"
+			},
+			"bearer_auth": {
+				"type": "http",
+				"scheme": "bearer"
+			}
+		},
+		"schemas": {
+			"OCSMeta": {
+				"type": "object",
+				"required": ["status", "statuscode"],
+				"properties": {
+					"status": {
+						"type": "string"
+					},
+					"statuscode": {
+						"type": "integer"
+					},
+					"message": {
+						"type": "string"
+					},
+					"totalitems": {
+						"type": "string"
+					},
+					"itemsperpage": {
+						"type": "string"
+					}
+				}
+			}
+		}
+	},
+	"paths": {
+		"/ocs/v2.php/apps/files_external_ethswarm/api/v1/storages": {
+			"post": {
+				"operationId": "storage-create",
+				"summary": "Create a new Hejbit Swarm external storage",
+				"tags": ["storage"],
+				"security": [
+					{
+						"bearer_auth": []
+					},
+					{
+						"basic_auth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"required": [
+									"folderName",
+									"accessKey",
+									"hostUrl"
+								],
+								"properties": {
+									"folderName": {
+										"type": "string",
+										"description": "The folder name/mount point for the storage"
+									},
+									"accessKey": {
+										"type": "string",
+										"description": "The Hejbit access key for authentication"
+									},
+									"hostUrl": {
+										"type": "string",
+										"description": "The Access Server URL (e.g., \"app.hejbit.com\")"
+									}
+								}
+							}
+						}
+					}
+				},
+				"parameters": [
+					{
+						"name": "OCS-APIRequest",
+						"in": "header",
+						"description": "Required to be true for the API request to pass",
+						"required": true,
+						"schema": {
+							"type": "boolean",
+							"default": true
+						}
+					}
+				],
+				"responses": {
+					"201": {
+						"description": "Storage created successfully",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["ocs"],
+									"properties": {
+										"ocs": {
+											"type": "object",
+											"required": ["meta", "data"],
+											"properties": {
+												"meta": {
+													"$ref": "#/components/schemas/OCSMeta"
+												},
+												"data": {
+													"type": "object",
+													"required": ["ocs"],
+													"properties": {
+														"ocs": {
+															"type": "object",
+															"required": [
+																"meta",
+																"data"
+															],
+															"properties": {
+																"meta": {
+																	"type": "object",
+																	"required": [
+																		"status",
+																		"statuscode",
+																		"message"
+																	],
+																	"properties": {
+																		"status": {
+																			"type": "string"
+																		},
+																		"statuscode": {
+																			"type": "integer",
+																			"format": "int64"
+																		},
+																		"message": {
+																			"type": "string"
+																		}
+																	}
+																},
+																"data": {
+																	"type": "object",
+																	"required": [
+																		"id",
+																		"mountPoint",
+																		"backend"
+																	],
+																	"properties": {
+																		"id": {
+																			"type": "integer",
+																			"format": "int64"
+																		},
+																		"mountPoint": {
+																			"type": "string"
+																		},
+																		"backend": {
+																			"type": "string"
+																		}
+																	}
+																}
+															}
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Bad request (missing parameters or invalid URL)",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["ocs"],
+									"properties": {
+										"ocs": {
+											"type": "object",
+											"required": ["meta", "data"],
+											"properties": {
+												"meta": {
+													"$ref": "#/components/schemas/OCSMeta"
+												},
+												"data": {
+													"type": "object",
+													"required": ["ocs"],
+													"properties": {
+														"ocs": {
+															"type": "object",
+															"required": [
+																"meta",
+																"data"
+															],
+															"properties": {
+																"meta": {
+																	"type": "object",
+																	"required": [
+																		"status",
+																		"statuscode",
+																		"message"
+																	],
+																	"properties": {
+																		"status": {
+																			"type": "string"
+																		},
+																		"statuscode": {
+																			"type": "integer",
+																			"format": "int64"
+																		},
+																		"message": {
+																			"type": "string"
+																		}
+																	}
+																},
+																"data": {
+																	"type": "object",
+																	"additionalProperties": {
+																		"type": "object"
+																	}
+																}
+															}
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized (user not authenticated)",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"type": "object",
+											"required": ["ocs"],
+											"properties": {
+												"ocs": {
+													"type": "object",
+													"required": [
+														"meta",
+														"data"
+													],
+													"properties": {
+														"meta": {
+															"$ref": "#/components/schemas/OCSMeta"
+														},
+														"data": {
+															"type": "object",
+															"required": ["ocs"],
+															"properties": {
+																"ocs": {
+																	"type": "object",
+																	"required": [
+																		"meta",
+																		"data"
+																	],
+																	"properties": {
+																		"meta": {
+																			"type": "object",
+																			"required": [
+																				"status",
+																				"statuscode",
+																				"message"
+																			],
+																			"properties": {
+																				"status": {
+																					"type": "string"
+																				},
+																				"statuscode": {
+																					"type": "integer",
+																					"format": "int64"
+																				},
+																				"message": {
+																					"type": "string"
+																				}
+																			}
+																		},
+																		"data": {
+																			"type": "object",
+																			"additionalProperties": {
+																				"type": "object"
+																			}
+																		}
+																	}
+																}
+															}
+														}
+													}
+												}
+											}
+										},
+										{
+											"type": "object",
+											"required": ["ocs"],
+											"properties": {
+												"ocs": {
+													"type": "object",
+													"required": [
+														"meta",
+														"data"
+													],
+													"properties": {
+														"meta": {
+															"$ref": "#/components/schemas/OCSMeta"
+														},
+														"data": {}
+													}
+												}
+											}
+										}
+									]
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal server error (failed to create storage)",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["ocs"],
+									"properties": {
+										"ocs": {
+											"type": "object",
+											"required": ["meta", "data"],
+											"properties": {
+												"meta": {
+													"$ref": "#/components/schemas/OCSMeta"
+												},
+												"data": {
+													"type": "object",
+													"required": ["ocs"],
+													"properties": {
+														"ocs": {
+															"type": "object",
+															"required": [
+																"meta",
+																"data"
+															],
+															"properties": {
+																"meta": {
+																	"type": "object",
+																	"required": [
+																		"status",
+																		"statuscode",
+																		"message"
+																	],
+																	"properties": {
+																		"status": {
+																			"type": "string"
+																		},
+																		"statuscode": {
+																			"type": "integer",
+																			"format": "int64"
+																		},
+																		"message": {
+																			"type": "string"
+																		}
+																	}
+																},
+																"data": {
+																	"type": "object",
+																	"additionalProperties": {
+																		"type": "object"
+																	}
+																}
+															}
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	},
+	"tags": []
+}
