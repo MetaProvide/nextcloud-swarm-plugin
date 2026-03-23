@@ -27,6 +27,7 @@ use OCA\Files_External\Lib\StorageConfig;
 use OCA\Files_External\Service\GlobalStoragesService;
 use OCA\Files_External_Ethswarm\AppInfo\Application;
 use OCA\Files_External_Ethswarm\Auth\AccessKey;
+use OCA\Files_External_Ethswarm\Utils\HostUrl;
 use OCP\IConfig;
 use OCP\IL10N;
 use Psr\Log\LoggerInterface;
@@ -76,11 +77,8 @@ class BeeSwarm extends Backend {
 		}
 
 		// server url
-		$host = $storage->getBackendOption(self::OPTION_HOST_URL);
-		if (!preg_match('/^https?:\/\//i', $host)) {
-			$host = 'https://'.$host;
-		}
-		if (!filter_var($host, FILTER_VALIDATE_URL)) {
+		$host = HostUrl::normalize((string) $storage->getBackendOption(self::OPTION_HOST_URL));
+		if (null === $host) {
 			$this->logger->warning('invalid url');
 			$result = false;
 		}

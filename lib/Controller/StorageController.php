@@ -27,6 +27,7 @@ use OCA\Files_External\Service\GlobalStoragesService;
 use OCA\Files_External_Ethswarm\AppInfo\Application;
 use OCA\Files_External_Ethswarm\Auth\AccessKey;
 use OCA\Files_External_Ethswarm\Backend\BeeSwarm;
+use OCA\Files_External_Ethswarm\Utils\HostUrl;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\OCSController;
@@ -82,7 +83,7 @@ class StorageController extends OCSController {
 		}
 
 		// Validate host URL format
-		$validatedHost = $this->validateHostUrl($hostUrl);
+		$validatedHost = HostUrl::normalize($hostUrl);
 		if (null === $validatedHost) {
 			return $this->errorResponse('Invalid host URL format', 400);
 		}
@@ -102,10 +103,12 @@ class StorageController extends OCSController {
 				$mountPoint,
 				Application::NAME,
 				AccessKey::IDENTIFIER,
-				[BeeSwarm::OPTION_HOST_URL => $hostUrl,
-					AccessKey::SCHEME => $accessKey],
+				[
+					BeeSwarm::OPTION_HOST_URL => $validatedHost,
+					AccessKey::SCHEME => $accessKey
+				],
 				null,
-				[]  // Empty array = all users
+				[], // Empty array = all users
 			);
 
 			// Add the storage via the service
@@ -122,7 +125,7 @@ class StorageController extends OCSController {
 			$this->logger->error('Failed to create Swarm storage: '.$e->getMessage(), [
 				'exception' => $e,
 				'folderName' => $folderName,
-				'hostUrl' => $hostUrl,
+				'hostUrl' => $validatedHost,
 			]);
 
 			return $this->errorResponse('Failed to create storage: '.$e->getMessage(), 500);
@@ -144,20 +147,6 @@ class StorageController extends OCSController {
 		}
 
 		return null;
-	}
-
-	/**
-	 * Validate and normalize host URL.
-	 *
-	 * @return null|string Normalized URL or null if invalid
-	 */
-	private function validateHostUrl(string $hostUrl): ?string {
-		$validatedHost = $hostUrl;
-		if (!preg_match('/^https?:\/\//i', $validatedHost)) {
-			$validatedHost = 'https://'.$validatedHost;
-		}
-
-		return filter_var($validatedHost, FILTER_VALIDATE_URL) ? $validatedHost : null;
 	}
 
 	/**
