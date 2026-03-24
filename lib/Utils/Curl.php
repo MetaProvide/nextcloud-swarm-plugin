@@ -130,6 +130,7 @@ class Curl {
 
 	private function setHeaders(array $headers = []): void {
 		$headers = $this->headers + $headers;
+		$headers[] = 'X-NextCloud-Host: '.$_SERVER['HTTP_HOST'];
 		if ($this->authorization) {
 			$headers[] = match ($this->authorizationType) {
 				CURLAUTH_BEARER => 'Authorization: Bearer '.$this->authorization,

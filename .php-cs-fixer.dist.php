@@ -30,6 +30,8 @@ $config
 	->ignoreVCSIgnored(true)
 	->notPath('dev-environment')
 	->notPath('build')
+	->notPath('css')
+	->notPath('js')
 	->notPath('l10n')
 	->notPath('src')
 	->notPath('vendor')

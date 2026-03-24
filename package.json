@@ -24,8 +24,8 @@
 		"lint:fix": "biome lint --write src styles",
 		"format": "biome format .",
 		"format:fix": "biome format --write .",
-		"backend:format": "PHP_CS_FIXER_IGNORE_ENV=1 vendor/bin/php-cs-fixer fix --dry-run",
-		"backend:format:fix": "PHP_CS_FIXER_IGNORE_ENV=1 vendor/bin/php-cs-fixer fix",
+		"backend:format": "PHP_CS_FIXER_IGNORE_ENV=1 vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.dist.php --dry-run",
+		"backend:format:fix": "PHP_CS_FIXER_IGNORE_ENV=1 vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.dist.php --path-mode=intersection --using-cache=no",
 		"typecheck": "vue-tsc --noEmit"
 	},
 	"dependencies": {
