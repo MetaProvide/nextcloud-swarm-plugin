@@ -24,6 +24,7 @@ namespace OCA\Files_External_Ethswarm\Storage;
 use CURLFile;
 use OCA\Files_External_Ethswarm\Auth\AccessKey;
 use OCA\Files_External_Ethswarm\Backend\BeeSwarm;
+use OCA\Files_External_Ethswarm\Contract\Enum\ApiEndpoints;
 use OCA\Files_External_Ethswarm\Dto\LinkDto;
 use OCA\Files_External_Ethswarm\Exception\CurlException;
 use OCA\Files_External_Ethswarm\Exception\HejBitException;
@@ -80,8 +81,8 @@ trait BeeSwarmTrait {
 	/**
 	 * @throws CurlException|HejBitException
 	 */
-	private function getLink(string $endpoint): LinkDto {
-		$endpoint = $this->api_url.$endpoint;
+	private function getLink(ApiEndpoints $endpoint): LinkDto {
+		$endpoint = $this->api_url.$endpoint->value;
 		$request = new Curl($endpoint, headers: [
 			'accept: application/json',
 		], authorization: $this->access_key);
@@ -102,7 +103,7 @@ trait BeeSwarmTrait {
 			return $this->uploadSwarmV1($path, $tempFile, $mimetype);
 		}
 
-		$link = $this->getLink('/api/upload');
+		$link = $this->getLink(ApiEndpoints::UPLOAD);
 		$request = new Curl($link->url, authorization: $link->token);
 		$response = $request->post([
 			'file' => new CURLFile($tempFile, $mimetype, basename($path)),
@@ -126,7 +127,7 @@ trait BeeSwarmTrait {
 			return $this->downloadSwarmV1($reference);
 		}
 
-		$link = $this->getLink('/api/download');
+		$link = $this->getLink(ApiEndpoints::DOWNLOAD);
 		$request = new Curl($link->url."/{$reference}", authorization: $link->token);
 		$response = $request->get();
 
@@ -151,7 +152,7 @@ trait BeeSwarmTrait {
 			return $this->checkConnectionV1();
 		}
 
-		$endpoint = $this->api_url.'/api/readiness';
+		$endpoint = $this->api_url.ApiEndpoints::READINESS->value;
 
 		$request = new Curl($endpoint, authorization: $this->access_key);
 		$request->get();
