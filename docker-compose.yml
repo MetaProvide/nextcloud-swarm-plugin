@@ -106,6 +106,7 @@ services:
       - backend
 
   rsync:
+    profiles: [ development ]
     build:
       context: ./docker/rsync
       dockerfile: Dockerfile
@@ -123,8 +124,7 @@ services:
       - backend
 
   adminer:
-    profiles:
-      - development
+    profiles: [ development ]
     # visit https://adminer.hejbit.local/?pgsql=postgres&username=swarmbox&db=swarmbox
     image: adminer:latest
     restart: unless-stopped
@@ -145,8 +145,7 @@ services:
       ADMINER_DEFAULT_SERVER: postgres
 
   flagd:
-    profiles:
-      - feature
+    profiles: [ feature ]
     image: ghcr.io/open-feature/flagd:latest
     restart: unless-stopped
     command: 'start --uri file:/etc/flagd/hejbit.flagd.json --cors-origin *'
@@ -164,8 +163,7 @@ services:
         condition: service_healthy
 
   onlyoffice:
-    profiles:
-      - onlyoffice
+    profiles: [ onlyoffice ]
     image: onlyoffice/documentserver
     environment:
       JWT_ENABLED: true
