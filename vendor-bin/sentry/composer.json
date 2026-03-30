@@ -1,5 +1,5 @@
 {
-    "require": {
-        "sentry/sentry": "^4.10"
-    }
+	"require": {
+		"sentry/sentry": "^4.10"
+	}
 }

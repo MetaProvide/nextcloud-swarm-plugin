@@ -33,5 +33,17 @@ return [
 			'url' => '/feedback/submit',
 			'verb' => 'POST',
 		],
+		[
+			'name' => 'Configuration#create',
+			'url' => 'configure/create',
+			'verb' => 'GET',
+		],
+	],
+	'ocs' => [
+		[
+			'name' => 'Storage#create',
+			'url' => '/api/v1/storages',
+			'verb' => 'POST',
+		],
 	],
 ];

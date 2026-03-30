@@ -1,0 +1,172 @@
+import { basename, dirname } from "node:path";
+import { getFilePickerBuilder } from "@nextcloud/dialogs";
+import { FileType } from "@nextcloud/files";
+import SvgHelper from "@/util/SvgHelper";
+
+const FilesHelper = {
+	isSwarmNode: (nodes) =>
+		getMainNode(nodes).attributes["ethswarm-node"] !== undefined,
+	isDialogCancelError: (error) => isDialogCancelError(error),
+	getSwarmRef: (nodes) => getSwarmRef(nodes),
+	hasSwarmRef: (nodes) => getSwarmRef(nodes) !== undefined,
+	canUnshareOnly: (nodes) => {
+		return nodes.every(
+			(node) =>
+				node.attributes["is-mount-root"] === true &&
+				node.attributes["mount-type"] === "shared",
+		);
+	},
+	canDisconnectOnly: (nodes) => {
+		return nodes.every(
+			(node) =>
+				node.attributes["is-mount-root"] === true &&
+				node.attributes["mount-type"] === "external",
+		);
+	},
+	isMixedUnshareAndDelete: (nodes) => {
+		if (nodes.length === 1) {
+			return false;
+		}
+		const hasSharedItems = nodes.some((node) =>
+			FilesHelper.canUnshareOnly([node]),
+		);
+		const hasDeleteItems = nodes.some(
+			(node) => !FilesHelper.canUnshareOnly([node]),
+		);
+		return hasSharedItems && hasDeleteItems;
+	},
+	isAllFiles: (nodes) => {
+		return !nodes.some((node) => node.type !== FileType.File);
+	},
+	isAllFolders: (nodes) => {
+		return !nodes.some((node) => node.type !== FileType.Folder);
+	},
+	getStoragePath: (nodes) => getStoragePath(nodes),
+	getPathParts: (nodes) => getPathParts(nodes),
+	isFolder: (nodes) => getMainNode(nodes).type === FileType.Folder,
+	isRoot: (node) => getPathParts(node).length === 1,
+	isRootLevel: (node) => getPathParts(node).length === 2,
+	isArchive: (node) => isArchive(node),
+	isArchiveFolder: (node) =>
+		getPathParts(node).length === 2 && isArchive(node),
+	locationPicker: (node, action, logo) =>
+		getFilePickerBuilder(`Select ${action} Location`)
+			.setButtonFactory((_selection, path) => {
+				return FilesHelper.getStoragePath(path) === ""
+					? []
+					: [
+							{
+								label: basename(path)
+									? t(
+											"files",
+											"{action} to {path}",
+											{ path: basename(path), action },
+											undefined,
+											{
+												escape: false,
+												sanitize: false,
+											},
+										)
+									: t("files", action),
+								type: "primary",
+								icon: SvgHelper.convert(logo),
+								callback: () => undefined,
+							},
+						];
+			})
+			.allowDirectories(true)
+			.setFilter((n) => {
+				const isNotArchiveFolder = !FilesHelper.isArchiveFolder(n);
+				console.log(`node:${FilesHelper.getStoragePath(n)}`);
+				console.log(`file:${FilesHelper.getStoragePath(node)}`);
+				const isSameStorage =
+					FilesHelper.getStoragePath(n) ===
+					FilesHelper.getStoragePath(node);
+				return isNotArchiveFolder && isSameStorage;
+			})
+			.setMimeTypeFilter([])
+			.setMultiSelect(false)
+			.disableNavigation()
+			.startAt(
+				dirname(node.path).substring(
+					0,
+					dirname(node.path).lastIndexOf("/"),
+				),
+			)
+			.build()
+			.pick()
+			.catch((error) => {
+				if (isDialogCancelError(error)) {
+					return null;
+				}
+				throw error;
+			}),
+	downloadFile: (blob, filename) => {
+		const url = URL.createObjectURL(blob);
+		const a = document.createElement("a");
+		a.href = url;
+		a.download = filename;
+		a.click();
+		URL.revokeObjectURL(url);
+	},
+};
+
+function getSwarmRef(nodes) {
+	return getMainNode(nodes).attributes["ethswarm-fileref"];
+}
+
+function getMainNode(nodes) {
+	if (Array.isArray(nodes)) {
+		return nodes[0];
+	}
+	return nodes;
+}
+
+function getRelativePath(nodes) {
+	if (typeof nodes === "string") {
+		return nodes;
+	}
+	const node = getMainNode(nodes);
+	const fullPath = node.attributes.filename;
+	const root = node.root;
+	return fullPath.replace(root, "");
+}
+
+function getPathParts(path) {
+	return getRelativePath(path)
+		.split("/")
+		.filter((part) => part !== "");
+}
+
+function getStoragePath(path) {
+	const parts = getPathParts(path);
+	return parts.length > 0 ? parts[0] : "";
+}
+
+function isArchive(nodes) {
+	return getPathParts(nodes)[1] === "Archive - HejBit";
+}
+
+function isDialogCancelError(error) {
+	if (error === null || typeof error === "undefined") {
+		return true;
+	}
+
+	if (typeof error === "string") {
+		return /cancel|abort|dismiss|closed|no nodes selected/i.test(error);
+	}
+
+	if (typeof error === "object") {
+		const message = "message" in error ? String(error.message ?? "") : "";
+		const name = "name" in error ? String(error.name ?? "") : "";
+
+		return (
+			/abort|cancel|dismiss|closed/i.test(name) ||
+			/cancel|abort|dismiss|closed|no nodes selected/i.test(message)
+		);
+	}
+
+	return false;
+}
+
+export default FilesHelper;

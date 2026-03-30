@@ -24,10 +24,12 @@ namespace OCA\Files_External_Ethswarm\Storage;
 use CURLFile;
 use OCA\Files_External_Ethswarm\Auth\AccessKey;
 use OCA\Files_External_Ethswarm\Backend\BeeSwarm;
+use OCA\Files_External_Ethswarm\Contract\Enum\ApiEndpoints;
 use OCA\Files_External_Ethswarm\Dto\LinkDto;
 use OCA\Files_External_Ethswarm\Exception\CurlException;
 use OCA\Files_External_Ethswarm\Exception\HejBitException;
 use OCA\Files_External_Ethswarm\Utils\Curl;
+use OCA\Files_External_Ethswarm\Utils\HostUrl;
 use OCP\Files\StorageBadConfigException;
 use OCP\Files\StorageNotAvailableException;
 
@@ -61,22 +63,26 @@ trait BeeSwarmTrait {
 	 * @throws StorageBadConfigException
 	 */
 	private function validateParams(array &$params): void {
-		if (!$params[BeeSwarm::OPTION_HOST_URL] || !$params[AccessKey::SCHEME]) {
+		$hostUrl = (string) ($params[BeeSwarm::OPTION_HOST_URL] ?? '');
+		$accessKey = (string) ($params[AccessKey::SCHEME] ?? '');
+
+		if (empty($hostUrl) || empty($accessKey)) {
 			throw new StorageBadConfigException('Creating '.self::class.' storage failed, required parameters not set');
 		}
-		if (!preg_match('/^https?:\/\//i', $params[BeeSwarm::OPTION_HOST_URL])) {
-			$params[BeeSwarm::OPTION_HOST_URL] = 'https://'.$params[BeeSwarm::OPTION_HOST_URL];
-		}
-		if (!filter_var($params[BeeSwarm::OPTION_HOST_URL], FILTER_VALIDATE_URL)) {
+
+		$validatedHostUrl = HostUrl::normalize($hostUrl);
+		if (null === $validatedHostUrl) {
 			throw new StorageBadConfigException('Creating '.self::class.' storage failed, invalid url');
 		}
+
+		$params[BeeSwarm::OPTION_HOST_URL] = $validatedHostUrl;
 	}
 
 	/**
 	 * @throws CurlException|HejBitException
 	 */
-	private function getLink(string $endpoint): LinkDto {
-		$endpoint = $this->api_url.$endpoint;
+	private function getLink(ApiEndpoints $endpoint): LinkDto {
+		$endpoint = $this->api_url.$endpoint->value;
 		$request = new Curl($endpoint, headers: [
 			'accept: application/json',
 		], authorization: $this->access_key);
@@ -97,7 +103,7 @@ trait BeeSwarmTrait {
 			return $this->uploadSwarmV1($path, $tempFile, $mimetype);
 		}
 
-		$link = $this->getLink('/api/upload');
+		$link = $this->getLink(ApiEndpoints::UPLOAD);
 		$request = new Curl($link->url, authorization: $link->token);
 		$response = $request->post([
 			'file' => new CURLFile($tempFile, $mimetype, basename($path)),
@@ -121,7 +127,7 @@ trait BeeSwarmTrait {
 			return $this->downloadSwarmV1($reference);
 		}
 
-		$link = $this->getLink('/api/download');
+		$link = $this->getLink(ApiEndpoints::DOWNLOAD);
 		$request = new Curl($link->url."/{$reference}", authorization: $link->token);
 		$response = $request->get();
 
@@ -146,7 +152,7 @@ trait BeeSwarmTrait {
 			return $this->checkConnectionV1();
 		}
 
-		$endpoint = $this->api_url.'/api/readiness';
+		$endpoint = $this->api_url.ApiEndpoints::READINESS->value;
 
 		$request = new Curl($endpoint, authorization: $this->access_key);
 		$request->get();

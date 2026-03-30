@@ -52,7 +52,8 @@ class Admin implements ISettings {
 			'telemetry_enabled' => $this->config->getSystemValue('telemetry.enabled', false),
 		];
 
-		Util::addScript($this->appName, 'nextcloud-swarm-plugin-main');
+		Util::addStyle($this->appName, 'files_external_ethswarm-main');
+		Util::addScript($this->appName, 'files_external_ethswarm-main');
 
 		return new TemplateResponse($this->appName, 'vue-admin-settings', ['params' => $parameters]);
 	}

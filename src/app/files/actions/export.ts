@@ -1,0 +1,77 @@
+import DownloadSvg from "@material-design-icons/svg/filled/download.svg?raw";
+import axios from "@nextcloud/axios";
+import { getDialogBuilder, showError, showSuccess } from "@nextcloud/dialogs";
+import { registerFileActionCompat } from "@/util/FilesCompatibility";
+import FilesHelper from "@/util/FilesHelper";
+import SvgHelper from "@/util/SvgHelper";
+
+registerFileActionCompat({
+	id: "exportAction",
+	displayName() {
+		return t("files_external_ethswarm", "Export");
+	},
+	iconSvgInline() {
+		return SvgHelper.convert(DownloadSvg);
+	},
+	enabled({ nodes }) {
+		if (nodes[0].attributes["ethswarm-node"]) {
+			return FilesHelper.isRoot(nodes);
+		}
+		return false;
+	},
+	async exec({ nodes }) {
+		const node = nodes[0];
+		await getDialogBuilder("Export HejBit Storage Metadata")
+			.setSeverity("warning")
+			.setText(
+				`
+				This action will export your HejBit storage metadata such as Swarm references for this storage to a JSON file.
+				You're responsible for keeping this file secure. Are you sure you want to export your HejBit storage metadata?
+			`,
+			)
+			.addButton({
+				label: "Cancel",
+				callback: () => {},
+			})
+			.addButton({
+				label: "Export",
+				callback: async () => downloadMetadata(node),
+			})
+			.build()
+			.show()
+			.catch((error) => {
+				if (!FilesHelper.isDialogCancelError(error)) {
+					throw error;
+				}
+			});
+	},
+});
+
+const downloadMetadata = async (node) => {
+	await axios({
+		method: "post",
+		url: node.encodedSource,
+		headers: {
+			"Hejbit-Action": "export",
+		},
+	}).then((response) => {
+		if (response.data.status === true) {
+			const blob = new Blob([JSON.stringify(response.data.data)], {
+				type: "application/json",
+			});
+			const storageName = FilesHelper.getStoragePath(node.path);
+			const date = new Date().toISOString().split("T")[0];
+			FilesHelper.downloadFile(
+				blob,
+				`hejbit-export-${storageName}-${date}.json`,
+			);
+			showSuccess("Exported storage metadata successfully");
+		} else {
+			console.error(
+				"Error while exporting metadata of the storage",
+				response,
+			);
+			showError(response.data.message);
+		}
+	});
+};
