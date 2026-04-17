@@ -46,6 +46,10 @@ use OCP\AppFramework\Db\Entity;
  * @method int         getVisibility()
  * @method void        setToken(string $token)
  * @method int         getToken()
+ * @method void        setEncryptionVersion(int $encryptionVersion)
+ * @method int         getEncryptionVersion()
+ * @method void        setEncryptionNonce(?string $encryptionNonce)
+ * @method null|string getEncryptionNonce()
  */
 class SwarmFile extends Entity {
 	/** @var string */
@@ -78,6 +82,12 @@ class SwarmFile extends Entity {
 	/** @var string */
 	protected $token;
 
+	/** @var int */
+	protected $encryptionVersion = 0;
+
+	/** @var null|string */
+	protected $encryptionNonce;
+
 	public function __construct() {
 		$this->addType('name', 'string');
 		$this->addType('swarmReference', 'string');
@@ -89,5 +99,14 @@ class SwarmFile extends Entity {
 		$this->addType('storage', 'int');
 		$this->addType('visibility', 'int');
 		$this->addType('token', 'string');
+		$this->addType('encryptionversion', 'integer');
+		$this->addType('encryptionnonce', 'string');
+	}
+
+	/**
+	 * Check if this file is encrypted.
+	 */
+	public function isEncrypted(): bool {
+		return $this->encryptionVersion > 0;
 	}
 }

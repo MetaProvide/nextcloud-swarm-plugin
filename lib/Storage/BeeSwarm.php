@@ -29,6 +29,7 @@ use OC\Files\Storage\Common;
 use OCA\Files_External_Ethswarm\AppInfo\Application;
 use OCA\Files_External_Ethswarm\Db\SwarmFile;
 use OCA\Files_External_Ethswarm\Db\SwarmFileMapper;
+use OCA\Files_External_Ethswarm\Service\CryptoService;
 use OCA\Files_External_Ethswarm\Service\NotificationService;
 use OCP\Constants;
 use OCP\Files\Config\IUserMountCache;
@@ -81,6 +82,8 @@ class BeeSwarm extends Common implements IBeeSwarm {
 
 	private IUserMountCache $mountCache;
 
+	private ?CryptoService $cryptoService = null;
+
 	/**
 	 * @param mixed $params
 	 *
@@ -115,6 +118,13 @@ class BeeSwarm extends Common implements IBeeSwarm {
 			OC::$server->get(IUserManager::class),
 			OC::$server->get(IUserSession::class)
 		);
+
+		// Initialize E2EE crypto service if mnemonic is provided
+		if (!empty($this->mnemonic) && !empty($this->encryption_salt)) {
+			$this->cryptoService = new CryptoService();
+			$masterKey = $this->cryptoService->deriveMasterKey($this->mnemonic, $this->encryption_salt);
+			$this->cryptoService->setMasterKey($masterKey);
+		}
 
 		$this->isNewStorage() && $this->prepareStorage();
 	}
@@ -359,7 +369,14 @@ class BeeSwarm extends Common implements IBeeSwarm {
 			case 'r':
 			case 'rb':
 				// Get file from swarm
-				return $this->downloadSwarm($reference);
+				$stream = $this->downloadSwarm($reference);
+
+				// Decrypt if E2EE is enabled and file is encrypted
+				if (null !== $this->cryptoService && $swarmFile->isEncrypted()) {
+					$stream = $this->decryptStream($stream, $swarmFile);
+				}
+
+				return $stream;
 
 			case 'w':    // Open for writing only; place the file pointer at the beginning of the file
 			case 'w+':    // Open for reading and writing
@@ -391,7 +408,14 @@ class BeeSwarm extends Common implements IBeeSwarm {
 		$swarmFile = $this->fileMapper->find($path, $this->storageId);
 		$reference = $swarmFile->getSwarmReference();
 
-		return stream_get_contents($this->downloadSwarm($reference));
+		$stream = $this->downloadSwarm($reference);
+
+		// Decrypt if E2EE is enabled and file is encrypted
+		if (null !== $this->cryptoService && $swarmFile->isEncrypted()) {
+			$stream = $this->decryptStream($stream, $swarmFile);
+		}
+
+		return stream_get_contents($stream);
 	}
 
 	/* Enabling this function causes a fatal exception "Call to a member function getId() on null /var/www/html/lib/private/Files/Mount/MountPoint.php - line 276: OC\Files\Cache\Wrapper\CacheWrapper->getId("")
@@ -472,6 +496,25 @@ class BeeSwarm extends Common implements IBeeSwarm {
 		$tmpFileSize = (file_exists($tmpFile) ? filesize($tmpFile) : -1);
 		$mimetype = str_ends_with(strtolower($path), '.md') ? 'text/markdown' : mime_content_type($tmpFile);
 
+		// Encryption metadata (populated if E2EE is enabled)
+		$encryptionVersion = 0;
+		$encryptionNonce = null;
+		$encryptionKey = null;
+
+		// Encrypt file content if E2EE is enabled
+		if (null !== $this->cryptoService && null !== $this->cryptoService->getMasterKey()) {
+			$fileKey = $this->cryptoService->deriveFileKey($this->cryptoService->getMasterKey(), $path);
+			$plaintext = file_get_contents($tmpFile);
+			if (false !== $plaintext) {
+				$encrypted = $this->cryptoService->encrypt($plaintext, $fileKey);
+				// Write encrypted content to temp file
+				file_put_contents($tmpFile, $encrypted['ciphertext']);
+				$encryptionVersion = CryptoService::ENCRYPTION_VERSION;
+				$encryptionNonce = $encrypted['nonce'];
+				$encryptionKey = $encrypted['authTag'];
+			}
+		}
+
 		try {
 			$reference = $this->uploadSwarm($path, $tmpFile, $mimetype);
 		} catch (Exception $e) {
@@ -492,6 +535,9 @@ class BeeSwarm extends Common implements IBeeSwarm {
 			'reference' => $reference,
 			'storage' => $this->storageId,
 			'token' => $this->token,
+			'encryption_version' => $encryptionVersion,
+			'encryption_nonce' => $encryptionNonce,
+			'encryption_key' => $encryptionKey,
 		];
 		$this->fileMapper->createFile($uploadFiles);
 
@@ -518,6 +564,40 @@ class BeeSwarm extends Common implements IBeeSwarm {
 		fclose($target);
 
 		return $tmpFile;
+	}
+
+	/**
+	 * Decrypt a stream using the file's encryption metadata.
+	 *
+	 * @param resource $stream
+	 *
+	 * @return resource
+	 */
+	private function decryptStream($stream, SwarmFile $swarmFile) {
+		$ciphertext = stream_get_contents($stream);
+		fclose($stream);
+
+		if (false === $ciphertext) {
+			throw new Exception('Failed to read encrypted stream');
+		}
+
+		$fileKey = $this->cryptoService->deriveFileKey(
+			$this->cryptoService->getMasterKey(),
+			$swarmFile->getName()
+		);
+
+		$plaintext = $this->cryptoService->decrypt(
+			$ciphertext,
+			$fileKey,
+			$swarmFile->getEncryptionNonce(),
+			$swarmFile->getEncryptionKey()
+		);
+
+		$decryptedStream = fopen('php://memory', 'r+');
+		fwrite($decryptedStream, $plaintext);
+		rewind($decryptedStream);
+
+		return $decryptedStream;
 	}
 
 	private function addCache(SwarmFile $file, ?int $permission = null): int {

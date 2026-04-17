@@ -41,6 +41,10 @@ trait BeeSwarmTrait {
 
 	protected string $access_key;
 
+	protected string $mnemonic = '';
+
+	protected string $encryption_salt = '';
+
 	public function isVersion(int $version = self::INFRASTRUCTURE_VERSION_GATEWAY): bool {
 		return match ($version) {
 			self::INFRASTRUCTURE_VERSION_GATEWAY => 'https://license.hejbit.com' === $this->api_url,
@@ -57,6 +61,8 @@ trait BeeSwarmTrait {
 
 		$this->api_url = $params[BeeSwarm::OPTION_HOST_URL];
 		$this->access_key = $params[AccessKey::SCHEME];
+		$this->mnemonic = $params['mnemonic'] ?? '';
+		$this->encryption_salt = $params['encryption_salt'] ?? '';
 	}
 
 	/**

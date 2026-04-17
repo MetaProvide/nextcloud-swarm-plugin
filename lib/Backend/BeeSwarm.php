@@ -63,6 +63,20 @@ class BeeSwarm extends Backend {
 					'app.hejbit.com'
 				))
 					->setTooltip($l->t('Access Server')),
+				(new DefinitionParameter(
+					'mnemonic',
+					$l->t('Recovery Phrase')
+				))
+					->setType(DefinitionParameter::VALUE_PASSWORD)
+					->setTooltip($l->t('Your 12-word HejBit recovery phrase for E2EE'))
+					->setFlag(DefinitionParameter::FLAG_OPTIONAL),
+				(new DefinitionParameter(
+					'encryption_salt',
+					$l->t('Encryption Salt')
+				))
+					->setType(DefinitionParameter::VALUE_PASSWORD)
+					->setTooltip($l->t('Auto-generated encryption salt (do not modify)'))
+					->setFlag(DefinitionParameter::FLAG_OPTIONAL),
 			])->addAuthScheme(AccessKey::SCHEME)
 		;
 	}
