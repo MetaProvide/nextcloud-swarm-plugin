@@ -142,8 +142,8 @@ class SwarmFileMapper extends QBMapper {
 		if (isset($data['encryption_nonce'])) {
 			$swarm->setEncryptionNonce($data['encryption_nonce']);
 		}
-		if (isset($data['encryption_key'])) {
-			$swarm->setEncryptionKey($data['encryption_key']);
+		if (isset($data['encryption_auth_tag'])) {
+			$swarm->setEncryptionAuthTag($data['encryption_auth_tag']);
 		}
 
 		return $this->insert($swarm);

@@ -32,6 +32,10 @@ use OCP\Migration\SimpleMigrationStep;
  * Adds the `encryption_key` column that the SwarmFile entity already
  * declares but no prior migration created. In the E2EE flow this column
  * stores the base64-encoded AES-256-GCM authentication tag.
+ *
+ * NOTE: This column is renamed to `encryption_auth_tag` in Version0008
+ * to clarify its actual purpose. The name `encryption_key` was misleading
+ * since it stores the auth tag, not a key.
  */
 class Version0007Date202604171430 extends SimpleMigrationStep {
 	public const _TABLENAME = 'files_swarm';

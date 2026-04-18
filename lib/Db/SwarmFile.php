@@ -26,20 +26,8 @@ namespace OCA\Files_External_Ethswarm\Db;
 use OCP\AppFramework\Db\Entity;
 
 /**
- * @method void        setName(string $name)
- * @method string      getName()
- * @method void        setSwarmReference(string $swarmReference)
- * @method null|string getSwarmReference()
- * @method void        setSwarmTag(string $tag)
- * @method null|string getSwarmTag()
- * @method void        setMimetype(int $mimetype)
- * @method int         getMimetype()
- * @method void        setSize(int $size)
- * @method string      getSize()
- * @method void        setStorageMtime(int $mtime)
- * @method int         getStorageMtime()
- * @method void        setEncryptionKey(string $encryptionKey)
- * @method string      getEncryptionKey()
+ * @method void        setEncryptionAuthTag(string $encryptionAuthTag)
+ * @method string      getEncryptionAuthTag()
  * @method void        setStorage(int $storage)
  * @method null|int    getStorage()
  * @method void        setVisibility(int $visibility)
@@ -71,7 +59,7 @@ class SwarmFile extends Entity {
 	protected $storageMtime;
 
 	/** @var string */
-	protected $encryptionKey;
+	protected $encryptionAuthTag;
 
 	/** @var null|int */
 	protected $storage;
@@ -95,7 +83,7 @@ class SwarmFile extends Entity {
 		$this->addType('mimetype', 'int');
 		$this->addType('size', 'int');
 		$this->addType('storageMtime', 'int');
-		$this->addType('encryptionkey', 'string');
+		$this->addType('encryptionauthtag', 'string');
 		$this->addType('storage', 'int');
 		$this->addType('visibility', 'int');
 		$this->addType('token', 'string');

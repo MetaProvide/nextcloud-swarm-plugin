@@ -499,7 +499,7 @@ class BeeSwarm extends Common implements IBeeSwarm {
 		// Encryption metadata (populated if E2EE is enabled)
 		$encryptionVersion = 0;
 		$encryptionNonce = null;
-		$encryptionKey = null;
+		$encryptionAuthTag = null;
 
 		// Encrypt file content if E2EE is enabled
 		if (null !== $this->cryptoService && null !== $this->cryptoService->getMasterKey()) {
@@ -511,7 +511,7 @@ class BeeSwarm extends Common implements IBeeSwarm {
 				file_put_contents($tmpFile, $encrypted['ciphertext']);
 				$encryptionVersion = CryptoService::ENCRYPTION_VERSION;
 				$encryptionNonce = $encrypted['nonce'];
-				$encryptionKey = $encrypted['authTag'];
+				$encryptionAuthTag = $encrypted['authTag'];
 			}
 		}
 
@@ -537,7 +537,7 @@ class BeeSwarm extends Common implements IBeeSwarm {
 			'token' => $this->token,
 			'encryption_version' => $encryptionVersion,
 			'encryption_nonce' => $encryptionNonce,
-			'encryption_key' => $encryptionKey,
+			'encryption_auth_tag' => $encryptionAuthTag,
 		];
 		$this->fileMapper->createFile($uploadFiles);
 
@@ -590,7 +590,7 @@ class BeeSwarm extends Common implements IBeeSwarm {
 			$ciphertext,
 			$fileKey,
 			$swarmFile->getEncryptionNonce(),
-			$swarmFile->getEncryptionKey()
+			$swarmFile->getEncryptionAuthTag()
 		);
 
 		$decryptedStream = fopen('php://memory', 'r+');
