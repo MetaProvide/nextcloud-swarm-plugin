@@ -24,19 +24,26 @@ namespace OCA\Files_External_Ethswarm\Migration;
 
 use Closure;
 use OCP\DB\ISchemaWrapper;
+use OCP\DB\Types;
+use OCP\IDBConnection;
 use OCP\Migration\IOutput;
 use OCP\Migration\SimpleMigrationStep;
 
 /**
- * Rename `encryption_key` column to `encryption_auth_tag`.
+ * Add `encryption_auth_tag` column and migrate data from `encryption_key`.
  *
- * The column was originally named `encryption_key` but it actually stores
- * the AES-256-GCM authentication tag (16 bytes, base64-encoded), not a key.
- * Renaming to `encryption_auth_tag` clarifies the actual purpose and aligns
- * with the naming used in the JS crypto module and gateway DTOs.
+ * The `encryption_key` column was misleadingly named — it stores the
+ * AES-256-GCM authentication tag (16 bytes, base64-encoded), not a key.
+ * This migration adds the correctly-named `encryption_auth_tag` column
+ * and copies existing data over.
  */
 class Version0008Date202604181430 extends SimpleMigrationStep {
 	public const _TABLENAME = 'files_swarm';
+
+	public function __construct(
+		private IDBConnection $db,
+	) {
+	}
 
 	public function changeSchema(IOutput $output, Closure $schemaClosure, array $options): ?ISchemaWrapper {
 		/** @var ISchemaWrapper $schema */
@@ -48,14 +55,25 @@ class Version0008Date202604181430 extends SimpleMigrationStep {
 
 		$table = $schema->getTable(self::_TABLENAME);
 
-		// Rename encryption_key → encryption_auth_tag if the old column exists
-		// and the new column doesn't exist yet
-		if ($table->hasColumn('encryption_key') && !$table->hasColumn('encryption_auth_tag')) {
-			$table->changeColumn('encryption_key', [
-				'newName' => 'encryption_auth_tag',
+		// Add the new column if it doesn't exist yet
+		if (!$table->hasColumn('encryption_auth_tag')) {
+			$table->addColumn('encryption_auth_tag', Types::STRING, [
+				'notnull' => false,
+				'length' => 64,
 			]);
 		}
 
 		return $schema;
+	}
+
+	public function postSchemaChange(IOutput $output, Closure $schemaClosure, array $options): void {
+		// Copy data from encryption_key to encryption_auth_tag where not null
+		$qb = $this->db->getQueryBuilder();
+		$qb->update(self::_TABLENAME)
+			->set('encryption_auth_tag', 'encryption_key')
+			->where($qb->expr()->isNotNull('encryption_key'));
+		$qb->executeStatement();
+
+		$output->info('Migrated encryption_key data to encryption_auth_tag');
 	}
 }
