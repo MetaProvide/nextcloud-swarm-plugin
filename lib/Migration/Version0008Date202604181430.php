@@ -75,5 +75,11 @@ class Version0008Date202604181430 extends SimpleMigrationStep {
 		$qb->executeStatement();
 
 		$output->info('Migrated encryption_key data to encryption_auth_tag');
+
+		$this->db->executeStatement(
+			'ALTER TABLE ' . self::_TABLENAME . ' DROP COLUMN encryption_key'
+		);
+
+		$output->info('Dropped old encryption_key column');
 	}
 }

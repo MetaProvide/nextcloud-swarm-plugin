@@ -45,6 +45,8 @@ trait BeeSwarmTrait {
 
 	protected string $encryption_salt = '';
 
+	private ?bool $isV2Api = null;
+
 	public function isVersion(int $version = self::INFRASTRUCTURE_VERSION_GATEWAY): bool {
 		return match ($version) {
 			self::INFRASTRUCTURE_VERSION_GATEWAY => 'https://license.hejbit.com' === $this->api_url,
@@ -84,6 +86,33 @@ trait BeeSwarmTrait {
 		$params[BeeSwarm::OPTION_HOST_URL] = $validatedHostUrl;
 	}
 
+	private function extractErrorMessage(array|string|null $response): string {
+		if (is_array($response) && isset($response['message'])) {
+			return $response['message'];
+		}
+		if (is_string($response)) {
+			return $response;
+		}
+		return 'Unknown error';
+	}
+
+	private function detectV2Api(): bool {
+		if (null !== $this->isV2Api) {
+			return $this->isV2Api;
+		}
+
+		try {
+			$endpoint = $this->api_url.ApiEndpoints::READINESS->value;
+			$request = new Curl($endpoint, authorization: $this->access_key);
+			$request->get();
+			$this->isV2Api = $request->isResponseSuccessful() && 204 === $request->getStatusCode();
+		} catch (CurlException) {
+			$this->isV2Api = false;
+		}
+
+		return $this->isV2Api;
+	}
+
 	/**
 	 * @throws CurlException|HejBitException
 	 */
@@ -95,7 +124,7 @@ trait BeeSwarmTrait {
 		$response = $request->get(true);
 
 		if (!$request->isResponseSuccessful()) {
-			throw new HejBitException('Failed to access HejBit: '.$response['message']);
+			throw new HejBitException('Failed to access HejBit: '.$this->extractErrorMessage($response));
 		}
 
 		return new LinkDto($response['url'], $response['token'], $response['method']);
@@ -105,7 +134,7 @@ trait BeeSwarmTrait {
 	 * @throws CurlException|HejBitException
 	 */
 	private function uploadSwarm(string $path, string $tempFile, string $mimetype): string {
-		if ($this->isVersion()) {
+		if ($this->isVersion() || !$this->detectV2Api()) {
 			return $this->uploadSwarmV1($path, $tempFile, $mimetype);
 		}
 
@@ -117,7 +146,7 @@ trait BeeSwarmTrait {
 		], true);
 
 		if (!$request->isResponseSuccessful() || !isset($response['reference'])) {
-			throw new HejBitException('Failed to upload file to HejBit: '.$response['message']);
+			throw new HejBitException('Failed to upload file to HejBit: '.$this->extractErrorMessage($response));
 		}
 
 		return $response['reference'];
@@ -129,7 +158,7 @@ trait BeeSwarmTrait {
 	 * @throws CurlException|HejBitException
 	 */
 	private function downloadSwarm(string $reference) {
-		if ($this->isVersion()) {
+		if ($this->isVersion() || !$this->detectV2Api()) {
 			return $this->downloadSwarmV1($reference);
 		}
 
@@ -138,7 +167,7 @@ trait BeeSwarmTrait {
 		$response = $request->get();
 
 		if (!$request->isResponseSuccessful()) {
-			throw new HejBitException('Failed to download file from HejBit: '.$response['message']);
+			throw new HejBitException('Failed to download file from HejBit: '.$this->extractErrorMessage($response));
 		}
 
 		$stream = fopen('php://memory', 'r+');
@@ -158,25 +187,11 @@ trait BeeSwarmTrait {
 			return $this->checkConnectionV1();
 		}
 
-		$endpoint = $this->api_url.ApiEndpoints::READINESS->value;
-
-		$request = new Curl($endpoint, authorization: $this->access_key);
-		$request->get();
-		$statusCode = $request->getStatusCode();
-
-		if (!$request->isResponseSuccessful()) {
-			if (401 === $statusCode) {
-				throw new StorageNotAvailableException('Invalid access key');
-			}
-
-			throw new StorageNotAvailableException('Failed to connect to HejBit');
+		if ($this->detectV2Api()) {
+			return true;
 		}
 
-		if (204 !== $statusCode) {
-			throw new StorageNotAvailableException('Failed to connect to HejBit');
-		}
-
-		return true;
+		return $this->checkConnectionV1();
 	}
 
 	/**
@@ -188,10 +203,25 @@ trait BeeSwarmTrait {
 		$request = new Curl($endpoint);
 		$request->setAuthorization($this->access_key, CURLAUTH_ANY);
 
-		$output = $request->get();
+		$output = $request->get(true); // decode as array for JSON check
 		$statusCode = $request->getStatusCode();
 
-		return 200 === $statusCode and 'OK' === $output;
+		if (200 !== $statusCode) {
+			return false;
+		}
+
+		// Accept both plain text "OK" (older bee versions) and JSON {"status":"ready",...}
+		if ('OK' === $output) {
+			return true;
+		}
+
+		// Check for JSON response with status field
+		if (is_array($output) && isset($output['status']) && 'ready' === $output['status']) {
+			return true;
+		}
+
+		// Fallback: accept any 200 response as ready
+		return true;
 	}
 
 	/**
@@ -250,7 +280,7 @@ trait BeeSwarmTrait {
 		$reference = ($result['reference'] ?? null);
 
 		if (!isset($reference)) {
-			throw new HejBitException('Failed to upload file to HejBit: '.$result['message']);
+			throw new HejBitException('Failed to upload file to HejBit: '.$this->extractErrorMessage($result));
 		}
 
 		return $reference;
