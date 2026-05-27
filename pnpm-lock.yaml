@@ -15,13 +15,13 @@ importers:
         specifier: ^0.14.15
         version: 0.14.15
       '@nextcloud/auth':
-        specifier: ^2.5.3
+        specifier: ^2.6.0
         version: 2.6.0
       '@nextcloud/axios':
-        specifier: ^2.5.2
+        specifier: ^2.6.0
         version: 2.6.0
       '@nextcloud/dialogs':
-        specifier: ^7.3.0
+        specifier: ^7.4.0
         version: 7.4.0(@vue/compiler-sfc@3.5.34)(typescript@5.9.3)
       '@nextcloud/event-bus':
         specifier: ^3.3.3
@@ -36,16 +36,16 @@ importers:
         specifier: ^1.10.0
         version: 1.10.0
       '@nextcloud/vue':
-        specifier: ^9.6.0
+        specifier: ^9.8.0
         version: 9.8.0(@vue/compiler-sfc@3.5.34)(typescript@5.9.3)
       '@openfeature/flagd-web-provider':
         specifier: ^0.7.4
         version: 0.7.4(@openfeature/web-sdk@1.8.0(@openfeature/core@1.10.0))
       '@openfeature/web-sdk':
-        specifier: ^1.7.3
+        specifier: ^1.8.0
         version: 1.8.0(@openfeature/core@1.10.0)
       vue:
-        specifier: ^3.5.30
+        specifier: ^3.5.34
         version: 3.5.34(typescript@5.9.3)
     devDependencies:
       '@biomejs/biome':
@@ -58,13 +58,13 @@ importers:
         specifier: ^2.5.2
         version: 2.5.2(@types/node@24.12.4)(browserslist@4.28.2)(picomatch@4.0.4)(rollup@4.60.4)(sass@1.100.0)(typescript@5.9.3)(vite@7.3.3(@types/node@24.12.4)(sass@1.100.0)(yaml@2.9.0))(vue@3.5.34(typescript@5.9.3))
       '@types/node':
-        specifier: ^24.5.2
+        specifier: ^24.12.4
         version: 24.12.4
       browserslist:
-        specifier: ^4.26.2
+        specifier: ^4.28.2
         version: 4.28.2
       lint-staged:
-        specifier: ^16.2.7
+        specifier: ^16.4.0
         version: 16.4.0
       simple-git-hooks:
         specifier: ^2.13.1
@@ -73,10 +73,10 @@ importers:
         specifier: ^5.9.3
         version: 5.9.3
       vite:
-        specifier: ^7.3.1
+        specifier: ^7.3.3
         version: 7.3.3(@types/node@24.12.4)(sass@1.100.0)(yaml@2.9.0)
       vue-tsc:
-        specifier: ^3.0.8
+        specifier: ^3.3.2
         version: 3.3.2(typescript@5.9.3)
 
 packages:
