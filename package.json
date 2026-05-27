@@ -7,11 +7,6 @@
 		"type": "git",
 		"url": "https://github.com/MetaProvide/nextcloud-swarm-plugin.git"
 	},
-	"engines": {
-		"node": "^24.0.0",
-		"pnpm": "^10.0.0"
-	},
-	"packageManager": "pnpm@10.28.2",
 	"scripts": {
 		"build": "vite build",
 		"dev": "vite build --mode development --watch",

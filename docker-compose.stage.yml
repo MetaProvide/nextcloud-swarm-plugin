@@ -1,5 +1,4 @@
 services:
-
   web:
     build: ./docker/web
     restart: unless-stopped
@@ -10,7 +9,7 @@ services:
         condition: service_started
     labels:
       caddy: ${APP_URL}
-      caddy.reverse_proxy: '{{upstreams 80}}'
+      caddy.reverse_proxy: "{{upstreams 80}}"
     networks:
       - frontend
       - proxy
@@ -65,7 +64,7 @@ services:
     image: redis:alpine
     restart: unless-stopped
     healthcheck:
-      test: [ "CMD", "redis-cli", "ping" ]
+      test: ["CMD", "redis-cli", "ping"]
       start_period: 3s
       timeout: 5s
       interval: 30s
@@ -80,7 +79,16 @@ services:
     volumes:
       - nc-db:/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD", "pg_isready", "-q", "-d", "${POSTGRES_DB}", "-U", "${POSTGRES_USER}" ]
+      test:
+        [
+          "CMD",
+          "pg_isready",
+          "-q",
+          "-d",
+          "${POSTGRES_DB}",
+          "-U",
+          "${POSTGRES_USER}",
+        ]
       start_period: 3s
       timeout: 5s
       interval: 30s
@@ -94,14 +102,14 @@ volumes:
 networks:
   frontend:
     ipam:
-        config:
-          - subnet: 172.${NC_VERSION:-32}.10.0/24
-            gateway: 172.${NC_VERSION:-32}.10.1
+      config:
+        - subnet: 172.${NC_VERSION:-32}.10.0/24
+          gateway: 172.${NC_VERSION:-32}.10.1
   backend:
     ipam:
-        config:
-          - subnet: 172.${NC_VERSION:-32}.20.0/24
-            gateway: 172.${NC_VERSION:-32}.20.1
+      config:
+        - subnet: 172.${NC_VERSION:-32}.20.0/24
+          gateway: 172.${NC_VERSION:-32}.20.1
   proxy:
     name: hejbit-network
     external: true
