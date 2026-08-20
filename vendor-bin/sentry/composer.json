@@ -1,5 +1,6 @@
 {
 	"require": {
-		"sentry/sentry": "^4.10"
+		"sentry/sentry": "^4.10",
+		"guzzlehttp/psr7": "^2.13"
 	}
 }
