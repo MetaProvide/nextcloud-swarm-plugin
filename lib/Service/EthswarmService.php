@@ -29,6 +29,7 @@ use OC;
 use OCA\Files_External_Ethswarm\Db\SwarmFile;
 use OCA\Files_External_Ethswarm\Db\SwarmFileMapper;
 use OCA\Files_External_Ethswarm\Storage\BeeSwarm;
+use OCA\Files_External_Ethswarm\Utils\Storage as StorageUtils;
 use OCP\Files\Storage\IStorage;
 use OCP\Files\StorageNotAvailableException;
 use OCP\IDBConnection;
@@ -147,6 +148,22 @@ class EthswarmService {
 		} catch (Exception $e) {
 			throw new StorageNotAvailableException($this->l10n->t('Failed to rename'));
 		}
+	}
+
+	public function importReference(string $directory, IStorage $storage, string $type, string $reference): array {
+		if (!StorageUtils::isSwarm($storage)) {
+			throw new StorageNotAvailableException($this->l10n->t('Storage is not a HejBit storage'));
+		}
+
+		/** @var BeeSwarm $storage */
+		$file = $storage->importReference($directory, $type, $reference);
+
+		return [
+			'path' => $file->getName(),
+			'reference' => $file->getSwarmReference(),
+			'mimetype' => $file->getMimetype(),
+			'size' => $file->getSize(),
+		];
 	}
 
 	public function exportReferences(IStorage $storage): array {

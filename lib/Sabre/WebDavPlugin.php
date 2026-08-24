@@ -102,7 +102,8 @@ class WebDavPlugin extends ServerPlugin {
 		}
 
 		try {
-			$path = $request->getPath();
+			$data = null;
+			$path = ltrim($request->getPath(), '/');
 			$node = $this->server->tree->getNodeForPath($path);
 
 			if (!$node instanceof File && !$node instanceof Directory) {
@@ -139,6 +140,20 @@ class WebDavPlugin extends ServerPlugin {
 
 					break;
 
+				case 'import':
+					if (!$node instanceof Directory) {
+						throw new NotImplemented('Import is only supported inside folders');
+					}
+
+					$data = $this->EthswarmService->importReference(
+						$filename,
+						$storage,
+						(string) $request->getHeader('Hejbit-Import-Type'),
+						(string) $request->getHeader('Hejbit-Import-Reference')
+					);
+
+					break;
+
 				default:
 					throw new NotImplemented('Action not implemented');
 			}
@@ -162,7 +177,7 @@ class WebDavPlugin extends ServerPlugin {
 	}
 
 	public function httpMove(RequestInterface $request, ResponseInterface $response): bool {
-		$node = $this->server->tree->getNodeForPath($request->getPath());
+		$node = $this->server->tree->getNodeForPath(ltrim($request->getPath(), '/'));
 
 		if (!$node instanceof File && !$node instanceof Directory) {
 			return true;

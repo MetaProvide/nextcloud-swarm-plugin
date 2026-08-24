@@ -59,6 +59,52 @@ trait BeeSwarmTrait {
 		$this->access_key = $params[AccessKey::SCHEME];
 	}
 
+	protected function createCurl(string $url, array $options = [], array $headers = [], ?string $authorization = null) {
+		return new Curl($url, $options, $headers, $authorization);
+	}
+
+	/**
+	 * @throws CurlException|HejBitException
+	 */
+	protected function importReferenceToSwarm(string $type, string $reference): array {
+		if ($this->isVersion()) {
+			throw new HejBitException('Import is not supported by this HejBit infrastructure');
+		}
+
+		$link = $this->getLink(ApiEndpoints::IMPORT);
+		$endpoint = rtrim($link->url, '/').'/'.$type.'/'.rawurlencode($reference);
+		$request = $this->createCurl($endpoint, authorization: $link->token);
+		$response = $request->exec(true, [
+			CURLOPT_CUSTOMREQUEST => $link->method,
+		], [
+			'accept: application/json',
+		]);
+
+		if (!is_array($response)) {
+			$response = [];
+		}
+
+		if (!$request->isResponseSuccessful()) {
+			throw new HejBitException('Failed to import file to HejBit: '.($response['message'] ?? 'Unknown error'));
+		}
+
+		$swarmReference = $response['reference'] ?? $response['swarmReference'] ?? null;
+		if (null === $swarmReference && 'swarm' === $type) {
+			$swarmReference = $reference;
+		}
+
+		if (null === $swarmReference) {
+			throw new HejBitException('Failed to import file to HejBit: missing Swarm reference');
+		}
+
+		return [
+			'name' => $response['filename'] ?? $response['name'] ?? null,
+			'reference' => $swarmReference,
+			'mimetype' => $response['contentType'] ?? $response['mimetype'] ?? $response['mimeType'] ?? 'application/octet-stream',
+			'size' => (int) ($response['size'] ?? 0),
+		];
+	}
+
 	/**
 	 * @throws StorageBadConfigException
 	 */
@@ -83,7 +129,7 @@ trait BeeSwarmTrait {
 	 */
 	private function getLink(ApiEndpoints $endpoint): LinkDto {
 		$endpoint = $this->api_url.$endpoint->value;
-		$request = new Curl($endpoint, headers: [
+		$request = $this->createCurl($endpoint, headers: [
 			'accept: application/json',
 		], authorization: $this->access_key);
 		$response = $request->get(true);
@@ -104,7 +150,7 @@ trait BeeSwarmTrait {
 		}
 
 		$link = $this->getLink(ApiEndpoints::UPLOAD);
-		$request = new Curl($link->url, authorization: $link->token);
+		$request = $this->createCurl($link->url, authorization: $link->token);
 		$response = $request->post([
 			'file' => new CURLFile($tempFile, $mimetype, basename($path)),
 			'name' => basename($path),
@@ -128,7 +174,7 @@ trait BeeSwarmTrait {
 		}
 
 		$link = $this->getLink(ApiEndpoints::DOWNLOAD);
-		$request = new Curl($link->url."/{$reference}", authorization: $link->token);
+		$request = $this->createCurl($link->url."/{$reference}", authorization: $link->token);
 		$response = $request->get();
 
 		if (!$request->isResponseSuccessful()) {

@@ -17,8 +17,10 @@ require_once __DIR__.'/../vendor/autoload.php';
 // this is usually not needed.
 require_once OC_SERVERROOT.'/lib/base.php';
 
-// Fix for "Autoload path not allowed: .../tests/lib/testcase.php"
-OC::$loader->addValidRoot(OC_SERVERROOT.'/tests');
+// Fix for "Autoload path not allowed: .../tests/lib/testcase.php" on legacy Nextcloud versions.
+if (property_exists(OC::class, 'loader') && null !== OC::$loader) {
+	OC::$loader->addValidRoot(OC_SERVERROOT.'/tests');
+}
 
 // Fix for "Autoload path not allowed: .../files_external_ethswarm/tests/testcase.php"
 OC_App::loadApp('files_external_ethswarm');

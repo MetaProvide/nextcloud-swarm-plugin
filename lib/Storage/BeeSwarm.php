@@ -123,6 +123,40 @@ class BeeSwarm extends Common implements IBeeSwarm {
 		return true;
 	}
 
+	/**
+	 * @throws Exception
+	 */
+	public function importReference(string $directory, string $type, string $reference): SwarmFile {
+		$type = strtolower(trim($type));
+		$reference = trim($reference);
+		$directory = trim($directory, '/');
+
+		$this->validateImportRequest($type, $reference);
+
+		$imported = $this->importReferenceToSwarm($type, $reference);
+		$path = $this->getAvailableImportPath($directory, $type, $reference, $imported['name']);
+		$mimetype = $this->normalizeImportMimetype($path, (string) ($imported['mimetype'] ?: 'application/octet-stream'));
+		$timestamp = time();
+
+		$file = $this->fileMapper->createFile([
+			'name' => $path,
+			'permissions' => (Constants::PERMISSION_ALL - Constants::PERMISSION_DELETE - Constants::PERMISSION_UPDATE),
+			'mimetype' => $this->mimeTypeHandler->getId($mimetype),
+			'mtime' => $timestamp,
+			'storage_mtime' => $timestamp,
+			'size' => max(0, (int) $imported['size']),
+			'etag' => null,
+			'reference' => $imported['reference'],
+			'storage' => $this->storageId,
+			'token' => $this->token,
+		]);
+
+		$this->addCache($file);
+		$this->notificationService->sendTemporaryNotification('swarm-fileupload', $path);
+
+		return $file;
+	}
+
 	public function restoreByToken(): void {
 		$this->fileMapper->updateStorageIds($this->token, $this->storageId);
 		$files = $this->fileMapper->findAllWithToken($this->token);
@@ -520,26 +554,90 @@ class BeeSwarm extends Common implements IBeeSwarm {
 		return $tmpFile;
 	}
 
+	private function validateImportRequest(string $type, string $reference): void {
+		if (!in_array($type, ['swarm', 'ipfs'], true)) {
+			throw new BadRequest('Import type must be either swarm or ipfs');
+		}
+
+		if ('' === $reference || str_contains($reference, '/') || str_contains($reference, '..') || preg_match('/[\x00-\x1F\x7F]/', $reference)) {
+			throw new BadRequest('Invalid import reference');
+		}
+	}
+
+	private function getAvailableImportPath(string $directory, string $type, string $reference, ?string $name = null): string {
+		$baseName = $this->sanitizeImportFileName($name ?: 'imported-'.$type.'-'.substr($reference, 0, 16));
+		$path = $this->joinPath($directory, $baseName);
+
+		if (!$this->file_exists($path)) {
+			return $path;
+		}
+
+		$extension = pathinfo($baseName, PATHINFO_EXTENSION);
+		$nameWithoutExtension = '' === $extension ? $baseName : substr($baseName, 0, -(strlen($extension) + 1));
+
+		for ($index = 1; $index < 1000; ++$index) {
+			$candidateName = '' === $extension ? "{$nameWithoutExtension}-{$index}" : "{$nameWithoutExtension}-{$index}.{$extension}";
+			$candidatePath = $this->joinPath($directory, $candidateName);
+			if (!$this->file_exists($candidatePath)) {
+				return $candidatePath;
+			}
+		}
+
+		throw new BadRequest('Could not create a unique imported file name');
+	}
+
+	private function sanitizeImportFileName(string $name): string {
+		$name = preg_replace('/[^A-Za-z0-9._-]+/', '-', trim($name));
+		$name = trim((string) $name, '.-');
+
+		return '' === $name ? 'imported-file' : $name;
+	}
+
+	private function normalizeImportMimetype(string $path, string $mimetype): string {
+		$mimetype = trim($mimetype);
+		if ('' !== $mimetype && 'application/octet-stream' !== $mimetype) {
+			return $mimetype;
+		}
+
+		$detectedMimetype = $this->mimeTypeDetector->detectPath($path);
+
+		return $detectedMimetype ?: 'application/octet-stream';
+	}
+
+	private function joinPath(string $directory, string $name): string {
+		return '' === $directory ? $name : $directory.'/'.$name;
+	}
+
 	private function addCache(SwarmFile $file, ?int $permission = null): int {
+		$mimetype = $this->mimeTypeHandler->getMimetypeById($file->getMimetype());
+		$timestamp = $file->getStorageMtime();
 		$fileData = [
 			'storage' => $file->getStorage(),
 			'path' => $file->getName(),
 			'path_hash' => md5($file->getName()),
 			'name' => basename($file->getName()),
-			'mimetype' => $this->mimeTypeHandler->getMimetypeById($file->getMimetype()),
+			'mimetype' => $mimetype,
 			'size' => $file->getSize(),
+			'unencrypted_size' => $file->getSize(),
 			'etag' => uniqid(),
-			'storage_mtime' => $file->getStorageMtime(),
+			'metadata_etag' => uniqid(),
+			'creation_time' => $timestamp,
+			'upload_time' => $timestamp,
+			'storage_mtime' => $timestamp,
 			// 2024-11-14 - We still don't support edit, so file is never updated.
-			'mtime' => $file->getStorageMtime(),
+			'mtime' => $timestamp,
 		];
 
 		$fileData['permissions'] = $permission ?? match (true) {
-			$this->is_file($file->getName()) => (Constants::PERMISSION_ALL - Constants::PERMISSION_DELETE - Constants::PERMISSION_UPDATE),
+			'httpd/unix-directory' !== $mimetype => (Constants::PERMISSION_ALL - Constants::PERMISSION_DELETE - Constants::PERMISSION_UPDATE),
 			default => (Constants::PERMISSION_ALL - Constants::PERMISSION_DELETE),
 		};
 
-		return $this->cacheHandler->put($fileData['path'], $fileData);
+		$fileId = $this->cacheHandler->put($fileData['path'], $fileData);
+		$parent = dirname($file->getName());
+		$this->cacheHandler->correctFolderSize('.' === $parent ? '' : $parent);
+
+		return $fileId;
 	}
 
 	private function isNewStorage(): bool {
