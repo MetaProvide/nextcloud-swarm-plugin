@@ -31,7 +31,7 @@ jobs:
           tools: composer
 
       - name: Install php-cs-fixer
-        run: composer require --dev friendsofphp/php-cs-fixer nextcloud/coding-standard --no-interaction --no-progress --no-scripts
+        run: composer install --no-interaction --no-progress --no-scripts --prefer-dist
 
       - name: Apply php-cs-fixer
         run: vendor/bin/php-cs-fixer fix
