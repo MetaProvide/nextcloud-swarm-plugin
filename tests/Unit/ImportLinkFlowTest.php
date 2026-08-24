@@ -20,6 +20,44 @@ class ImportLinkFlowTest extends TestCase {
 		$this->assertSame('hejbit-api-key', $client->requests[0]->authorization);
 	}
 
+	public function testFetchesGatewayUrlTemplateFromAuthAppWithApiKey(): void {
+		$client = new ImportLinkFlowHarness('https://auth.example', 'hejbit-api-key');
+		$template = $client->gatewayUrlTemplate();
+
+		$this->assertSame('https://auth.example/api/gateway-link', $client->requests[0]->url);
+		$this->assertSame(['accept: application/json'], $client->requests[0]->headers);
+		$this->assertSame('hejbit-api-key', $client->requests[0]->authorization);
+		$this->assertSame('https://gateway.example/bzz/{reference}/', $template['template']);
+		$this->assertSame(3600, $template['ttl']);
+	}
+
+	public function testFallsBackToBzzLinkForAnInvalidGatewayUrlTemplate(): void {
+		$client = new ImportLinkFlowHarness(
+			'https://auth.example',
+			'hejbit-api-key',
+			['urlTemplate' => 'http://gateway.example/bzz/{reference}/'],
+		);
+
+		$this->assertSame([
+			'template' => 'https://bzz.link/bzz/{reference}/',
+			'ttl' => 300,
+		], $client->gatewayUrlTemplate());
+	}
+
+	public function testFallsBackToBzzLinkWhenGatewayUrlRequestFails(): void {
+		$client = new ImportLinkFlowHarness(
+			'https://auth.example',
+			'hejbit-api-key',
+			[],
+			false,
+		);
+
+		$this->assertSame([
+			'template' => 'https://bzz.link/bzz/{reference}/',
+			'ttl' => 300,
+		], $client->gatewayUrlTemplate());
+	}
+
 	public function testImportsSwarmReferenceUsingSignedGatewayLink(): void {
 		$client = new ImportLinkFlowHarness('https://auth.example', 'hejbit-api-key');
 		$client->import('swarm', 'swarm-reference');
@@ -66,9 +104,19 @@ class ImportLinkFlowHarness {
 	/** @var array<int, array<string, mixed>> */
 	private array $responses;
 
-	public function __construct(string $apiUrl, string $accessKey) {
+	/** @var array<string, mixed> */
+	private array $gatewayResponse;
+
+	private bool $gatewayRequestSuccessful;
+
+	public function __construct(string $apiUrl, string $accessKey, ?array $gatewayResponse = null, bool $gatewayRequestSuccessful = true) {
 		$this->api_url = $apiUrl;
 		$this->access_key = $accessKey;
+		$this->gatewayResponse = $gatewayResponse ?? [
+			'urlTemplate' => 'https://gateway.example/bzz/{reference}/',
+			'cacheTtlSeconds' => 3600,
+		];
+		$this->gatewayRequestSuccessful = $gatewayRequestSuccessful;
 		$this->responses = [
 			[
 				'url' => 'https://gateway.example/import',
@@ -88,8 +136,23 @@ class ImportLinkFlowHarness {
 		return $this->importReferenceToSwarm($type, $reference);
 	}
 
+	/**
+	 * @return array{template: string, ttl: int}
+	 */
+	public function gatewayUrlTemplate(): array {
+		return $this->getGatewayUrlTemplate();
+	}
+
 	protected function createCurl(string $url, array $options = [], array $headers = [], ?string $authorization = null) {
-		$request = new FakeImportCurl($url, $options, $headers, $authorization, array_shift($this->responses));
+		$isGatewayRequest = str_ends_with($url, '/api/gateway-link');
+		$request = new FakeImportCurl(
+			$url,
+			$options,
+			$headers,
+			$authorization,
+			$isGatewayRequest ? $this->gatewayResponse : array_shift($this->responses),
+			$isGatewayRequest ? $this->gatewayRequestSuccessful : true,
+		);
 		$this->requests[] = $request;
 
 		return $request;
@@ -106,6 +169,7 @@ class FakeImportCurl {
 		public array $headers,
 		public ?string $authorization,
 		private array $response,
+		private bool $successful = true,
 	) {}
 
 	public function get(bool $array = false): array|string {
@@ -120,6 +184,6 @@ class FakeImportCurl {
 	}
 
 	public function isResponseSuccessful(): bool {
-		return true;
+		return $this->successful;
 	}
 }

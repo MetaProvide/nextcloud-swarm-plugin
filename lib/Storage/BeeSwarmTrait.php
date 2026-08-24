@@ -34,6 +34,9 @@ use OCP\Files\StorageBadConfigException;
 use OCP\Files\StorageNotAvailableException;
 
 trait BeeSwarmTrait {
+	protected const DEFAULT_GATEWAY_URL_TEMPLATE = 'https://bzz.link/bzz/{reference}/';
+	protected const GATEWAY_URL_TEMPLATE_CACHE_TTL = 86400;
+	protected const GATEWAY_URL_TEMPLATE_FAILURE_CACHE_TTL = 300;
 	private const INFRASTRUCTURE_VERSION_GATEWAY = 1;
 	private const INFRASTRUCTURE_VERSION_HEJBIT = 2;
 
@@ -61,6 +64,41 @@ trait BeeSwarmTrait {
 
 	protected function createCurl(string $url, array $options = [], array $headers = [], ?string $authorization = null) {
 		return new Curl($url, $options, $headers, $authorization);
+	}
+
+	/**
+	 * @return array{template: string, ttl: int}
+	 */
+	protected function getGatewayUrlTemplate(): array {
+		if ($this->isVersion()) {
+			return $this->gatewayUrlTemplateFallback();
+		}
+
+		$endpoint = $this->api_url.ApiEndpoints::GATEWAY_LINK->value;
+		$request = $this->createCurl($endpoint, headers: [
+			'accept: application/json',
+		], authorization: $this->access_key);
+		$response = $request->get(true);
+		$template = is_array($response) ? $response['urlTemplate'] ?? null : null;
+
+		if (!$request->isResponseSuccessful() || !$this->isValidGatewayUrlTemplate($template)) {
+			return $this->gatewayUrlTemplateFallback();
+		}
+
+		return [
+			'template' => $template,
+			'ttl' => min(max((int) ($response['cacheTtlSeconds'] ?? self::GATEWAY_URL_TEMPLATE_CACHE_TTL), 300), self::GATEWAY_URL_TEMPLATE_CACHE_TTL),
+		];
+	}
+
+	/**
+	 * @return array{template: string, ttl: int}
+	 */
+	protected function gatewayUrlTemplateFallback(): array {
+		return [
+			'template' => self::DEFAULT_GATEWAY_URL_TEMPLATE,
+			'ttl' => self::GATEWAY_URL_TEMPLATE_FAILURE_CACHE_TTL,
+		];
 	}
 
 	/**
@@ -103,6 +141,16 @@ trait BeeSwarmTrait {
 			'mimetype' => $response['contentType'] ?? $response['mimetype'] ?? $response['mimeType'] ?? 'application/octet-stream',
 			'size' => (int) ($response['size'] ?? 0),
 		];
+	}
+
+	private function isValidGatewayUrlTemplate(mixed $template): bool {
+		if (!is_string($template) || 1 !== substr_count($template, '{reference}')) {
+			return false;
+		}
+
+		$parsedUrl = parse_url(str_replace('{reference}', 'reference', $template));
+
+		return is_array($parsedUrl) && 'https' === ($parsedUrl['scheme'] ?? null) && isset($parsedUrl['host']);
 	}
 
 	/**

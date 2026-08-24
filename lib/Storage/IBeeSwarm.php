@@ -8,4 +8,6 @@ interface IBeeSwarm {
 	public function isSwarm(): true;
 
 	public function importReference(string $directory, string $type, string $reference): SwarmFile;
+
+	public function getGatewayUrl(string $reference): string;
 }

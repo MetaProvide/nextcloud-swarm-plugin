@@ -40,6 +40,7 @@ use Sabre\HTTP\ResponseInterface;
 
 class WebDavPlugin extends ServerPlugin {
 	public const ETHSWARM_FILEREF = '{http://nextcloud.org/ns}ethswarm-fileref';
+	public const ETHSWARM_GATEWAY_URL = '{http://nextcloud.org/ns}ethswarm-gateway-url';
 	public const ETHSWARM_NODE = '{http://nextcloud.org/ns}ethswarm-node';
 	public const ETHSWARM_HIDDEN = '{http://nextcloud.org/ns}hidden';
 
@@ -79,6 +80,10 @@ class WebDavPlugin extends ServerPlugin {
 		if ($node instanceof File) {
 			$ref = $this->EthswarmService->getSwarmRef($fileName, $storageId);
 			$propFind->set(self::ETHSWARM_FILEREF, $ref, 200);
+			$storage = $fileInfo->getMountPoint()->getStorage();
+			if (Storage::isSwarm($storage)) {
+				$propFind->set(self::ETHSWARM_GATEWAY_URL, $storage->getGatewayUrl($ref), 200);
+			}
 		}
 
 		if ($node instanceof Directory) {

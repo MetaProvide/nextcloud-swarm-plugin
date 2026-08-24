@@ -36,6 +36,8 @@ use OCP\Files\FileInfo;
 use OCP\Files\IMimeTypeDetector;
 use OCP\Files\IMimeTypeLoader;
 use OCP\Files\StorageBadConfigException;
+use OCP\ICache;
+use OCP\ICacheFactory;
 use OCP\IConfig;
 use OCP\IDBConnection;
 use OCP\IL10N;
@@ -46,6 +48,7 @@ use OCP\L10N\IFactory as IL10NFactory;
 use OCP\Notification\IManager;
 use Psr\Log\LoggerInterface;
 use Sabre\DAV\Exception\BadRequest;
+use Throwable;
 use Traversable;
 
 class BeeSwarm extends Common implements IBeeSwarm {
@@ -81,6 +84,8 @@ class BeeSwarm extends Common implements IBeeSwarm {
 
 	private IUserMountCache $mountCache;
 
+	private ICache $gatewayUrlCache;
+
 	/**
 	 * @param mixed $params
 	 *
@@ -103,6 +108,7 @@ class BeeSwarm extends Common implements IBeeSwarm {
 		$this->logger = OC::$server->get(LoggerInterface::class);
 		$this->config = OC::$server->get(IConfig::class);
 		$this->mountCache = OC::$server->get(IUserMountCache::class);
+		$this->gatewayUrlCache = OC::$server->get(ICacheFactory::class)->createDistributed(Application::NAME.'-gateway-url');
 		$this->cacheHandler = new Cache($this);
 		$this->fileMapper = new SwarmFileMapper($this->dbConnection);
 
@@ -121,6 +127,25 @@ class BeeSwarm extends Common implements IBeeSwarm {
 
 	public function isSwarm(): true {
 		return true;
+	}
+
+	public function getGatewayUrl(string $reference): string {
+		$cacheKey = hash('sha256', $this->api_url."\0".$this->access_key);
+		$template = $this->gatewayUrlCache->get($cacheKey);
+
+		if (!is_string($template)) {
+			try {
+				$gatewayUrlTemplate = $this->getGatewayUrlTemplate();
+			} catch (Throwable $exception) {
+				$gatewayUrlTemplate = $this->gatewayUrlTemplateFallback();
+				$this->logger->warning('Unable to resolve the Swarm gateway link: '.$exception->getMessage());
+			}
+
+			$template = $gatewayUrlTemplate['template'];
+			$this->gatewayUrlCache->set($cacheKey, $template, $gatewayUrlTemplate['ttl']);
+		}
+
+		return str_replace('{reference}', rawurlencode($reference), $template);
 	}
 
 	/**
