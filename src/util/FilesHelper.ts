@@ -8,6 +8,7 @@ const FilesHelper = {
 		getMainNode(nodes).attributes["ethswarm-node"] !== undefined,
 	isDialogCancelError: (error) => isDialogCancelError(error),
 	getSwarmRef: (nodes) => getSwarmRef(nodes),
+	getGatewayUrl: (nodes) => getGatewayUrl(nodes),
 	hasSwarmRef: (nodes) => getSwarmRef(nodes) !== undefined,
 	canUnshareOnly: (nodes) => {
 		return nodes.every(
@@ -113,6 +114,10 @@ const FilesHelper = {
 
 function getSwarmRef(nodes) {
 	return getMainNode(nodes).attributes["ethswarm-fileref"];
+}
+
+function getGatewayUrl(nodes) {
+	return getMainNode(nodes).attributes["ethswarm-gateway-url"];
 }
 
 function getMainNode(nodes) {

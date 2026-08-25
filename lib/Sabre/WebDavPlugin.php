@@ -40,6 +40,7 @@ use Sabre\HTTP\ResponseInterface;
 
 class WebDavPlugin extends ServerPlugin {
 	public const ETHSWARM_FILEREF = '{http://nextcloud.org/ns}ethswarm-fileref';
+	public const ETHSWARM_GATEWAY_URL = '{http://nextcloud.org/ns}ethswarm-gateway-url';
 	public const ETHSWARM_NODE = '{http://nextcloud.org/ns}ethswarm-node';
 	public const ETHSWARM_HIDDEN = '{http://nextcloud.org/ns}hidden';
 
@@ -79,6 +80,10 @@ class WebDavPlugin extends ServerPlugin {
 		if ($node instanceof File) {
 			$ref = $this->EthswarmService->getSwarmRef($fileName, $storageId);
 			$propFind->set(self::ETHSWARM_FILEREF, $ref, 200);
+			$storage = $fileInfo->getMountPoint()->getStorage();
+			if (Storage::isSwarm($storage)) {
+				$propFind->set(self::ETHSWARM_GATEWAY_URL, $storage->getGatewayUrl($ref), 200);
+			}
 		}
 
 		if ($node instanceof Directory) {
@@ -102,7 +107,8 @@ class WebDavPlugin extends ServerPlugin {
 		}
 
 		try {
-			$path = $request->getPath();
+			$data = null;
+			$path = ltrim($request->getPath(), '/');
 			$node = $this->server->tree->getNodeForPath($path);
 
 			if (!$node instanceof File && !$node instanceof Directory) {
@@ -139,6 +145,20 @@ class WebDavPlugin extends ServerPlugin {
 
 					break;
 
+				case 'import':
+					if (!$node instanceof Directory) {
+						throw new NotImplemented('Import is only supported inside folders');
+					}
+
+					$data = $this->EthswarmService->importReference(
+						$filename,
+						$storage,
+						(string) $request->getHeader('Hejbit-Import-Type'),
+						(string) $request->getHeader('Hejbit-Import-Reference')
+					);
+
+					break;
+
 				default:
 					throw new NotImplemented('Action not implemented');
 			}
@@ -162,7 +182,7 @@ class WebDavPlugin extends ServerPlugin {
 	}
 
 	public function httpMove(RequestInterface $request, ResponseInterface $response): bool {
-		$node = $this->server->tree->getNodeForPath($request->getPath());
+		$node = $this->server->tree->getNodeForPath(ltrim($request->getPath(), '/'));
 
 		if (!$node instanceof File && !$node instanceof Directory) {
 			return true;

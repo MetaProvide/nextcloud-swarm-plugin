@@ -18,6 +18,9 @@
 	border-radius: 0.25rem;
 }
 
-[data-section-id="files_external_ethswarm"] img {
+[data-section-id="files_external_ethswarm"] img,
+.app-navigation-entry-link[href$="/settings/admin/files_external_ethswarm"]
+	.app-navigation-entry-icon
+	> img {
 	filter: none !important;
 }
