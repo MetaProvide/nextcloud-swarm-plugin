@@ -13,7 +13,7 @@ RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"; \
 	} > /usr/local/etc/php/conf.d/nextcloud.ini;
 
 RUN mkdir -p /var/www/html/custom_apps && \
-    chown -R www-data:www-data /var/www/html/custom_apps
+	chown -R www-data:www-data /var/www/html/custom_apps
 
 
 FROM base AS production
@@ -29,7 +29,7 @@ RUN pecl install xdebug && docker-php-ext-enable xdebug;
 RUN { \
 	echo "xdebug.mode=develop,debug"; \
 	echo "xdebug.start_with_request=trigger"; \
-    echo "xdebug.discover_client_host=true"; \
+	echo "xdebug.discover_client_host=true"; \
 	echo "xdebug.client_host=host.docker.internal"; \
 	} >> /usr/local/etc/php/conf.d/nextcloud.ini;
 

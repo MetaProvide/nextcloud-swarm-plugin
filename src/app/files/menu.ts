@@ -1,9 +1,27 @@
 import { subscribe } from "@nextcloud/event-bus";
+import { NewMenuEntryCategory } from "@nextcloud/files";
+import ImportSvg from "@material-design-icons/svg/filled/input.svg?raw";
 import {
 	addNewFileMenuEntryCompat,
 	getNewFileMenuEntriesCompat,
 	removeNewFileMenuEntryCompat,
 } from "@/util/FilesCompatibility";
+import SvgHelper from "@/util/SvgHelper";
+import { openImportModal } from "./import";
+
+const hejBitImportMenuEntry = {
+	id: "hejbitImport",
+	category: NewMenuEntryCategory.Other,
+	displayName: t("files_external_ethswarm", "Import"),
+	iconSvgInline: SvgHelper.convert(ImportSvg),
+	order: 20,
+	enabled(context) {
+		return context?.attributes?.["ethswarm-node"] !== undefined;
+	},
+	handler(context) {
+		openImportModal(context);
+	},
+};
 
 const filesMenu = {
 	originalMenu: [],
@@ -32,9 +50,26 @@ const filesMenu = {
 				removeNewFileMenuEntryCompat(removeMenuEntry);
 			}
 		});
+
+		const currentEntries = getNewFileMenuEntriesCompat();
+		if (
+			!currentEntries.some(
+				(entry) => entry.id === hejBitImportMenuEntry.id,
+			)
+		) {
+			addNewFileMenuEntryCompat(hejBitImportMenuEntry);
+		}
 	},
 	restore() {
 		const currentEntries = getNewFileMenuEntriesCompat();
+		if (
+			currentEntries.some(
+				(entry) => entry.id === hejBitImportMenuEntry.id,
+			)
+		) {
+			removeNewFileMenuEntryCompat(hejBitImportMenuEntry);
+		}
+
 		this.originalMenu.forEach((backedUpMenuEntry) => {
 			!currentEntries.some(
 				(entry) => entry.id === backedUpMenuEntry.id,

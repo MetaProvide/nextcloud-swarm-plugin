@@ -1,17 +1,13 @@
 {
 	"name": "nextcloud-swarm-plugin",
 	"version": "1.0.0",
+	"packageManager": "pnpm@10.28.2",
 	"description": "Swarm plugin for Nextcloud",
 	"license": "AGPL-3.0-or-later",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/MetaProvide/nextcloud-swarm-plugin.git"
 	},
-	"engines": {
-		"node": "^24.0.0",
-		"pnpm": "^10.0.0"
-	},
-	"packageManager": "pnpm@10.28.2",
 	"scripts": {
 		"build": "vite build",
 		"dev": "vite build --mode development --watch",
@@ -31,29 +27,29 @@
 	"dependencies": {
 		"@betahuhn/feedback-js": "^2.1.25",
 		"@material-design-icons/svg": "^0.14.15",
-		"@nextcloud/auth": "^2.5.3",
-		"@nextcloud/axios": "^2.5.2",
-		"@nextcloud/dialogs": "^7.3.0",
+		"@nextcloud/auth": "^2.6.0",
+		"@nextcloud/axios": "^2.6.0",
+		"@nextcloud/dialogs": "^7.4.0",
 		"@nextcloud/event-bus": "^3.3.3",
 		"@nextcloud/files": "^4.0.0",
 		"@nextcloud/router": "^3.1.0",
 		"@nextcloud/typings": "^1.10.0",
-		"@nextcloud/vue": "^9.6.0",
+		"@nextcloud/vue": "^9.8.0",
 		"@openfeature/flagd-web-provider": "^0.7.4",
-		"@openfeature/web-sdk": "^1.7.3",
-		"vue": "^3.5.30"
+		"@openfeature/web-sdk": "^1.8.0",
+		"vue": "^3.5.34"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.4.7",
 		"@nextcloud/browserslist-config": "^3.1.2",
 		"@nextcloud/vite-config": "^2.5.2",
-		"@types/node": "^24.5.2",
-		"browserslist": "^4.26.2",
-		"lint-staged": "^16.2.7",
+		"@types/node": "^24.12.4",
+		"browserslist": "^4.28.2",
+		"lint-staged": "^16.4.0",
 		"simple-git-hooks": "^2.13.1",
 		"typescript": "^5.9.3",
-		"vite": "^7.3.1",
-		"vue-tsc": "^3.0.8"
+		"vite": "^7.3.3",
+		"vue-tsc": "^3.3.2"
 	},
 	"browserslist": [
 		"extends @nextcloud/browserslist-config"
