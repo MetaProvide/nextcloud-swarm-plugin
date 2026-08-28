@@ -6,7 +6,7 @@ namespace OCA\Files_External_Ethswarm\Utils;
 
 final class HostUrl {
 	public static function normalize(string $hostUrl): ?string {
-		$normalizedHostUrl = trim($hostUrl);
+		$normalizedHostUrl = rtrim(trim($hostUrl), '/');
 
 		if ('' === $normalizedHostUrl) {
 			return null;
