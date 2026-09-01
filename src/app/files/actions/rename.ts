@@ -13,7 +13,10 @@ registerFileActionCompat({
 		return SvgHelper.convert(EditSvg);
 	},
 	enabled({ nodes }) {
-		if (nodes[0].attributes["ethswarm-node"]) {
+		if (
+			nodes[0].attributes["ethswarm-node"] &&
+			FilesHelper.isAllFiles(nodes)
+		) {
 			return !(FilesHelper.isArchive(nodes) || FilesHelper.isRoot(nodes));
 		}
 		return false;
