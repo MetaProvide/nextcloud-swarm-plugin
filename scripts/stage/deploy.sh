@@ -82,7 +82,8 @@ deploy() {
 
 sync_code() {
 	git reset --hard > /dev/null 2>&1
-	git pull 2>&1 || return 1
+	# HTTP/1.1: GitHub returns 401 on git-upload-pack over HTTP/2 from this server
+	git -c http.version=HTTP/1.1 pull 2>&1 || return 1
 }
 
 setup_node() {
