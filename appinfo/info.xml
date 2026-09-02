@@ -26,7 +26,7 @@ This plugin integrates [Swarm](https://www.ethswarm.org/) (a decentralized, bloc
 
 Before using the plugin, ensure you have the following:
 
--   An active Nextcloud instance (version 32 or 33)
+-   An active Nextcloud instance (version 32-34)
 -   A valid subscription on [app.hejbit.com](https://app.hejbit.com)
     -   [Get Your Free Trial for the Nextcloud Swarm Plugin](https://app.hejbit.com/register)
 
@@ -102,7 +102,7 @@ This program is licensed under the AGPLv3 or later.
     <repository type="git">https://github.com/MetaProvide/nextcloud-swarm-plugin.git</repository>
 	<screenshot>https://raw.githubusercontent.com/MetaProvide/nextcloud-swarm-plugin/main/assets/images/swarm_Files.png</screenshot>
     <dependencies>
-        <nextcloud min-version="32" max-version="33"/>
+        <nextcloud min-version="32" max-version="34"/>
     </dependencies>
 	<settings>
 		<admin>OCA\Files_External_Ethswarm\Settings\Admin</admin>
