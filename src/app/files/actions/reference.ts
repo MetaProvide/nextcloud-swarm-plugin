@@ -46,7 +46,9 @@ registerFileActionCompat({
 			return;
 		}
 
-		const gatewayUrl = `https://gateway.ethswarm.org/access/${swarmref}`;
+		const gatewayUrl =
+			FilesHelper.getGatewayUrl(node) ??
+			`https://bzz.link/bzz/${encodeURIComponent(swarmref)}/`;
 
 		await new Dialog("Swarm Reference", swarmref, [
 			{
@@ -90,7 +92,7 @@ registerFileActionCompat({
 						),
 						t(
 							"files_external_ethswarm",
-							"You are about to access this file through gateway.ethswarm.org, a public Swarm gateway used to access Swarm content. Please note this opens an external link and can leave network and server access traces to your swarm reference.",
+							"You are about to access this file through a public Swarm gateway. Please note this opens an external link and can leave network and server access traces to your swarm reference.",
 						),
 						[
 							{

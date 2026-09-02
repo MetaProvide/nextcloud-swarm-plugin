@@ -150,7 +150,7 @@ log_note "deploying hejbit to staging"
 log_gap
 
 TIMESTAMP=$(date +%s)
-for version in {32..33}; do
+for version in {32..34}; do
 	deploy "$version"
 done
 
