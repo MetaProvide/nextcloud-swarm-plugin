@@ -1,6 +1,6 @@
 {
 	"name": "nextcloud-swarm-plugin",
-	"version": "1.0.0",
+	"version": "1.0.5",
 	"packageManager": "pnpm@10.28.2",
 	"description": "Swarm plugin for Nextcloud",
 	"license": "AGPL-3.0-or-later",

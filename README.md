@@ -21,18 +21,16 @@ This plugin integrates [Swarm](https://www.ethswarm.org/) (a decentralized, bloc
 
 Before using the plugin, ensure you have the following:
 
--   An active Nextcloud instance (version 32 or 33)
--   A valid Access Key and URL to activate the service
-    -   [Get Your Free Trial for the Nextcloud Swarm Plugin](https://app.hejbit.com)
+-   An active Nextcloud instance (version 32-34)
+-   A valid subscription on [app.hejbit.com](https://app.hejbit.com)
+    -   [Get Your Free Trial for the Nextcloud Swarm Plugin](https://app.hejbit.com/register)
 
 ## Setup and Installation
 
 Follow these steps to configure HejBit Swarm in Nextcloud:
 
-1. Ensure the "External Storage" plugin is enabled.
-2. Install the "External Storage: HejBit Swarm" app from the Nextcloud App Store.
-3. Navigate to External Storage Administration: Profile menu -> Settings -> External Storage.
-4. Create a new external storage with a folder name of your choice and select 'HejBit-Swarm' as the storage type. Then, enter the Access Key and URL configuration.
+1. Install the "External Storage: HejBit Swarm" app from the Nextcloud App Store.
+2. As a signed in user, use [Quick Connect](https://app.hejbit.com/plugin/setup) to setup the storage on your Nextcloud instance
 
 ## Usage
 
