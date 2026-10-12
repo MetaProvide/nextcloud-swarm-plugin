@@ -193,7 +193,7 @@ class StorageController extends OCSController {
 	 */
 	private function resolveUniqueMountPoint(string $mountPoint): string {
 		$existingMountPoints = [];
-		foreach ($this->getGlobalStorages() as $storage) {
+		foreach ($this->globalStoragesService->getAllGlobalStorages() as $storage) {
 			if (!method_exists($storage, 'getMountPoint')) {
 				continue;
 			}
@@ -213,27 +213,6 @@ class StorageController extends OCSController {
 		} while (isset($existingMountPoints[strtolower($candidateMountPoint)]));
 
 		return $candidateMountPoint;
-	}
-
-	/**
-	 * Get global storages with NC32/NC33 compatibility.
-	 *
-	 * @return array<int, mixed>
-	 */
-	private function getGlobalStorages(): array {
-		if (method_exists($this->globalStoragesService, 'getAllGlobalStorages')) {
-			return $this->globalStoragesService->getAllGlobalStorages();
-		}
-
-		if (method_exists($this->globalStoragesService, 'getAllStorages')) {
-			return $this->globalStoragesService->getAllStorages();
-		}
-
-		if (method_exists($this->globalStoragesService, 'getStorages')) {
-			return $this->globalStoragesService->getStorages();
-		}
-
-		return [];
 	}
 
 	/**
