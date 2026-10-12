@@ -29,7 +29,7 @@ services:
       context: ./docker/nextcloud
       dockerfile: Dockerfile
       args:
-        NC_VERSION: ${NC_VERSION:-32}
+        NC_VERSION: ${NC_VERSION:-33}
       target: ${ENV:-development}
     restart: unless-stopped
     depends_on:
@@ -56,7 +56,7 @@ services:
       - ./:/var/www/html/custom_apps/files_external_ethswarm
 
   cron:
-    image: nextcloud:${NC_VERSION:-32}-fpm-alpine
+    image: nextcloud:${NC_VERSION:-33}-fpm-alpine
     restart: always
     volumes:
       - nc-app:/var/www/html
