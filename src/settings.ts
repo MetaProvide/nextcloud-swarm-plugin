@@ -1,15 +1,10 @@
-import { isNextcloud33OrHigher } from "@/util/FilesCompatibility";
-
 document.addEventListener("DOMContentLoaded", () => {
 	if (!window.location.href.includes("settings/admin/externalstorages")) {
 		return;
 	}
 
 	// Informational banner
-	// NC32: .settings-hint  |  NC33: .settings-section__desc
-	const targetElement =
-		document.querySelector(".settings-hint") ||
-		document.querySelector(".settings-section__desc");
+	const targetElement = document.querySelector(".settings-section__desc");
 	if (targetElement) {
 		const link =
 			'<a href="https://app.hejbit.com" target="_blank" style="text-decoration: underline">app.hejbit.com</a>';
@@ -19,21 +14,19 @@ document.addEventListener("DOMContentLoaded", () => {
 		targetElement.insertAdjacentElement("afterend", el);
 	}
 
-	// NC33 Vue-based external storage settings ignores DefinitionParameter
+	// The Vue-based external storage settings ignores DefinitionParameter
 	// defaultValue for text inputs. Use a MutationObserver to detect when
 	// the host_url input appears in the "Add external storage" dialog and
 	// prefill it with "app.hejbit.com".
-	if (isNextcloud33OrHigher()) {
-		prefillHostUrlForNc33();
-	}
+	prefillHostUrl();
 });
 
 /**
  * Watch for the host_url input element being added to the DOM (inside
- * the NC33 "Add external storage" Vue dialog) and set its value to
+ * the "Add external storage" Vue dialog) and set its value to
  * "app.hejbit.com" when it first appears empty.
  */
-function prefillHostUrlForNc33() {
+function prefillHostUrl() {
 	const DEFAULT_HOST = "app.hejbit.com";
 
 	const tryPrefill = (root: ParentNode) => {

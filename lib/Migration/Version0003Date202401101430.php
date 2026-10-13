@@ -53,7 +53,9 @@ class Version0003Date202401101430 extends SimpleMigrationStep {
 		$currentVersion = $this->getCurrentPluginVersion();
 		$mimetype = 'text/markdown';
 
-		if (version_compare($currentVersion, '0.5.4', '==')) {
+		// On a fresh install the installed_version config value may not exist yet,
+		// in which case fetchOne() returns false and this migration has nothing to do
+		if (is_string($currentVersion) && version_compare($currentVersion, '0.5.4', '==')) {
 			$updateQb = $this->db->getQueryBuilder();
 			$updateQb->update('files_swarm')
 				->set('mimetype', $updateQb->createNamedParameter($this->mimeTypeHandler->getId($mimetype), IQueryBuilder::PARAM_INT))

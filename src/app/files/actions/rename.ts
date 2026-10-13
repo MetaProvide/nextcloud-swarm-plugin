@@ -1,10 +1,10 @@
 import EditSvg from "@material-design-icons/svg/filled/edit.svg?raw";
 import { emit } from "@nextcloud/event-bus";
-import { registerFileActionCompat } from "@/util/FilesCompatibility";
+import { registerFileAction } from "@nextcloud/files";
 import FilesHelper from "@/util/FilesHelper";
 import SvgHelper from "@/util/SvgHelper";
 
-registerFileActionCompat({
+registerFileAction({
 	id: "renameAction",
 	displayName() {
 		return t("files_external_ethswarm", "Rename");
@@ -23,5 +23,6 @@ registerFileActionCompat({
 	},
 	async exec({ nodes }) {
 		emit("files:node:rename", nodes[0]);
+		return null;
 	},
 });

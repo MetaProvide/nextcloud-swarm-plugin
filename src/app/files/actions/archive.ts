@@ -3,11 +3,11 @@ import UnarchiveSvg from "@material-design-icons/svg/filled/unarchive.svg?raw";
 import axios from "@nextcloud/axios";
 import { showError, showSuccess } from "@nextcloud/dialogs";
 import { emit } from "@nextcloud/event-bus";
-import { registerFileActionCompat } from "@/util/FilesCompatibility";
+import { registerFileAction } from "@nextcloud/files";
 import FilesHelper from "@/util/FilesHelper";
 import SvgHelper from "@/util/SvgHelper";
 
-registerFileActionCompat({
+registerFileAction({
 	id: "archiveAction",
 	displayName({ nodes }) {
 		return t(
@@ -37,7 +37,7 @@ registerFileActionCompat({
 				UnarchiveSvg,
 			);
 			if (!path) {
-				return;
+				return null;
 			}
 			const destination = FilesHelper.getPathParts(path)
 				.slice(1)
@@ -76,6 +76,7 @@ registerFileActionCompat({
 				}
 			});
 		}
+		return null;
 	},
 	execBatch({ nodes, view }) {
 		return Promise.all(

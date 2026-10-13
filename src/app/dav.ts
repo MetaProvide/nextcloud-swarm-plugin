@@ -1,5 +1,5 @@
-import { registerDavPropertyCompat } from "@/util/FilesCompatibility";
+import { registerDavProperty } from "@nextcloud/files/dav";
 
-registerDavPropertyCompat("nc:ethswarm-fileref");
-registerDavPropertyCompat("nc:ethswarm-gateway-url");
-registerDavPropertyCompat("nc:ethswarm-node");
+registerDavProperty("nc:ethswarm-fileref");
+registerDavProperty("nc:ethswarm-gateway-url");
+registerDavProperty("nc:ethswarm-node");

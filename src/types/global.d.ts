@@ -23,11 +23,6 @@ declare global {
 	interface Window {
 		OC: Nextcloud.v32.OC;
 		OCP?: Nextcloud.v32.OCP;
-		_nc_files_scope?: any;
-		_nc_fileactions?: any[];
-		_nc_dav_properties?: string[];
-		_nc_dav_namespaces?: Record<string, string>;
-		_nc_newfilemenu?: any;
 	}
 }
 
