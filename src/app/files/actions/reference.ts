@@ -1,19 +1,15 @@
 import ClipboardSvg from "@material-design-icons/svg/filled/content_paste.svg?raw";
 import OpenSvg from "@material-design-icons/svg/filled/open_in_new.svg?raw";
 import { Dialog, showSuccess, showWarning } from "@nextcloud/dialogs";
+import { registerFileAction } from "@nextcloud/files";
 import SwarmSvg from "@/../img/swarm-logo.svg?raw";
-import { registerFileActionCompat } from "@/util/FilesCompatibility";
 import FilesHelper from "@/util/FilesHelper";
 import SvgHelper from "@/util/SvgHelper";
 
-registerFileActionCompat({
+registerFileAction({
 	id: "EthswarmCopyRef",
 
 	displayName() {
-		return t("files_external_ethswarm", "Swarm Reference");
-	},
-
-	altText() {
 		return t("files_external_ethswarm", "Swarm Reference");
 	},
 
@@ -43,7 +39,7 @@ registerFileActionCompat({
 					"Folder structure is not yet supported on Swarm. This folder is only available on Nextcloud, although all files within it are accessible on Swarm.",
 				),
 			);
-			return;
+			return null;
 		}
 
 		const gatewayUrl =
@@ -129,5 +125,6 @@ registerFileActionCompat({
 					throw error;
 				}
 			});
+		return null;
 	},
 });

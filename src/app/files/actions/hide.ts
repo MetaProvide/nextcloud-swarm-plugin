@@ -5,12 +5,11 @@ import HideSource from "@material-design-icons/svg/filled/visibility_off.svg?raw
 import axios from "@nextcloud/axios";
 import { showError, showInfo } from "@nextcloud/dialogs";
 import { emit } from "@nextcloud/event-bus";
-import { FileType } from "@nextcloud/files";
-import { registerFileActionCompat } from "@/util/FilesCompatibility";
+import { FileType, registerFileAction } from "@nextcloud/files";
 import FilesHelper from "@/util/FilesHelper";
 import SvgHelper from "@/util/SvgHelper";
 
-registerFileActionCompat({
+registerFileAction({
 	id: "unhideAction",
 	displayName({ nodes, view }) {
 		/**
@@ -85,7 +84,7 @@ registerFileActionCompat({
 	order: 150,
 });
 
-registerFileActionCompat({
+registerFileAction({
 	id: "hideAction",
 	displayName({ nodes, view }) {
 		/**

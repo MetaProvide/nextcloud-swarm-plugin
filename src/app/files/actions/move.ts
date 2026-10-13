@@ -2,11 +2,11 @@ import MoveSvg from "@material-design-icons/svg/filled/drive_file_move.svg?raw";
 import axios from "@nextcloud/axios";
 import { showError, showSuccess } from "@nextcloud/dialogs";
 import { emit } from "@nextcloud/event-bus";
-import { registerFileActionCompat } from "@/util/FilesCompatibility";
+import { registerFileAction } from "@nextcloud/files";
 import FilesHelper from "@/util/FilesHelper";
 import SvgHelper from "@/util/SvgHelper";
 
-registerFileActionCompat({
+registerFileAction({
 	id: "moveAction",
 	displayName() {
 		return t("files_external_ethswarm", "Move");
@@ -24,7 +24,7 @@ registerFileActionCompat({
 		const node = nodes[0];
 		const path = await FilesHelper.locationPicker(node, "Move", MoveSvg);
 		if (!path) {
-			return;
+			return null;
 		}
 		const destination = FilesHelper.getPathParts(path).slice(1).join("/");
 		await axios({
@@ -43,6 +43,7 @@ registerFileActionCompat({
 				showError(response.data.message);
 			}
 		});
+		return null;
 	},
 	execBatch({ nodes, view }) {
 		return Promise.all(
