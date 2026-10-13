@@ -1,11 +1,11 @@
 import DownloadSvg from "@material-design-icons/svg/filled/download.svg?raw";
 import axios from "@nextcloud/axios";
 import { getDialogBuilder, showError, showSuccess } from "@nextcloud/dialogs";
-import { registerFileActionCompat } from "@/util/FilesCompatibility";
+import { registerFileAction } from "@nextcloud/files";
 import FilesHelper from "@/util/FilesHelper";
 import SvgHelper from "@/util/SvgHelper";
 
-registerFileActionCompat({
+registerFileAction({
 	id: "exportAction",
 	displayName() {
 		return t("files_external_ethswarm", "Export");
@@ -44,6 +44,7 @@ registerFileActionCompat({
 					throw error;
 				}
 			});
+		return null;
 	},
 });
 

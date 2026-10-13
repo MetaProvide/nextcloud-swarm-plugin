@@ -1,11 +1,11 @@
-import { subscribe } from "@nextcloud/event-bus";
-import { NewMenuEntryCategory } from "@nextcloud/files";
 import ImportSvg from "@material-design-icons/svg/filled/input.svg?raw";
+import { subscribe } from "@nextcloud/event-bus";
 import {
-	addNewFileMenuEntryCompat,
-	getNewFileMenuEntriesCompat,
-	removeNewFileMenuEntryCompat,
-} from "@/util/FilesCompatibility";
+	addNewFileMenuEntry,
+	getNewFileMenuEntries,
+	NewMenuEntryCategory,
+	removeNewFileMenuEntry,
+} from "@nextcloud/files";
 import SvgHelper from "@/util/SvgHelper";
 import { openImportModal } from "./import";
 
@@ -39,7 +39,7 @@ const filesMenu = {
 	},
 	backup() {
 		if (!this.originalMenu.length) {
-			this.originalMenu = getNewFileMenuEntriesCompat().map((entry) => ({
+			this.originalMenu = getNewFileMenuEntries().map((entry) => ({
 				...entry,
 			}));
 		}
@@ -47,33 +47,33 @@ const filesMenu = {
 	cleanup() {
 		this.originalMenu.forEach((removeMenuEntry) => {
 			if (removeMenuEntry.id !== "newFolder") {
-				removeNewFileMenuEntryCompat(removeMenuEntry);
+				removeNewFileMenuEntry(removeMenuEntry);
 			}
 		});
 
-		const currentEntries = getNewFileMenuEntriesCompat();
+		const currentEntries = getNewFileMenuEntries();
 		if (
 			!currentEntries.some(
 				(entry) => entry.id === hejBitImportMenuEntry.id,
 			)
 		) {
-			addNewFileMenuEntryCompat(hejBitImportMenuEntry);
+			addNewFileMenuEntry(hejBitImportMenuEntry);
 		}
 	},
 	restore() {
-		const currentEntries = getNewFileMenuEntriesCompat();
+		const currentEntries = getNewFileMenuEntries();
 		if (
 			currentEntries.some(
 				(entry) => entry.id === hejBitImportMenuEntry.id,
 			)
 		) {
-			removeNewFileMenuEntryCompat(hejBitImportMenuEntry);
+			removeNewFileMenuEntry(hejBitImportMenuEntry);
 		}
 
 		this.originalMenu.forEach((backedUpMenuEntry) => {
 			!currentEntries.some(
 				(entry) => entry.id === backedUpMenuEntry.id,
-			) && addNewFileMenuEntryCompat(backedUpMenuEntry);
+			) && addNewFileMenuEntry(backedUpMenuEntry);
 		});
 		this.originalMenu = [];
 	},

@@ -1,12 +1,12 @@
 import InfoSvg from "@material-design-icons/svg/filled/info.svg?raw";
 import { showInfo } from "@nextcloud/dialogs";
+import { registerFileAction } from "@nextcloud/files";
 import HejBitSvg from "@/../img/hejbit-logo.svg?raw";
 import HejBitSvgPadded from "@/../img/hejbit-logo-padded.svg?raw";
-import { registerFileActionCompat } from "@/util/FilesCompatibility";
 import FilesHelper from "@/util/FilesHelper";
 import SvgHelper from "@/util/SvgHelper";
 
-registerFileActionCompat({
+registerFileAction({
 	id: "overlayAction",
 
 	displayName() {
@@ -92,6 +92,7 @@ registerFileActionCompat({
 				),
 			);
 		}
+		return null;
 	},
 
 	execBatch({ nodes, view }) {
