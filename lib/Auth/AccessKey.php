@@ -28,14 +28,12 @@ use OCP\IL10N;
 /**
  * Basic Http Authentication.
  */
-class AccessKey extends AuthMechanism
-{
+class AccessKey extends AuthMechanism {
 	/** @const string */
 	public const IDENTIFIER = 'access:key';
 	public const SCHEME = 'access_key';
 
-	public function __construct(IL10N $l)
-	{
+	public function __construct(IL10N $l) {
 		$this
 			->setIdentifier(self::IDENTIFIER)
 			->setScheme(self::SCHEME)
