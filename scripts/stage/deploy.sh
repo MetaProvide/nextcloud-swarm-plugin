@@ -109,6 +109,29 @@ setup_node() {
 	command -v pnpm > /dev/null 2>&1 || return 1
 }
 
+setup_node() {
+	command -v pnpm > /dev/null 2>&1 && return 0
+
+	export NVM_DIR="$HOME/.nvm"
+	if [ -s "$NVM_DIR/nvm.sh" ]; then
+		. "$NVM_DIR/nvm.sh"
+
+		NODE_24_VERSION=$(nvm version 24 2> /dev/null)
+		if [ "$NODE_24_VERSION" != "N/A" ]; then
+			nvm use --silent "$NODE_24_VERSION" > /dev/null 2>&1 || return 1
+		else
+			nvm use --silent default > /dev/null 2>&1 || return 1
+		fi
+	fi
+
+	if command -v corepack > /dev/null 2>&1; then
+		corepack enable > /dev/null 2>&1 || return 1
+		corepack prepare pnpm@10.28.2 --activate > /dev/null 2>&1 || return 1
+	fi
+
+	command -v pnpm > /dev/null 2>&1 || return 1
+}
+
 build_app() {
 	rm -rf css js
 
